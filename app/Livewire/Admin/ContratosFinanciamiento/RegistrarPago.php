@@ -80,16 +80,21 @@ class RegistrarPago extends Component
             ->where('contrato_financiamiento_id', $this->contrato->id)
             ->findOrFail($this->cuota_id);
 
-        $resultado = $service->ejecutar(
-            $this->contrato,
-            (float) str_replace(',', '', (string) $this->monto),
-            $cuota,
-            $this->fecha_pago,
-            $this->concepto,
-            $this->observaciones,
-            $this->forma_pago,
-            $this->referencia,
-        );
+        try {
+            $resultado = $service->ejecutar(
+                $this->contrato,
+                (float) str_replace(',', '', (string) $this->monto),
+                $cuota,
+                $this->fecha_pago,
+                $this->concepto,
+                $this->observaciones,
+                $this->forma_pago,
+                $this->referencia,
+            );
+        } catch (\RuntimeException $e) {
+            $this->addError('monto', $e->getMessage());
+            return;
+        }
 
         session()->flash('ok', 'Pago registrado correctamente.');
 

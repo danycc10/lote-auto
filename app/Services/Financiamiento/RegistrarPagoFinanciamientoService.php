@@ -24,7 +24,9 @@ class RegistrarPagoFinanciamientoService
         ?CuotaFinanciamiento $cuota = null,
         ?string $fechaPago = null,
         ?string $concepto = null,
-        ?string $observaciones = null
+        ?string $observaciones = null,
+        ?string $formaPago = null,
+        ?string $referencia = null,
     ): array {
         return DB::transaction(function () use (
             $contrato,
@@ -32,7 +34,9 @@ class RegistrarPagoFinanciamientoService
             $cuota,
             $fechaPago,
             $concepto,
-            $observaciones
+            $observaciones,
+            $formaPago,
+            $referencia,
         ) {
             $fechaPago = $fechaPago ?: now()->toDateString();
 
@@ -103,6 +107,8 @@ class RegistrarPagoFinanciamientoService
                 'monto' => $monto,
                 'monto_aplicado' => $monto,
                 'monto_restante' => 0,
+                'forma_pago' => $formaPago ?? 'efectivo',
+                'referencia' => $referencia,
                 'estatus' => 'aplicado',
                 'observaciones' => $observaciones,
             ]);
@@ -136,7 +142,16 @@ class RegistrarPagoFinanciamientoService
             $contratoBloqueado->saldo_actual = $nuevoSaldoActual;
 
             if (array_key_exists('estatus', $contratoBloqueado->getAttributes())) {
-                $contratoBloqueado->estatus = $nuevoSaldoActual <= 0 ? 'liquidado' : 'activo';
+                if ($nuevoSaldoActual <= 0) {
+                    $contratoBloqueado->estatus = 'liquidado';
+                } else {
+                    $tieneVencidas = DB::table('cuotas_financiamiento')
+                        ->where('contrato_financiamiento_id', $contratoBloqueado->id)
+                        ->where('estatus', 'vencida')
+                        ->exists();
+
+                    $contratoBloqueado->estatus = $tieneVencidas ? 'atrasado' : 'activo';
+                }
             }
 
             $contratoBloqueado->save();

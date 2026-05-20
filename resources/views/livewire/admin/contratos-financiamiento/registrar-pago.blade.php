@@ -76,7 +76,13 @@
 
         <div class="flex justify-end gap-2 pt-2">
             <a href="{{ route('admin.contratos-financiamiento.show', $contrato) }}" class="px-4 py-2 rounded-2xl border font-semibold hover:bg-gray-50">Cancelar</a>
-            <button type="submit" class="px-5 py-3 rounded-2xl bg-black text-white font-bold hover:opacity-90">Guardar pago y generar recibo</button>
+            <button type="submit"
+                wire:loading.attr="disabled"
+                wire:target="guardar"
+                class="px-5 py-3 rounded-2xl bg-black text-white font-bold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed">
+                <span wire:loading.remove wire:target="guardar">Guardar pago y generar recibo</span>
+                <span wire:loading wire:target="guardar">Procesando...</span>
+            </button>
         </div>
     </form>
 </div>

@@ -142,19 +142,7 @@ class CancelarReciboFinanciamientoService
             $contrato->total_pagado = $totalPagado;
             $contrato->saldo_actual = max(0, (float) $contrato->total_pagar - (float) $totalPagado);
 
-            if (array_key_exists('estatus', $contrato->getAttributes())) {
-                if ((float) $contrato->saldo_actual <= 0) {
-                    $contrato->estatus = 'liquidado';
-                } else {
-                    $tieneVencidas = DB::table('cuotas_financiamiento')
-                        ->where('contrato_financiamiento_id', $contrato->id)
-                        ->where('estatus', 'vencida')
-                        ->exists();
-
-                    $contrato->estatus = $tieneVencidas ? 'atrasado' : 'activo';
-                }
-            }
-
+            $contrato->recalcularEstatus();
             $contrato->save();
 
             $recibo->estatus = 'cancelado';

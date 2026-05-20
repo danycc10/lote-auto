@@ -141,19 +141,7 @@ class RegistrarPagoFinanciamientoService
             $contratoBloqueado->total_pagado = $nuevoTotalPagado;
             $contratoBloqueado->saldo_actual = $nuevoSaldoActual;
 
-            if (array_key_exists('estatus', $contratoBloqueado->getAttributes())) {
-                if ($nuevoSaldoActual <= 0) {
-                    $contratoBloqueado->estatus = 'liquidado';
-                } else {
-                    $tieneVencidas = DB::table('cuotas_financiamiento')
-                        ->where('contrato_financiamiento_id', $contratoBloqueado->id)
-                        ->where('estatus', 'vencida')
-                        ->exists();
-
-                    $contratoBloqueado->estatus = $tieneVencidas ? 'atrasado' : 'activo';
-                }
-            }
-
+            $contratoBloqueado->recalcularEstatus();
             $contratoBloqueado->save();
 
             $folio = $this->folioService->execute($fechaPago);

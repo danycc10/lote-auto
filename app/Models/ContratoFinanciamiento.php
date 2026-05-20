@@ -106,4 +106,15 @@ class ContratoFinanciamiento extends Model
     {
         return trim(($this->folio ?? '') . ' - ' . ($this->cliente?->nombre_completo ?? 'Sin cliente'));
     }
+
+    public function recalcularEstatus(): void
+    {
+        if ((float) $this->saldo_actual <= 0) {
+            $this->estatus = 'liquidado';
+            return;
+        }
+
+        $tieneVencidas = $this->cuotas()->where('estatus', 'vencida')->exists();
+        $this->estatus = $tieneVencidas ? 'atrasado' : 'activo';
+    }
 }

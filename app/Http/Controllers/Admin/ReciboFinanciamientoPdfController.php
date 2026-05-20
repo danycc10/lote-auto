@@ -10,7 +10,7 @@ class ReciboFinanciamientoPdfController extends Controller
 {
     public function show(ReciboFinanciamiento $recibo)
     {
-        $recibo->load(['contrato.auto.marca', 'contrato.auto.modelo', 'cliente', 'cuota', 'pago']);
+        $recibo->load(['contrato.auto.marca', 'contrato.auto.modelo', 'cliente', 'cuota', 'pago.capturadoPor']);
 
         $pdf = Pdf::loadView('pdf.contratos-financiamiento.recibo', [
             'recibo' => $recibo,

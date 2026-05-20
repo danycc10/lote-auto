@@ -16,7 +16,7 @@ class Index extends Component
     public string $q = '';
     public string $sortBy = 'fecha_recibo';
     public string $sortDir = 'desc';
-    public string $estatus = 'todos';
+    public string $estatus = 'vigente';
 
     public ?string $fechaDesde = null;
     public ?string $fechaHasta = null;
@@ -33,7 +33,7 @@ class Index extends Component
         'q' => ['except' => ''],
         'sortBy' => ['except' => 'fecha_recibo'],
         'sortDir' => ['except' => 'desc'],
-        'estatus' => ['except' => 'todos'],
+        'estatus' => ['except' => 'vigente'],
         'fechaDesde' => ['except' => null],
         'fechaHasta' => ['except' => null],
         'montoMin' => ['except' => null],

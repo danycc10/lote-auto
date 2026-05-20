@@ -220,7 +220,7 @@
 
     {{-- ENCABEZADO --}}
     <div class="brand">
-        <div class="brand-name">Lote Autos</div>
+        <div class="brand-name">{{ config('app.name') }}</div>
         <div class="brand-sub muted">Recibo de pago</div>
     </div>
 
@@ -272,6 +272,13 @@
             <div class="row">
                 <span class="label">Referencia:</span>
                 <span class="value">{{ $recibo->pago->referencia }}</span>
+            </div>
+        @endif
+
+        @if($recibo->pago?->capturadoPor)
+            <div class="row">
+                <span class="label">Cobrador:</span>
+                <span class="value">{{ $recibo->pago->capturadoPor->name }}</span>
             </div>
         @endif
 

@@ -38,8 +38,11 @@
 
         <div class="pt-2">
             <button wire:click="guardar"
-                    class="px-5 py-2.5 rounded-xl bg-black text-white hover:bg-gray-800">
-                Guardar cambios
+                    wire:loading.attr="disabled"
+                    wire:target="guardar"
+                    class="px-5 py-2.5 rounded-xl bg-black text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed">
+                <span wire:loading.remove wire:target="guardar">Guardar cambios</span>
+                <span wire:loading wire:target="guardar">Guardando...</span>
             </button>
         </div>
 

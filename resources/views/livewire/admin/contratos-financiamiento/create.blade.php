@@ -386,8 +386,11 @@
 
                     <div class="pt-2">
                         <button type="submit"
-                            class="w-full px-5 py-3 rounded-2xl bg-black text-white font-bold shadow-sm hover:opacity-90">
-                            Guardar contrato
+                            wire:loading.attr="disabled"
+                            wire:target="guardar"
+                            class="w-full px-5 py-3 rounded-2xl bg-black text-white font-bold shadow-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <span wire:loading.remove wire:target="guardar">Guardar contrato</span>
+                            <span wire:loading wire:target="guardar">Guardando...</span>
                         </button>
                     </div>
                 </div>

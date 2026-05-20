@@ -141,7 +141,10 @@ class Index extends Component
         \App\Services\Financiamiento\CancelarReciboFinanciamientoService $service
     ): void {
         $this->validate([
-            'motivoCancelacion' => ['nullable', 'string', 'max:1000'],
+            'motivoCancelacion' => ['required', 'string', 'min:5', 'max:1000'],
+        ], [
+            'motivoCancelacion.required' => 'El motivo de cancelación es obligatorio.',
+            'motivoCancelacion.min' => 'El motivo debe tener al menos 5 caracteres.',
         ]);
 
         if (!$this->reciboCancelarId) {

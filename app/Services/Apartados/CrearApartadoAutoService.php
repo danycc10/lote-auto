@@ -67,6 +67,7 @@ class CrearApartadoAutoService
 
         $ultimo = ApartadoAuto::query()
             ->where('folio', 'like', $prefix . '%')
+            ->lockForUpdate()
             ->latest('id')
             ->value('folio');
 

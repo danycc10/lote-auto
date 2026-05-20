@@ -200,8 +200,11 @@
             </a>
 
             <button type="submit"
-                    class="px-5 py-3 rounded-2xl bg-black text-white font-bold shadow-sm hover:opacity-90">
-                Guardar cliente
+                    wire:loading.attr="disabled"
+                    wire:target="guardar"
+                    class="px-5 py-3 rounded-2xl bg-black text-white font-bold shadow-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed">
+                <span wire:loading.remove wire:target="guardar">Guardar cliente</span>
+                <span wire:loading wire:target="guardar">Guardando...</span>
             </button>
         </div>
     </form>

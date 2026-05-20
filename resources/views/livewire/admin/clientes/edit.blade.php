@@ -252,8 +252,11 @@
             </a>
 
             <button type="submit"
-                    class="px-5 py-3 rounded-2xl bg-black text-white font-bold shadow-sm hover:opacity-90">
-                Guardar cambios
+                    wire:loading.attr="disabled"
+                    wire:target="actualizar"
+                    class="px-5 py-3 rounded-2xl bg-black text-white font-bold shadow-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed">
+                <span wire:loading.remove wire:target="actualizar">Guardar cambios</span>
+                <span wire:loading wire:target="actualizar">Guardando...</span>
             </button>
         </div>
     </form>

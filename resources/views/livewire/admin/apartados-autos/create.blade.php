@@ -179,8 +179,11 @@
                     </div>
 
                     <button type="submit"
-                            class="w-full inline-flex justify-center items-center px-4 py-3 rounded-xl bg-gray-900 text-white font-bold hover:bg-black">
-                        Guardar apartado
+                            wire:loading.attr="disabled"
+                            wire:target="save"
+                            class="w-full inline-flex justify-center items-center px-4 py-3 rounded-xl bg-gray-900 text-white font-bold hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span wire:loading.remove wire:target="save">Guardar apartado</span>
+                        <span wire:loading wire:target="save">Guardando...</span>
                     </button>
                 </div>
             </div>

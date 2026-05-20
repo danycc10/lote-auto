@@ -198,8 +198,9 @@
 
                                 <a href="{{ route('admin.recibos.pdf', $recibo->id) }}"
                                     target="_blank"
-                                    class="inline-flex items-center px-3 py-2 rounded-xl border border-blue-300 bg-blue-50 text-blue-700 text-xs font-semibold hover:bg-blue-100">
-                                    Imprimir
+                                    title="{{ $recibo->estatus === 'cancelado' ? 'Este recibo está CANCELADO' : 'Imprimir PDF' }}"
+                                    class="inline-flex items-center px-3 py-2 rounded-xl border text-xs font-semibold {{ $recibo->estatus === 'cancelado' ? 'border-gray-300 bg-gray-100 text-gray-500 hover:bg-gray-200' : 'border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100' }}">
+                                    {{ $recibo->estatus === 'cancelado' ? 'PDF (cancelado)' : 'Imprimir' }}
                                 </a>
 
                                 @if($recibo->estatus !== 'cancelado')
@@ -288,8 +289,9 @@
 
                 <a href="{{ route('admin.recibos.pdf', $recibo->id) }}"
                     target="_blank"
-                    class="inline-flex justify-center items-center px-3 py-2 rounded-2xl border border-blue-300 bg-blue-50 text-blue-700 text-sm font-semibold hover:bg-blue-100">
-                    Imprimir
+                    title="{{ $recibo->estatus === 'cancelado' ? 'Este recibo está CANCELADO' : 'Imprimir PDF' }}"
+                    class="inline-flex justify-center items-center px-3 py-2 rounded-2xl border text-sm font-semibold {{ $recibo->estatus === 'cancelado' ? 'border-gray-300 bg-gray-100 text-gray-500 hover:bg-gray-200' : 'border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100' }}">
+                    {{ $recibo->estatus === 'cancelado' ? 'PDF (cancelado)' : 'Imprimir' }}
                 </a>
 
                 @if($recibo->estatus !== 'cancelado')

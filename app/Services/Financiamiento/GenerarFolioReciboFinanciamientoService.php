@@ -18,6 +18,7 @@ class GenerarFolioReciboFinanciamientoService
         $ultimoFolio = ReciboFinanciamiento::query()
             ->whereDate('fecha_recibo', $fecha->toDateString())
             ->where('folio', 'like', 'RF-' . $fechaTexto . '-%')
+            ->lockForUpdate()
             ->orderByDesc('id')
             ->value('folio');
 

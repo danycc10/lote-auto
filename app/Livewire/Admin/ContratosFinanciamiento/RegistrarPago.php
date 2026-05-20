@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\ContratosFinanciamiento;
 
 use App\Models\ContratoFinanciamiento;
 use App\Models\CuotaFinanciamiento;
+use App\Services\Financiamiento\EstadoCuentaFinanciamientoService;
 use App\Services\Financiamiento\RegistrarPagoFinanciamientoService;
 use Livewire\Component;
 
@@ -41,6 +42,23 @@ class RegistrarPago extends Component
             'concepto' => ['nullable', 'string', 'max:255'],
             'observaciones' => ['nullable', 'string'],
         ];
+    }
+
+    public function getRecargoSugeridoProperty(): float
+    {
+        if (!$this->cuota_id) {
+            return 0.0;
+        }
+
+        $cuota = CuotaFinanciamiento::with('contrato')
+            ->where('contrato_financiamiento_id', $this->contrato->id)
+            ->find($this->cuota_id);
+
+        if (!$cuota) {
+            return 0.0;
+        }
+
+        return app(EstadoCuentaFinanciamientoService::class)->recargoSugerido($cuota);
     }
 
     public function getCuotasDisponiblesProperty()
@@ -105,6 +123,7 @@ class RegistrarPago extends Component
     {
         return view('livewire.admin.contratos-financiamiento.registrar-pago', [
             'cuotasDisponibles' => $this->cuotasDisponibles,
+            'recargoSugerido' => $this->recargoSugerido,
         ])
             ->layout('layouts.app')
             ->title('Registrar pago');

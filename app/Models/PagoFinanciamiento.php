@@ -29,6 +29,7 @@ class PagoFinanciamiento extends Model
 
     protected $casts = [
         'fecha_pago' => 'date',
+        'cancelado_at' => 'datetime',
         'monto' => 'decimal:2',
         'monto_aplicado' => 'decimal:2',
         'monto_restante' => 'decimal:2',

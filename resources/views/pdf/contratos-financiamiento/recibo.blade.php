@@ -206,6 +206,18 @@
 <body>
 <div class="ticket">
 
+    {{-- SELLO CANCELADO --}}
+    @if($recibo->estatus === 'cancelado')
+    <div style="background:#dc2626;color:#fff;text-align:center;padding:6px 4px;font-size:12px;font-weight:bold;letter-spacing:1px;margin-bottom:6px;">
+        ✕ RECIBO CANCELADO ✕
+    </div>
+    @if($recibo->cancelado_at)
+    <div style="text-align:center;font-size:7px;color:#dc2626;margin-bottom:6px;">
+        Cancelado el {{ $recibo->cancelado_at->format('d/m/Y H:i') }}
+    </div>
+    @endif
+    @endif
+
     {{-- ENCABEZADO --}}
     <div class="brand">
         <div class="brand-name">Lote Autos</div>

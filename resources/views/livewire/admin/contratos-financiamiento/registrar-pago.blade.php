@@ -47,6 +47,13 @@
                 <label class="block text-sm font-bold text-gray-700 mb-1">Monto *</label>
                 <input type="number" step="0.01" wire:model="monto" class="w-full rounded-2xl border-gray-300 focus:border-black focus:ring-black">
                 @error('monto') <div class="text-sm text-red-600 mt-1">{{ $message }}</div> @enderror
+                @if($recargoSugerido > 0)
+                <div class="mt-2 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                    <span class="font-bold">Recargo por mora:</span>
+                    ${{ number_format($recargoSugerido, 2) }} sugerido.
+                    El monto ingresado no incluye el recargo automáticamente.
+                </div>
+                @endif
             </div>
             <div>
                 <label class="block text-sm font-bold text-gray-700 mb-1">Forma de pago *</label>

@@ -11,7 +11,7 @@ class ClienteArchivoController extends Controller
 {
     public function show(Cliente $cliente, string $tipo): StreamedResponse
     {
-        abort_unless(auth()->check(), 403);
+        abort_unless(auth()->user()?->can('clientes.ver'), 403);
 
         $ruta = match ($tipo) {
             'ine' => $cliente->ruta_ine,

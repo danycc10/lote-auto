@@ -37,6 +37,7 @@ use App\Livewire\Admin\Finanzas\LogsFinancierosIndex;
 use App\Livewire\Admin\Administracion\Index as AdministracionIndex;
 use App\Livewire\Admin\Sistema\Index as SistemaIndex;
 use App\Livewire\Admin\Sistema\AuditoriaIndex;
+use App\Livewire\Admin\Sistema\ConfiguracionIndex as SistemaConfiguracionIndex;
 use App\Livewire\Public\AutosDisponibles;
 use App\Livewire\Public\LandingAutos;
 use App\Livewire\Public\AutoDetalle;
@@ -95,14 +96,15 @@ Route::middleware(['throttle:60,1'])->group(function () {
     Route::get('/autos/{auto:uuid}', AutoDetalle::class)->name('public.autos.show');
 });
 
+// Dashboard de cobranza (requiere módulo financiamiento)
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
     'permission:dashboard.ver',
+    'modulo.financiamiento',
 ])->group(function () {
-    Route::get('/dashboard', Dashboard::class)
-        ->name('dashboard');
+    Route::get('/dashboard', Dashboard::class)->name('dashboard');
 });
 
 Route::middleware(['auth', 'verified'])
@@ -110,14 +112,26 @@ Route::middleware(['auth', 'verified'])
     ->name('admin.')
     ->group(function () {
 
+        // ── Siempre disponibles ──────────────────────────────────────
         Route::get('/administracion', AdministracionIndex::class)
             ->middleware('permission:dashboard.ver')
             ->name('administracion.index');
 
-
         Route::get('/sistema', SistemaIndex::class)
             ->middleware('permission:dashboard.ver')
             ->name('sistema.index');
+
+        Route::get('/sistema/configuracion', SistemaConfiguracionIndex::class)
+            ->middleware('permission:dashboard.ver')
+            ->name('sistema.configuracion');
+
+        Route::get('/sistema/auditoria', AuditoriaIndex::class)
+            ->middleware('permission:auditoria.ver')
+            ->name('sistema.auditoria');
+
+        Route::get('/seguridad/roles-permisos', RolesPermisosManager::class)
+            ->middleware('permission:seguridad.roles')
+            ->name('seguridad.roles-permisos');
 
         Route::get('/autos', AutosIndex::class)
             ->middleware('permission:autos.ver')
@@ -131,88 +145,84 @@ Route::middleware(['auth', 'verified'])
             ->middleware('permission:autos.editar')
             ->name('autos.edit');
 
-        Route::get('/clientes', ClientesIndex::class)
-            ->middleware('permission:clientes.ver')
-            ->name('clientes.index');
+        // ── Módulo de financiamiento (condicional) ───────────────────
+        Route::middleware('modulo.financiamiento')->group(function () {
 
-        Route::get('/clientes/create', ClientesCreate::class)
-            ->middleware('permission:clientes.crear')
-            ->name('clientes.create');
+            Route::get('/clientes', ClientesIndex::class)
+                ->middleware('permission:clientes.ver')
+                ->name('clientes.index');
 
-        Route::get('/clientes/{cliente}/edit', ClientesEdit::class)
-            ->middleware('permission:clientes.editar')
-            ->name('clientes.edit');
+            Route::get('/clientes/create', ClientesCreate::class)
+                ->middleware('permission:clientes.crear')
+                ->name('clientes.create');
 
-        Route::get('/clientes/{cliente}/archivo/{tipo}', [ClienteArchivoController::class, 'show'])
-            ->middleware('permission:clientes.ver')
-            ->whereIn('tipo', ['ine', 'comprobante'])
-            ->name('clientes.archivo');
+            Route::get('/clientes/{cliente}/edit', ClientesEdit::class)
+                ->middleware('permission:clientes.editar')
+                ->name('clientes.edit');
 
-        Route::get('/apartados-autos', ApartadosAutosIndex::class)
-            ->middleware('permission:apartados.ver')
-            ->name('apartados-autos.index');
+            Route::get('/clientes/{cliente}/archivo/{tipo}', [ClienteArchivoController::class, 'show'])
+                ->middleware('permission:clientes.ver')
+                ->whereIn('tipo', ['ine', 'comprobante'])
+                ->name('clientes.archivo');
 
-        Route::get('/apartados-autos/create', ApartadosAutosCreate::class)
-            ->middleware('permission:apartados.crear')
-            ->name('apartados-autos.create');
+            Route::get('/apartados-autos', ApartadosAutosIndex::class)
+                ->middleware('permission:apartados.ver')
+                ->name('apartados-autos.index');
 
-        Route::get('/contratos-financiamiento', ContratosFinanciamientoIndex::class)
-            ->middleware('permission:contratos.ver')
-            ->name('contratos-financiamiento.index');
+            Route::get('/apartados-autos/create', ApartadosAutosCreate::class)
+                ->middleware('permission:apartados.crear')
+                ->name('apartados-autos.create');
 
-        Route::get('/contratos-financiamiento/create', ContratosFinanciamientoCreate::class)
-            ->middleware('permission:contratos.crear')
-            ->name('contratos-financiamiento.create');
+            Route::get('/contratos-financiamiento', ContratosFinanciamientoIndex::class)
+                ->middleware('permission:contratos.ver')
+                ->name('contratos-financiamiento.index');
 
-        Route::get('/contratos-financiamiento/{contrato}', ContratosFinanciamientoShow::class)
-            ->middleware('permission:contratos.ver')
-            ->name('contratos-financiamiento.show');
+            Route::get('/contratos-financiamiento/create', ContratosFinanciamientoCreate::class)
+                ->middleware('permission:contratos.crear')
+                ->name('contratos-financiamiento.create');
 
-        Route::get('/contratos-financiamiento/{contrato}/edit', ContratosFinanciamientoEdit::class)
-            ->middleware('permission:contratos.editar')
-            ->name('contratos-financiamiento.edit');
+            Route::get('/contratos-financiamiento/{contrato}', ContratosFinanciamientoShow::class)
+                ->middleware('permission:contratos.ver')
+                ->name('contratos-financiamiento.show');
 
-        Route::get('/contratos-financiamiento/{contrato}/registrar-pago', ContratosFinanciamientoRegistrarPago::class)
-            ->middleware('permission:pagos.registrar')
-            ->name('contratos-financiamiento.registrar-pago');
+            Route::get('/contratos-financiamiento/{contrato}/edit', ContratosFinanciamientoEdit::class)
+                ->middleware('permission:contratos.editar')
+                ->name('contratos-financiamiento.edit');
 
-        Route::get('/contratos-financiamiento/{contrato}/archivo', [ContratoFinanciamientoArchivoController::class, 'show'])
-            ->middleware('permission:contratos.ver')
-            ->name('contratos-financiamiento.archivo');
+            Route::get('/contratos-financiamiento/{contrato}/registrar-pago', ContratosFinanciamientoRegistrarPago::class)
+                ->middleware('permission:pagos.registrar')
+                ->name('contratos-financiamiento.registrar-pago');
 
-        Route::get('/recibos', RecibosIndex::class)
-            ->middleware('permission:recibos.ver')
-            ->name('recibos.index');
+            Route::get('/contratos-financiamiento/{contrato}/archivo', [ContratoFinanciamientoArchivoController::class, 'show'])
+                ->middleware('permission:contratos.ver')
+                ->name('contratos-financiamiento.archivo');
 
-        Route::get('/recibos-financiamiento/{recibo}/pdf', [ReciboFinanciamientoPdfController::class, 'show'])
-            ->middleware('permission:recibos.imprimir')
-            ->name('recibos-financiamiento.pdf');
+            Route::get('/recibos', RecibosIndex::class)
+                ->middleware('permission:recibos.ver')
+                ->name('recibos.index');
 
-        Route::get('/recibos/create', RecibosCreate::class)
-            ->middleware('permission:recibos.ver')
-            ->name('recibos.create');
+            Route::get('/recibos-financiamiento/{recibo}/pdf', [ReciboFinanciamientoPdfController::class, 'show'])
+                ->middleware('permission:recibos.imprimir')
+                ->name('recibos-financiamiento.pdf');
 
-        Route::get('/recibos/{recibo}', RecibosShow::class)
-            ->middleware('permission:recibos.ver')
-            ->name('recibos.show');
+            Route::get('/recibos/create', RecibosCreate::class)
+                ->middleware('permission:recibos.ver')
+                ->name('recibos.create');
 
-        Route::get('/recibos/{recibo}/edit', RecibosEdit::class)
-            ->middleware('permission:recibos.cancelar')
-            ->name('recibos.edit');
+            Route::get('/recibos/{recibo}', RecibosShow::class)
+                ->middleware('permission:recibos.ver')
+                ->name('recibos.show');
 
-        Route::get('/recibos/{recibo}/pdf', [ReciboFinanciamientoPdfController::class, 'show'])
-            ->middleware('permission:recibos.imprimir')
-            ->name('recibos.pdf');
+            Route::get('/recibos/{recibo}/edit', RecibosEdit::class)
+                ->middleware('permission:recibos.cancelar')
+                ->name('recibos.edit');
 
-        Route::get('/seguridad/roles-permisos', RolesPermisosManager::class)
-            ->middleware('permission:seguridad.roles')
-            ->name('seguridad.roles-permisos');
+            Route::get('/recibos/{recibo}/pdf', [ReciboFinanciamientoPdfController::class, 'show'])
+                ->middleware('permission:recibos.imprimir')
+                ->name('recibos.pdf');
 
-        Route::get('/finanzas/logs-financieros', LogsFinancierosIndex::class)
-            ->middleware('permission:logs_financieros.ver')
-            ->name('finanzas.logs-financieros');
-
-        Route::get('/sistema/auditoria', AuditoriaIndex::class)
-            ->middleware('permission:auditoria.ver')
-            ->name('sistema.auditoria');
+            Route::get('/finanzas/logs-financieros', LogsFinancierosIndex::class)
+                ->middleware('permission:logs_financieros.ver')
+                ->name('finanzas.logs-financieros');
+        });
     });

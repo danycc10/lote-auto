@@ -41,13 +41,59 @@ use App\Livewire\Public\AutosDisponibles;
 use App\Livewire\Public\LandingAutos;
 use App\Livewire\Public\AutoDetalle;
 
-Route::get('/autos/{auto:uuid}', AutoDetalle::class)->name('public.autos.show');
+Route::get('/robots.txt', function () {
+    $content  = "User-agent: *\n";
+    $content .= "Disallow: /admin/\n";
+    $content .= "Disallow: /dashboard\n";
+    $content .= "Allow: /\n\n";
+    $content .= "Sitemap: " . url('/sitemap.xml') . "\n";
+    return response($content, 200, ['Content-Type' => 'text/plain; charset=utf-8']);
+});
 
-Route::get('/', LandingAutos::class)->name('public.home');
+Route::get('/sitemap.xml', function () {
+    $autos = \App\Models\Auto::query()
+        ->select(['uuid', 'updated_at'])
+        ->where('estatus', 'disponible')
+        ->where('activo', true)
+        ->latest('updated_at')
+        ->get();
 
+    $urls = collect([
+        ['loc' => url('/'),       'changefreq' => 'daily',  'priority' => '1.0'],
+        ['loc' => url('/autos'),  'changefreq' => 'daily',  'priority' => '0.9'],
+    ]);
 
+    foreach ($autos as $auto) {
+        $urls->push([
+            'loc'        => route('public.autos.show', $auto->uuid),
+            'lastmod'    => $auto->updated_at->format('Y-m-d'),
+            'changefreq' => 'weekly',
+            'priority'   => '0.8',
+        ]);
+    }
 
-Route::get('/autos', AutosDisponibles::class)->name('public.autos');
+    $xml  = '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL;
+    $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . PHP_EOL;
+    foreach ($urls as $url) {
+        $xml .= '  <url>' . PHP_EOL;
+        $xml .= '    <loc>' . e($url['loc']) . '</loc>' . PHP_EOL;
+        if (isset($url['lastmod'])) {
+            $xml .= '    <lastmod>' . $url['lastmod'] . '</lastmod>' . PHP_EOL;
+        }
+        $xml .= '    <changefreq>' . $url['changefreq'] . '</changefreq>' . PHP_EOL;
+        $xml .= '    <priority>' . $url['priority'] . '</priority>' . PHP_EOL;
+        $xml .= '  </url>' . PHP_EOL;
+    }
+    $xml .= '</urlset>';
+
+    return response($xml, 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+});
+
+Route::middleware(['throttle:60,1'])->group(function () {
+    Route::get('/', LandingAutos::class)->name('public.home');
+    Route::get('/autos', AutosDisponibles::class)->name('public.autos');
+    Route::get('/autos/{auto:uuid}', AutoDetalle::class)->name('public.autos.show');
+});
 
 Route::middleware([
     'auth:sanctum',

@@ -68,6 +68,39 @@ $specs = array_filter([
 @section('title', $titulo . ' ' . ($auto->anio ?? ''))
 @section('meta_description', 'Auto ' . $titulo . ' ' . ($auto->anio ?? '') . ' disponible con financiamiento. ' . config('app.name'))
 @section('og_title', $titulo . ' ' . ($auto->anio ?? '') . ' — ' . config('app.name'))
+@section('og_image', $portadaUrl ?? asset('favicon.ico'))
+
+@push('head')
+<script type="application/ld+json">
+{!! json_encode([
+    '@context' => 'https://schema.org',
+    '@graph'   => [
+        [
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => [
+                ['@type' => 'ListItem', 'position' => 1, 'name' => 'Inicio',    'item' => $homeUrl],
+                ['@type' => 'ListItem', 'position' => 2, 'name' => 'Catálogo', 'item' => $catUrl],
+                ['@type' => 'ListItem', 'position' => 3, 'name' => $titulo . ' ' . ($auto->anio ?? ''), 'item' => url()->current()],
+            ],
+        ],
+        array_filter([
+            '@type'  => 'Product',
+            'name'   => $titulo . ' ' . ($auto->anio ?? ''),
+            'description' => $auto->descripcion ?? ('Auto ' . $titulo . ' disponible con financiamiento en ' . config('app.name')),
+            'brand'  => ['@type' => 'Brand', 'name' => $marca],
+            'image'  => $portadaUrl ?: null,
+            'offers' => [
+                '@type'         => 'Offer',
+                'priceCurrency' => 'MXN',
+                'price'         => (string) number_format((float) ($auto->precio_contado ?? 0), 2, '.', ''),
+                'availability'  => 'https://schema.org/InStock',
+                'url'           => url()->current(),
+            ],
+        ]),
+    ],
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+</script>
+@endpush
 
 <div class="bg-[#06091a] text-white overflow-x-hidden min-h-screen" style="background-color:#06091a">
 

@@ -121,7 +121,7 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                             $heroMarca  = is_object($heroMarcaRaw)  ? ($heroMarcaRaw->nombre  ?? $heroMarcaRaw->name  ?? '') : ($heroMarcaRaw  ?? '');
                             $heroModelo = is_object($heroModeloRaw) ? ($heroModeloRaw->nombre ?? $heroModeloRaw->name ?? '') : ($heroModeloRaw ?? '');
                             $heroTitulo = trim($heroMarca . ' ' . $heroModelo) ?: 'Auto disponible';
-                            $heroImagen = $heroAuto->portada?->ruta ?? $heroAuto->imagenes?->first()?->ruta ?? null;
+                            $heroImagen = $heroAuto->imagenPortada?->ruta ?? $heroAuto->imagenes?->first()?->ruta ?? null;
                             $heroImagenUrl = null;
                             if ($heroImagen) {
                                 if (Str::startsWith($heroImagen, ['http://', 'https://']))    { $heroImagenUrl = $heroImagen; }
@@ -146,6 +146,7 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                         >
                             <img src="{{ $heroImagenUrl }}"
                                  alt="{{ $heroTitulo }}"
+                                 width="1200" height="750"
                                  class="h-full w-full object-cover"
                                  loading="eager">
                             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" aria-hidden="true"></div>
@@ -450,7 +451,7 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                 $precioContado   = (float)($auto->precio_contado   ?? $auto->precio_venta ?? $auto->precio ?? 0);
                 $precioFinanciado = (float)($auto->precio_financiado ?? 0);
                 $precioMostrar   = $precioContado ?: $precioFinanciado;
-                $imagen = $auto->portada?->ruta ?? $auto->imagenes?->first()?->ruta ?? null;
+                $imagen = $auto->imagenPortada?->ruta ?? null;
                 $imagenUrl = null;
                 if ($imagen) {
                     if (Str::startsWith($imagen, ['http://', 'https://']))    { $imagenUrl = $imagen; }
@@ -469,6 +470,7 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                     @if($imagenUrl)
                     <img src="{{ $imagenUrl }}"
                          alt="{{ $tituloAuto }}"
+                         width="800" height="500"
                          class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                          loading="lazy">
                     <div class="absolute inset-0 bg-gradient-to-t from-[#0e1725]/70 via-transparent to-transparent" aria-hidden="true"></div>

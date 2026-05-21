@@ -173,6 +173,7 @@ $specs = array_filter([
                         <template x-for="(img, i) in images" :key="i">
                             <img :src="img.url"
                                  :alt="'{{ $titulo }} - imagen ' + (i+1)"
+                                 width="1200" height="750"
                                  x-show="active === i"
                                  loading="eager"
                                  class="absolute inset-0 h-full w-full object-cover transition-opacity duration-300"
@@ -223,7 +224,7 @@ $specs = array_filter([
                                 :aria-pressed="active === i"
                                 class="shrink-0 h-20 w-28 rounded-xl overflow-hidden border-2 transition"
                                 :class="active === i ? 'border-blue-500 opacity-100' : 'border-white/[0.08] opacity-50 hover:opacity-75'">
-                            <img :src="img.url" :alt="'Miniatura ' + (i+1)" class="h-full w-full object-cover">
+                            <img :src="img.url" :alt="'Miniatura ' + (i+1)" width="112" height="80" class="h-full w-full object-cover">
                         </button>
                     </template>
                 </div>
@@ -443,6 +444,7 @@ $specs = array_filter([
                     @if($relImgUrl)
                         <img src="{{ $relImgUrl }}"
                              alt="{{ $relTitulo }}"
+                             width="400" height="300"
                              loading="lazy"
                              class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
                     @else

@@ -204,6 +204,7 @@ $homeUrl  = Route::has('public.home') ? route('public.home') : url('/');
                     @if($imagenUrl)
                         <img src="{{ $imagenUrl }}"
                              alt="{{ $tituloAuto }} {{ $auto->anio }}"
+                             width="800" height="500"
                              loading="lazy"
                              class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
                     @else

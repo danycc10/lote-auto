@@ -1,10 +1,9 @@
-<div class="py-8">
-    <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-8">
+<div class="p-4 sm:p-6 max-w-3xl space-y-6">
 
         {{-- Header --}}
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3">
             <a href="{{ route('admin.sistema.index') }}"
-               class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition">
+               class="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900 transition-colors">
                 <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd"/>
                 </svg>
@@ -13,16 +12,16 @@
         </div>
 
         <div>
-            <h1 class="text-3xl font-bold text-gray-900">Configuración del sistema</h1>
-            <p class="text-sm text-gray-500 mt-1">Activa o desactiva los módulos disponibles en el panel de administración.</p>
+            <h1 class="text-xl font-semibold text-slate-900">Configuración del sistema</h1>
+            <p class="text-sm text-slate-500 mt-0.5">Activa o desactiva los módulos disponibles en el panel de administración.</p>
         </div>
 
         {{-- Módulos --}}
         <div class="space-y-4">
-            <h2 class="text-xs font-bold uppercase tracking-widest text-gray-400">Módulos</h2>
+            <h2 class="text-xs font-medium text-slate-400 uppercase tracking-wider">Módulos</h2>
 
             {{-- Módulo: Catálogo de Autos --}}
-            <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+            <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
                 <div class="flex items-start justify-between gap-4">
                     <div class="flex items-start gap-4">
                         <div class="flex-shrink-0 h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
@@ -58,7 +57,7 @@
             </div>
 
             {{-- Módulo: Financiamiento --}}
-            <div class="bg-white rounded-2xl border shadow-sm p-6 transition {{ $financiamientoActivo ? 'border-gray-200' : 'border-orange-200 bg-orange-50/30' }}">
+            <div class="bg-white rounded-xl border shadow-sm p-6 transition {{ $financiamientoActivo ? 'border-slate-200' : 'border-orange-200 bg-orange-50/30' }}">
                 <div class="flex items-start justify-between gap-4">
                     <div class="flex items-start gap-4">
                         <div class="flex-shrink-0 h-10 w-10 rounded-xl {{ $financiamientoActivo ? 'bg-indigo-50' : 'bg-gray-100' }} flex items-center justify-center">
@@ -127,5 +126,4 @@
             </div>
         </div>
 
-    </div>
 </div>

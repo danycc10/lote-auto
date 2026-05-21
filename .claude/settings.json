@@ -10,7 +10,8 @@
       "Bash(python .claude/skills/ui-ux-pro-max/scripts/search.py \"fintech ERP admin dashboard auto dealer financing\" --design-system -p \"LoteAutos Admin\" -f markdown)",
       "Bash(Get-ChildItem -Recurse -Path \"c:\\\\laragon\\\\www\\\\lote-autos-finan\" -Filter \"*recibo*\" -Include \"*.blade.php\", \"*.php\")",
       "Bash(Select-Object -ExpandProperty FullName)",
-      "Bash(Get-ChildItem -Path \"c:\\\\laragon\\\\www\\\\lote-autos-finan\" -Recurse -Include \"*nav*\", \"*sidebar*\", \"*menu*\" -ErrorAction SilentlyContinue)"
+      "Bash(Get-ChildItem -Path \"c:\\\\laragon\\\\www\\\\lote-autos-finan\" -Recurse -Include \"*nav*\", \"*sidebar*\", \"*menu*\" -ErrorAction SilentlyContinue)",
+      "Bash(composer require *)"
     ]
   }
 }

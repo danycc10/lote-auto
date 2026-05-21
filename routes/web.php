@@ -34,6 +34,9 @@ use App\Livewire\Admin\Seguridad\RolesPermisosManager;
 
 use App\Livewire\Admin\Finanzas\LogsFinancierosIndex;
 
+use App\Livewire\Admin\Reportes\Index as ReportesIndex;
+use App\Http\Controllers\Admin\ReportesExportController;
+
 use App\Livewire\Admin\Administracion\Index as AdministracionIndex;
 use App\Livewire\Admin\Administracion\TarjetasCobroIndex;
 use App\Livewire\Admin\Sistema\Index as SistemaIndex;
@@ -225,6 +228,14 @@ Route::middleware(['auth', 'verified'])
             Route::get('/finanzas/logs-financieros', LogsFinancierosIndex::class)
                 ->middleware('permission:logs_financieros.ver')
                 ->name('finanzas.logs-financieros');
+
+            Route::get('/reportes', ReportesIndex::class)
+                ->middleware('permission:dashboard.ver')
+                ->name('reportes.index');
+
+            Route::get('/reportes/export', [ReportesExportController::class, 'export'])
+                ->middleware('permission:dashboard.ver')
+                ->name('reportes.export');
 
             Route::get('/administracion/tarjetas-cobro', TarjetasCobroIndex::class)
                 ->middleware('permission:dashboard.ver')

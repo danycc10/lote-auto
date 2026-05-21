@@ -44,6 +44,7 @@
         {{-- Nav items --}}
         <nav class="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">
 
+
             @if(\App\Models\Configuracion::esActivo('modulo.financiamiento'))
             @can('dashboard.ver')
             <a href="{{ route('dashboard') }}" @click="$store.sidebar.open = false"
@@ -52,7 +53,7 @@
                 <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M18.375 2.25c-1.035 0-1.875.84-1.875 1.875v15.75c0 1.035.84 1.875 1.875 1.875h.75c1.035 0 1.875-.84 1.875-1.875V4.125c0-1.036-.84-1.875-1.875-1.875h-.75zM9.75 8.625c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 01-1.875-1.875V8.625zM3 13.125c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v6.75c0 1.035-.84 1.875-1.875 1.875h-.75A1.875 1.875 0 013 19.875v-6.75z"/>
                 </svg>
-                Dashboard
+                Cobranza
             </a>
             @endcan
             @endif
@@ -142,12 +143,25 @@
             </a>
             @endcan
 
+            @can('dashboard.ver')
+            <a href="{{ route('admin.administracion.tarjetas-cobro') }}" @click="$store.sidebar.open = false"
+                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                    {{ request()->routeIs('admin.administracion.tarjetas-cobro') ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
+                <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M4.5 3.75a3 3 0 00-3 3v.75h21v-.75a3 3 0 00-3-3h-15z"/>
+                    <path fill-rule="evenodd" d="M22.5 9.75h-21v7.5a3 3 0 003 3h15a3 3 0 003-3v-7.5zm-18 3.75a.75.75 0 01.75-.75h6a.75.75 0 010 1.5h-6a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5h3a.75.75 0 000-1.5h-3z" clip-rule="evenodd"/>
+                </svg>
+                Tarjetas y cuentas
+            </a>
+            @endcan
+
             @endif
 
             {{-- SISTEMA --}}
             <div class="pt-5 pb-1.5 px-3">
                 <p class="text-[10px] font-semibold text-slate-600 uppercase tracking-widest">Sistema</p>
             </div>
+
 
             <a href="{{ route('admin.sistema.configuracion') }}" @click="$store.sidebar.open = false"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
@@ -181,10 +195,5 @@
             @endcan
 
         </nav>
-
-        {{-- Footer --}}
-        <div class="px-4 py-3 border-t border-slate-800 shrink-0">
-            <p class="text-[11px] text-slate-600 font-medium">{{ config('app.name') }}</p>
-        </div>
     </aside>
 </div>

@@ -27,6 +27,7 @@ class RegistrarPagoFinanciamientoService
         ?string $observaciones = null,
         ?string $formaPago = null,
         ?string $referencia = null,
+        ?int $tarjetaCobroId = null,
     ): array {
         return DB::transaction(function () use (
             $contrato,
@@ -37,6 +38,7 @@ class RegistrarPagoFinanciamientoService
             $observaciones,
             $formaPago,
             $referencia,
+            $tarjetaCobroId,
         ) {
             $fechaPago = $fechaPago ?: now()->toDateString();
 
@@ -109,6 +111,7 @@ class RegistrarPagoFinanciamientoService
                 'monto_restante' => 0,
                 'forma_pago' => $formaPago ?? 'efectivo',
                 'referencia' => $referencia,
+                'tarjeta_cobro_id' => $tarjetaCobroId,
                 'estatus' => 'aplicado',
                 'observaciones' => $observaciones,
             ]);

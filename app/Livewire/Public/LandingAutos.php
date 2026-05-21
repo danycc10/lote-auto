@@ -3,38 +3,33 @@
 namespace App\Livewire\Public;
 
 use App\Models\Auto;
-use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 
 class LandingAutos extends Component
 {
     public function render()
     {
-        $autosDestacados = Cache::remember('landing_destacados_v1', now()->addMinutes(5), fn () =>
-            Auto::query()
-                ->with(['marca', 'modelo', 'imagenPortada'])
-                ->where('estatus', 'disponible')
-                ->where('activo', true)
-                ->latest()
-                ->limit(6)
-                ->get()
-        );
+        $autosDestacados = Auto::query()
+            ->with(['marca', 'modelo', 'imagenPortada'])
+            ->where('estatus', 'disponible')
+            ->where('activo', true)
+            ->latest()
+            ->limit(6)
+            ->get();
 
-        $heroAutos = Cache::remember('landing_hero_v1', now()->addMinutes(5), fn () =>
-            Auto::query()
-                ->with(['marca', 'modelo', 'imagenPortada', 'imagenes'])
-                ->where('estatus', 'disponible')
-                ->where('activo', true)
-                ->whereHas('imagenes')
-                ->latest()
-                ->limit(8)
-                ->get()
-                ->filter(fn ($auto) =>
-                    optional($auto->imagenPortada)->ruta || optional($auto->imagenes->first())->ruta
-                )
-                ->take(5)
-                ->values()
-        );
+        $heroAutos = Auto::query()
+            ->with(['marca', 'modelo', 'imagenPortada', 'imagenes'])
+            ->where('estatus', 'disponible')
+            ->where('activo', true)
+            ->whereHas('imagenes')
+            ->latest()
+            ->limit(8)
+            ->get()
+            ->filter(fn ($auto) =>
+                optional($auto->imagenPortada)->ruta || optional($auto->imagenes->first())->ruta
+            )
+            ->take(5)
+            ->values();
 
         return view('livewire.public.landing-autos', [
             'autosDestacados' => $autosDestacados,

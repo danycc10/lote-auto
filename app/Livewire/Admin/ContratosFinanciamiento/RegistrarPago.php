@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\ContratosFinanciamiento;
 
 use App\Models\ContratoFinanciamiento;
 use App\Models\CuotaFinanciamiento;
+use App\Models\TarjetaCobro;
 use App\Services\Financiamiento\EstadoCuentaFinanciamientoService;
 use App\Services\Financiamiento\RegistrarPagoFinanciamientoService;
 use Livewire\Component;
@@ -15,7 +16,9 @@ class RegistrarPago extends Component
     public $cuota_id = null;
     public $fecha_pago;
     public $monto;
+    public bool $incluirRecargo = false;
     public $forma_pago = 'efectivo';
+    public $tarjeta_cobro_id = null;
     public $referencia = null;
     public $concepto = null;
     public $observaciones = null;
@@ -61,6 +64,21 @@ class RegistrarPago extends Component
         return app(EstadoCuentaFinanciamientoService::class)->recargoSugerido($cuota);
     }
 
+    public function getTarjetasDisponiblesProperty()
+    {
+        $formasConTarjeta = ['tarjeta', 'transferencia', 'deposito'];
+
+        if (! in_array($this->forma_pago, $formasConTarjeta, true)) {
+            return collect();
+        }
+
+        return TarjetaCobro::query()
+            ->where('tipo', $this->forma_pago)
+            ->where('activa', true)
+            ->orderBy('nombre')
+            ->get();
+    }
+
     public function getCuotasDisponiblesProperty()
     {
         return CuotaFinanciamiento::query()
@@ -70,8 +88,52 @@ class RegistrarPago extends Component
             ->get();
     }
 
+    public function getCuotaSeleccionadaProperty(): ?CuotaFinanciamiento
+    {
+        if (!$this->cuota_id) {
+            return null;
+        }
+        return $this->cuotasDisponibles->firstWhere('id', $this->cuota_id);
+    }
+
+    public function seleccionarCuota(int $id): void
+    {
+        $cuota = $this->cuotasDisponibles->firstWhere('id', $id);
+        if (!$cuota) {
+            return;
+        }
+
+        $this->cuota_id = $id;
+        $this->incluirRecargo = false;
+        $this->monto = number_format((float) $cuota->saldo, 2, '.', '');
+        $this->concepto = 'Pago de cuota #' . $cuota->numero;
+    }
+
+    public function updatedIncluirRecargo($value): void
+    {
+        $cuota = $this->cuotaSeleccionada;
+        if (!$cuota) {
+            return;
+        }
+
+        $saldo = (float) $cuota->saldo;
+        $recargo = $this->recargoSugerido;
+
+        $this->monto = number_format(
+            $value ? $saldo + $recargo : $saldo,
+            2, '.', ''
+        );
+    }
+
+    public function updatedFormaPago(): void
+    {
+        $this->tarjeta_cobro_id = null;
+    }
+
     public function updatedCuotaId($value): void
     {
+        $this->incluirRecargo = false;
+
         if (!$value) {
             $this->monto = null;
             return;
@@ -83,10 +145,7 @@ class RegistrarPago extends Component
 
         if ($cuota) {
             $this->monto = number_format((float) $cuota->saldo, 2, '.', '');
-
-            if (blank($this->concepto)) {
-                $this->concepto = 'Pago de cuota #' . $cuota->numero;
-            }
+            $this->concepto = 'Pago de cuota #' . $cuota->numero;
         }
     }
 
@@ -108,6 +167,7 @@ class RegistrarPago extends Component
                 $this->observaciones,
                 $this->forma_pago,
                 $this->referencia,
+                $this->tarjeta_cobro_id ? (int) $this->tarjeta_cobro_id : null,
             );
         } catch (\RuntimeException $e) {
             $this->addError('monto', $e->getMessage());
@@ -122,8 +182,10 @@ class RegistrarPago extends Component
     public function render()
     {
         return view('livewire.admin.contratos-financiamiento.registrar-pago', [
-            'cuotasDisponibles' => $this->cuotasDisponibles,
-            'recargoSugerido' => $this->recargoSugerido,
+            'cuotasDisponibles'   => $this->cuotasDisponibles,
+            'recargoSugerido'     => $this->recargoSugerido,
+            'cuotaSeleccionada'   => $this->cuotaSeleccionada,
+            'tarjetasDisponibles' => $this->tarjetasDisponibles,
         ])
             ->layout('layouts.app')
             ->title('Registrar pago');

@@ -21,6 +21,7 @@ class PagoFinanciamiento extends Model
         'monto_restante',
         'forma_pago',
         'referencia',
+        'tarjeta_cobro_id',
         'observaciones',
         'evidencia_path',
         'firma_path',
@@ -53,6 +54,11 @@ class PagoFinanciamiento extends Model
     public function capturadoPor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'capturado_por');
+    }
+
+    public function tarjetaCobro(): BelongsTo
+    {
+        return $this->belongsTo(TarjetaCobro::class, 'tarjeta_cobro_id');
     }
 
     public function aplicaciones(): HasMany

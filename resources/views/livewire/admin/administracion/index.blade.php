@@ -91,6 +91,20 @@
                 </a>
             @endcan
 
+            @can('dashboard.ver')
+                <a href="{{ route('admin.administracion.tarjetas-cobro') }}"
+                   class="group bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all">
+                    <div class="h-10 w-10 rounded-lg bg-teal-50 flex items-center justify-center mb-4">
+                        <svg class="h-5 w-5 text-teal-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M4.5 3.75a3 3 0 00-3 3v.75h21v-.75a3 3 0 00-3-3h-15z"/>
+                            <path fill-rule="evenodd" d="M22.5 9.75h-21v7.5a3 3 0 003 3h15a3 3 0 003-3v-7.5zm-18 3.75a.75.75 0 01.75-.75h6a.75.75 0 010 1.5h-6a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5h3a.75.75 0 000-1.5h-3z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <h2 class="text-sm font-semibold text-slate-900 group-hover:text-teal-700 transition-colors">Tarjetas y cuentas</h2>
+                    <p class="text-xs text-slate-500 mt-1">Terminales, CLABES y cuentas de cobro.</p>
+                </a>
+            @endcan
+
         @endif
 
     </div>

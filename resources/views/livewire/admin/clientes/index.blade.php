@@ -91,94 +91,76 @@
     {{-- Tabla --}}
     <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
         @if ($clientes->count())
-            <div class="overflow-x-auto" wire:loading.class="opacity-60 pointer-events-none">
-                <table class="min-w-full text-sm">
+            <div wire:loading.class="opacity-60 pointer-events-none">
+                <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b border-slate-200 bg-slate-50/70">
-                            <th class="px-5 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Cliente</th>
-                            <th class="px-5 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Contacto</th>
-                            <th class="px-5 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Ubicación</th>
-                            <th class="px-5 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Perfil</th>
-                            <th class="px-5 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider">Documentos</th>
-                            <th class="px-5 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider">Estado</th>
-                            <th class="px-5 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Acciones</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Cliente</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Contacto</th>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider">Docs</th>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider">Estado</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         @foreach ($clientes as $cliente)
-                            <tr class="hover:bg-slate-50/60 transition-colors align-top">
-                                <td class="px-5 py-4 min-w-[220px]">
-                                    <div class="flex items-start gap-3">
-                                        <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 mt-0.5">
-                                            <span class="text-xs font-semibold text-indigo-700">
-                                                {{ strtoupper(substr($cliente->nombres ?? '?', 0, 1)) }}
-                                            </span>
+                            <tr class="hover:bg-slate-50/60 transition-colors align-middle">
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+                                            <span class="text-xs font-semibold text-indigo-700">{{ strtoupper(substr($cliente->nombres ?? '?', 0, 1)) }}</span>
                                         </div>
-                                        <div>
-                                            <p class="font-semibold text-slate-900">{{ $cliente->nombre_completo }}</p>
-                                            <p class="text-xs text-slate-400 mt-0.5">ID {{ $cliente->id }}</p>
-                                            @if($cliente->curp)
-                                                <p class="text-xs text-slate-400">{{ $cliente->curp }}</p>
-                                            @endif
+                                        <div class="min-w-0">
+                                            <p class="text-sm font-semibold text-slate-900 truncate">{{ $cliente->nombre_completo }}</p>
+                                            <p class="text-xs text-slate-400">ID {{ $cliente->id }}@if($cliente->curp) · {{ $cliente->curp }}@endif</p>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-5 py-4 min-w-[200px]">
+                                <td class="px-4 py-3">
                                     <div class="space-y-0.5 text-xs text-slate-600">
-                                        <p><span class="text-slate-400">Tel:</span> {{ $cliente->telefono ?: '—' }}</p>
-                                        <p><span class="text-slate-400">Correo:</span> {{ $cliente->correo ?: '—' }}</p>
-                                        <p><span class="text-slate-400">RFC:</span> {{ $cliente->rfc ?: '—' }}</p>
-                                    </div>
-                                </td>
-                                <td class="px-5 py-4 min-w-[180px]">
-                                    <div class="space-y-0.5 text-xs text-slate-600">
-                                        <p>{{ $cliente->ciudad ?: '—' }}, {{ $cliente->estado ?: '—' }}</p>
-                                        <p class="text-slate-400">CP: {{ $cliente->codigo_postal ?: '—' }}</p>
-                                    </div>
-                                </td>
-                                <td class="px-5 py-4 min-w-[180px]">
-                                    <div class="space-y-0.5 text-xs text-slate-600">
-                                        <p>{{ $cliente->ocupacion ?: '—' }}</p>
-                                        @if($cliente->ingreso_mensual !== null)
-                                            <p class="font-medium text-slate-700 tabular-nums">${{ number_format((float) $cliente->ingreso_mensual, 2) }}/mes</p>
+                                        <p>{{ $cliente->telefono ?: '—' }}</p>
+                                        <p class="text-slate-400 truncate max-w-[180px]">{{ $cliente->correo ?: '—' }}</p>
+                                        @if($cliente->ciudad)
+                                            <p class="text-slate-400">{{ $cliente->ciudad }}, {{ $cliente->estado }}</p>
                                         @endif
                                     </div>
                                 </td>
-                                <td class="px-5 py-4 text-center min-w-[160px]">
-                                    <div class="flex flex-col items-center gap-1.5">
+                                <td class="px-4 py-3 text-center">
+                                    <div class="flex items-center justify-center gap-1.5">
                                         @if($cliente->ruta_ine)
                                             <a href="{{ route('admin.clientes.archivo', [$cliente, 'ine']) }}" target="_blank"
-                                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 transition">
+                                               title="Ver INE"
+                                               class="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 transition">
                                                 <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Zm6-10.125a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0Zm1.294 6.336a6.721 6.721 0 0 1-3.17.789 6.721 6.721 0 0 1-3.168-.789 3.376 3.376 0 0 1 6.338 0Z"/></svg>
                                                 INE
                                             </a>
                                         @else
-                                            <span class="inline-flex px-2.5 py-1 rounded-lg border border-dashed border-slate-200 text-xs text-slate-400">Sin INE</span>
+                                            <span class="inline-flex px-2 py-1 rounded-md border border-dashed border-slate-200 text-xs text-slate-300">INE</span>
                                         @endif
-
                                         @if($cliente->ruta_comprobante_domicilio)
                                             <a href="{{ route('admin.clientes.archivo', [$cliente, 'comprobante']) }}" target="_blank"
-                                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 transition">
+                                               title="Ver comprobante"
+                                               class="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 transition">
                                                 <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
-                                                Domicilio
+                                                Dom
                                             </a>
                                         @else
-                                            <span class="inline-flex px-2.5 py-1 rounded-lg border border-dashed border-slate-200 text-xs text-slate-400">Sin comprobante</span>
+                                            <span class="inline-flex px-2 py-1 rounded-md border border-dashed border-slate-200 text-xs text-slate-300">Dom</span>
                                         @endif
                                     </div>
                                 </td>
-                                <td class="px-5 py-4 text-center">
+                                <td class="px-4 py-3 text-center">
                                     @if ($cliente->activo)
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
                                             <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>Activo
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-600 border border-red-200">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600 border border-red-200">
                                             <span class="h-1.5 w-1.5 rounded-full bg-red-500"></span>Inactivo
                                         </span>
                                     @endif
                                 </td>
-                                <td class="px-5 py-4 text-right min-w-[220px]">
+                                <td class="px-4 py-3 text-right">
                                     <div class="flex items-center justify-end gap-1.5">
                                         <button type="button" wire:click="toggleActivo({{ $cliente->id }})"
                                             wire:loading.attr="disabled" wire:target="toggleActivo({{ $cliente->id }})"
@@ -193,7 +175,7 @@
                                             wire:confirm="¿Seguro que deseas eliminar este cliente? Esta acción no se puede deshacer."
                                             wire:loading.attr="disabled" wire:target="eliminar({{ $cliente->id }})"
                                             class="px-2.5 py-1.5 rounded-lg bg-red-600 text-xs font-medium text-white hover:bg-red-700 transition">
-                                            Eliminar
+                                            ×
                                         </button>
                                     </div>
                                 </td>

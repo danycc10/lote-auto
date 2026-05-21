@@ -35,6 +35,7 @@ use App\Livewire\Admin\Seguridad\RolesPermisosManager;
 use App\Livewire\Admin\Finanzas\LogsFinancierosIndex;
 
 use App\Livewire\Admin\Administracion\Index as AdministracionIndex;
+use App\Livewire\Admin\Administracion\TarjetasCobroIndex;
 use App\Livewire\Admin\Sistema\Index as SistemaIndex;
 use App\Livewire\Admin\Sistema\AuditoriaIndex;
 use App\Livewire\Admin\Sistema\ConfiguracionIndex as SistemaConfiguracionIndex;
@@ -224,5 +225,9 @@ Route::middleware(['auth', 'verified'])
             Route::get('/finanzas/logs-financieros', LogsFinancierosIndex::class)
                 ->middleware('permission:logs_financieros.ver')
                 ->name('finanzas.logs-financieros');
+
+            Route::get('/administracion/tarjetas-cobro', TarjetasCobroIndex::class)
+                ->middleware('permission:dashboard.ver')
+                ->name('administracion.tarjetas-cobro');
         });
     });

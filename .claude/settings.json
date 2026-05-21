@@ -7,7 +7,9 @@
       "PowerShell(cd \"c:\\\\laragon\\\\www\\\\lote-autos-finan\"; php artisan tinker --execute=\"$compiled = Blade::compileString\\(file_get_contents\\(resource_path\\('views/layouts/guest.blade.php'\\)\\)\\); file_put_contents\\('guest_compiled.php', $compiled\\); echo 'lines: ' . substr_count\\($compiled, PHP_EOL\\);\" 2>&1)",
       "Bash(Get-ChildItem -Path \"c:\\\\laragon\\\\www\\\\lote-autos-finan\" -Recurse -Directory)",
       "Bash(Select-Object -First 20)",
-      "Bash(python .claude/skills/ui-ux-pro-max/scripts/search.py \"fintech ERP admin dashboard auto dealer financing\" --design-system -p \"LoteAutos Admin\" -f markdown)"
+      "Bash(python .claude/skills/ui-ux-pro-max/scripts/search.py \"fintech ERP admin dashboard auto dealer financing\" --design-system -p \"LoteAutos Admin\" -f markdown)",
+      "Bash(Get-ChildItem -Recurse -Path \"c:\\\\laragon\\\\www\\\\lote-autos-finan\" -Filter \"*recibo*\" -Include \"*.blade.php\", \"*.php\")",
+      "Bash(Select-Object -ExpandProperty FullName)"
     ]
   }
 }

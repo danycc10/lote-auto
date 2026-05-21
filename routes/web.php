@@ -31,6 +31,7 @@ use App\Http\Controllers\Admin\ContratoFinanciamientoArchivoController;
 use App\Http\Controllers\Admin\ReciboFinanciamientoPdfController;
 
 use App\Livewire\Admin\Seguridad\RolesPermisosManager;
+use App\Livewire\Admin\Usuarios\Index as UsuariosIndex;
 
 use App\Livewire\Admin\Finanzas\LogsFinancierosIndex;
 
@@ -136,6 +137,10 @@ Route::middleware(['auth', 'verified'])
         Route::get('/seguridad/roles-permisos', RolesPermisosManager::class)
             ->middleware('permission:seguridad.roles')
             ->name('seguridad.roles-permisos');
+
+        Route::get('/seguridad/usuarios', UsuariosIndex::class)
+            ->middleware('permission:seguridad.roles')
+            ->name('seguridad.usuarios');
 
         Route::get('/autos', AutosIndex::class)
             ->middleware('permission:autos.ver')

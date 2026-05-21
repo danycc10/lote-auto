@@ -342,7 +342,7 @@
         </div>
 
         {{-- Sidebar --}}
-        <div class="space-y-5 xl:sticky xl:top-6 xl:self-start">
+        <div class="space-y-5 xl:sticky xl:top-[4.5rem] xl:self-start">
 
             {{-- Resumen --}}
             <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">

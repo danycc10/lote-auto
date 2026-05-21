@@ -325,7 +325,7 @@
         </div>
 
         {{-- Sidebar --}}
-        <div class="space-y-5 xl:sticky xl:top-6 xl:self-start">
+        <div class="space-y-5 xl:sticky xl:top-[4.5rem] xl:self-start">
             <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <div class="px-5 py-3.5 border-b border-slate-100 bg-slate-50/70">
                     <h2 class="text-sm font-semibold text-slate-900">Resumen del contrato</h2>

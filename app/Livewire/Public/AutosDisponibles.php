@@ -4,6 +4,7 @@ namespace App\Livewire\Public;
 
 use App\Models\Auto;
 use App\Models\MarcaAuto;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -75,10 +76,12 @@ class AutosDisponibles extends Component
             ->latest()
             ->paginate(12);
 
-        $marcas = MarcaAuto::query()
-            ->where('activo', true)
-            ->orderBy('nombre')
-            ->get();
+        $marcas = Cache::remember('marcas_activas_v1', 3600, fn () =>
+            MarcaAuto::query()
+                ->where('activo', true)
+                ->orderBy('nombre')
+                ->pluck('nombre', 'id')
+        );
 
         return view('livewire.public.autos-disponibles', [
             'autos' => $autos,

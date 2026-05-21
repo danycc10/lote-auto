@@ -95,8 +95,8 @@ $homeUrl  = Route::has('public.home') ? route('public.home') : url('/');
                         wire:model.live="marca"
                         class="w-full rounded-xl border border-white/[0.08] bg-slate-800/80 py-2.5 px-3 text-sm text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 focus:outline-none transition">
                         <option value="" class="bg-slate-900">Todas</option>
-                        @foreach($marcas as $m)
-                        <option value="{{ $m->id }}" class="bg-slate-900">{{ $m->nombre }}</option>
+                        @foreach($marcas as $id => $nombre)
+                        <option value="{{ $id }}" class="bg-slate-900">{{ $nombre }}</option>
                         @endforeach
                     </select>
                 </div>

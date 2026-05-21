@@ -6,12 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Str;
 
 class Auto extends Model
 {
     protected $table = 'autos';
 
     protected $fillable = [
+        'uuid',
         'marca_auto_id',
         'modelo_auto_id',
         'codigo_inventario',
@@ -39,6 +41,15 @@ class Auto extends Model
         'destacado' => 'boolean',
         'activo' => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $auto): void {
+            if (empty($auto->uuid)) {
+                $auto->uuid = (string) Str::uuid();
+            }
+        });
+    }
 
     public function marca(): BelongsTo
     {

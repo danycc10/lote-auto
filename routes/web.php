@@ -41,7 +41,7 @@ use App\Livewire\Public\AutosDisponibles;
 use App\Livewire\Public\LandingAutos;
 use App\Livewire\Public\AutoDetalle;
 
-Route::get('/autos/{auto}', AutoDetalle::class)->name('public.autos.show');
+Route::get('/autos/{auto:uuid}', AutoDetalle::class)->name('public.autos.show');
 
 Route::get('/', LandingAutos::class)->name('public.home');
 

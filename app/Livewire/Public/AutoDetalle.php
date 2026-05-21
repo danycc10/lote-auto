@@ -23,7 +23,32 @@ class AutoDetalle extends Component
 
     public function render()
     {
-        return view('livewire.public.auto-detalle')
-            ->layout('layouts.guest');
+        // Autos de la misma marca primero, luego rellena con otros
+        $relacionados = Auto::query()
+            ->with(['marca', 'modelo', 'imagenPortada'])
+            ->where('estatus', 'disponible')
+            ->where('activo', true)
+            ->where('id', '!=', $this->auto->id)
+            ->where('marca_auto_id', $this->auto->marca_auto_id)
+            ->inRandomOrder()
+            ->limit(4)
+            ->get();
+
+        if ($relacionados->count() < 4) {
+            $excluir = $relacionados->pluck('id')->push($this->auto->id);
+            $relleno = Auto::query()
+                ->with(['marca', 'modelo', 'imagenPortada'])
+                ->where('estatus', 'disponible')
+                ->where('activo', true)
+                ->whereNotIn('id', $excluir)
+                ->inRandomOrder()
+                ->limit(4 - $relacionados->count())
+                ->get();
+            $relacionados = $relacionados->merge($relleno);
+        }
+
+        return view('livewire.public.auto-detalle', [
+            'relacionados' => $relacionados,
+        ])->layout('layouts.guest');
     }
 }

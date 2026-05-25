@@ -45,7 +45,11 @@
 
         {{-- Desktop nav --}}
         <nav class="hidden lg:flex items-center gap-1 text-sm font-semibold text-slate-300" aria-label="Navegación principal">
-            <a href="{{ $homeUrl }}#autos"
+            <a href="{{ $homeUrl }}"
+               class="rounded-lg px-3 py-2 transition-colors hover:bg-white/8 hover:text-white">
+                Inicio
+            </a>
+            <a href="{{ $catalogoUrl }}"
                class="rounded-lg px-3 py-2 transition-colors hover:bg-white/8 hover:text-white">
                 Inventario
             </a>
@@ -61,22 +65,10 @@
                class="rounded-lg px-3 py-2 transition-colors hover:bg-white/8 hover:text-white">
                 Contacto
             </a>
-            <a href="{{ $catalogoUrl }}"
-               class="rounded-lg px-3 py-2 transition-colors hover:bg-white/8 hover:text-white">
-                Catálogo
-            </a>
         </nav>
 
         {{-- Desktop CTA --}}
         <div class="hidden sm:flex items-center gap-2.5 shrink-0">
-            <a href="{{ $catalogoUrl }}"
-               class="hidden xl:inline-flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/[0.07] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/12">
-                <svg class="h-4 w-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path d="M8 10a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0z"/>
-                    <path fill-rule="evenodd" d="M4.5 2A1.5 1.5 0 003 3.5v13A1.5 1.5 0 004.5 18h11a1.5 1.5 0 001.5-1.5V7.621a1.5 1.5 0 00-.44-1.06l-4.12-4.122A1.5 1.5 0 0011.378 2H4.5zm5 5a3 3 0 100 6 3 3 0 000-6z" clip-rule="evenodd"/>
-                </svg>
-                Catálogo
-            </a>
             <a href="https://wa.me/{{ $whatsapp }}?text={{ urlencode('Hola, quiero información sobre los autos disponibles') }}"
                target="_blank" rel="noopener noreferrer"
                class="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-emerald-900/30 transition hover:bg-emerald-400 active:scale-[0.97]">
@@ -123,11 +115,11 @@
     >
         <div class="max-w-7xl mx-auto px-4 py-4 space-y-1">
             @foreach([
-                ['label' => 'Inventario',     'href' => $homeUrl . '#autos'],
+                ['label' => 'Inicio',         'href' => $homeUrl],
+                ['label' => 'Inventario',     'href' => $catalogoUrl],
                 ['label' => 'Financiamiento', 'href' => $homeUrl . '#financiamiento'],
                 ['label' => 'Proceso',        'href' => $homeUrl . '#proceso'],
                 ['label' => 'Contacto',       'href' => $homeUrl . '#contacto'],
-                ['label' => 'Catálogo',       'href' => $catalogoUrl],
             ] as $link)
             <a @click="open = false"
                href="{{ $link['href'] }}"

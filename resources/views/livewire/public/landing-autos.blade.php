@@ -461,12 +461,13 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                     else                                                        { $imagenUrl = asset('storage/' . $imagen); }
                 }
                 $mensajeWa = $waBase . urlencode('Hola, me interesa el ' . $tituloAuto . ' ' . ($auto->anio ?? ''));
+                $detalleUrl = route('public.autos.show', $auto->uuid);
             @endphp
 
             <article class="group overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0e1725] card-hover-glow" aria-label="{{ $tituloAuto }}">
 
-                {{-- Image --}}
-                <div class="relative aspect-[16/10] overflow-hidden bg-slate-900">
+                {{-- Image — clickeable al detalle --}}
+                <a href="{{ $detalleUrl }}" class="block relative aspect-[16/10] overflow-hidden bg-slate-900" tabindex="-1" aria-hidden="true">
                     @if($imagenUrl)
                     <img src="{{ $imagenUrl }}"
                          alt="{{ $tituloAuto }}"
@@ -475,7 +476,7 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                          loading="lazy">
                     <div class="absolute inset-0 bg-gradient-to-t from-[#0e1725]/70 via-transparent to-transparent" aria-hidden="true"></div>
                     @else
-                    <div class="h-full w-full bg-gradient-to-br from-slate-800 to-slate-900 flex flex-col items-center justify-center" aria-label="Sin imagen disponible">
+                    <div class="h-full w-full bg-gradient-to-br from-slate-800 to-slate-900 flex flex-col items-center justify-center">
                         <svg class="h-12 w-12 text-slate-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/>
                         </svg>
@@ -484,7 +485,7 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                     @endif
 
                     {{-- Badges --}}
-                    <div class="absolute left-3 top-3 flex items-center gap-2" aria-label="Estado del auto">
+                    <div class="absolute left-3 top-3 flex items-center gap-2">
                         <span class="inline-flex items-center gap-1 rounded-full bg-emerald-500/90 backdrop-blur-sm px-3 py-1 text-xs font-bold text-white shadow">
                             <span class="h-1.5 w-1.5 rounded-full bg-white" aria-hidden="true"></span>
                             Disponible
@@ -495,7 +496,7 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                         </span>
                         @endif
                     </div>
-                </div>
+                </a>
 
                 {{-- Content --}}
                 <div class="p-5">
@@ -503,7 +504,11 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                         {{ $auto->anio ?? '' }}
                         @if($versionNombre) · {{ $versionNombre }} @endif
                     </p>
-                    <h3 class="mt-1 text-xl font-bold text-white leading-tight">{{ $tituloAuto }}</h3>
+                    <a href="{{ $detalleUrl }}" class="block mt-1 group/title">
+                        <h3 class="text-xl font-bold text-white leading-tight group-hover/title:text-blue-300 transition-colors">
+                            {{ $tituloAuto }}
+                        </h3>
+                    </a>
 
                     {{-- Price block --}}
                     <div class="mt-5 flex items-end justify-between gap-4">
@@ -548,16 +553,26 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                     </div>
                     @endif
 
-                    {{-- CTA --}}
-                    <a href="{{ $mensajeWa }}"
-                       target="_blank" rel="noopener noreferrer"
-                       class="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-emerald-400 active:scale-[0.97]"
-                       aria-label="Solicitar información sobre {{ $tituloAuto }} por WhatsApp">
-                        <svg class="h-4 w-4 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                        </svg>
-                        Quiero este auto
-                    </a>
+                    {{-- CTAs --}}
+                    <div class="mt-5 flex gap-2">
+                        <a href="{{ $detalleUrl }}"
+                           class="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-white/[0.12] bg-white/[0.05] px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10 active:scale-[0.97]">
+                            <svg class="h-4 w-4 shrink-0 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z"/>
+                                <path fill-rule="evenodd" d="M.664 10.59a1.651 1.651 0 010-1.186A10.004 10.004 0 0110 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0110 17c-4.257 0-7.893-2.66-9.336-6.41zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                            </svg>
+                            Ver detalles
+                        </a>
+                        <a href="{{ $mensajeWa }}"
+                           target="_blank" rel="noopener noreferrer"
+                           class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-3 text-sm font-bold text-white transition hover:bg-emerald-400 active:scale-[0.97]"
+                           aria-label="Preguntar por {{ $tituloAuto }} por WhatsApp">
+                            <svg class="h-4 w-4 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                            </svg>
+                            WhatsApp
+                        </a>
+                    </div>
                 </div>
             </article>
             @endforeach
@@ -651,7 +666,7 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
 
-                {{-- Left --}}
+                {{-- Left: info + WA buttons --}}
                 <div>
                     <p class="text-xs font-semibold tracking-[0.22em] uppercase text-emerald-400">Contacto</p>
                     <h2 id="contacto-heading" class="mt-3 text-4xl md:text-5xl font-black tracking-tight">
@@ -663,7 +678,7 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                     </p>
 
                     {{-- Contact info cards --}}
-                    <div class="mt-8 space-y-4">
+                    <div class="mt-8 space-y-3">
                         <div class="flex items-center gap-4 rounded-xl border border-white/[0.08] bg-white/[0.03] p-4">
                             <div class="shrink-0 h-11 w-11 rounded-xl bg-emerald-500/15 flex items-center justify-center" aria-hidden="true">
                                 <svg class="h-5 w-5 text-emerald-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -691,33 +706,31 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                         <div class="flex items-center gap-4 rounded-xl border border-white/[0.08] bg-white/[0.03] p-4">
                             <div class="shrink-0 h-11 w-11 rounded-xl bg-violet-500/15 flex items-center justify-center" aria-hidden="true">
                                 <svg class="h-5 w-5 text-violet-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Atención</p>
-                                <p class="text-base font-bold text-white">Respuesta en menos de 24 horas</p>
+                                <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Ubicación</p>
+                                {{-- Actualiza esta dirección con la del negocio --}}
+                                <p class="text-base font-bold text-white">Tu Ciudad, Estado</p>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {{-- Right: CTA card --}}
-                <div class="rounded-2xl border border-white/[0.1] bg-gradient-to-br from-white/[0.05] to-transparent p-8">
-                    <p class="text-xs font-semibold tracking-[0.22em] uppercase text-slate-400 mb-6">Enviar mensaje</p>
-
-                    <div class="space-y-4">
+                    {{-- WA action buttons --}}
+                    <div class="mt-6 space-y-3">
                         <a href="{{ $waGeneral }}"
                            target="_blank" rel="noopener noreferrer"
-                           class="flex w-full items-center gap-4 rounded-xl bg-emerald-500 px-6 py-5 font-bold text-white transition hover:bg-emerald-400 active:scale-[0.98] group">
-                            <div class="shrink-0 h-10 w-10 rounded-lg bg-white/20 flex items-center justify-center" aria-hidden="true">
+                           class="flex w-full items-center gap-4 rounded-xl bg-emerald-500 px-6 py-4 font-bold text-white transition hover:bg-emerald-400 active:scale-[0.98] group">
+                            <div class="shrink-0 h-9 w-9 rounded-lg bg-white/20 flex items-center justify-center" aria-hidden="true">
                                 <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
                                 </svg>
                             </div>
                             <div>
                                 <p class="font-bold leading-none">Información general</p>
-                                <p class="mt-1 text-sm text-emerald-100 font-normal">Sobre autos disponibles</p>
+                                <p class="mt-0.5 text-sm text-emerald-100 font-normal">Sobre autos disponibles</p>
                             </div>
                             <svg class="h-5 w-5 ml-auto shrink-0 transition group-hover:translate-x-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd"/>
@@ -726,21 +739,44 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
 
                         <a href="{{ $waCotizar }}"
                            target="_blank" rel="noopener noreferrer"
-                           class="flex w-full items-center gap-4 rounded-xl border border-white/[0.1] bg-white/[0.05] px-6 py-5 font-bold text-white transition hover:bg-white/10 active:scale-[0.98] group">
-                            <div class="shrink-0 h-10 w-10 rounded-lg bg-white/10 flex items-center justify-center" aria-hidden="true">
+                           class="flex w-full items-center gap-4 rounded-xl border border-white/[0.1] bg-white/[0.05] px-6 py-4 font-bold text-white transition hover:bg-white/10 active:scale-[0.98] group">
+                            <div class="shrink-0 h-9 w-9 rounded-lg bg-white/10 flex items-center justify-center" aria-hidden="true">
                                 <svg class="h-5 w-5 text-slate-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>
                                 </svg>
                             </div>
                             <div>
                                 <p class="font-bold leading-none">Cotizar mi auto</p>
-                                <p class="mt-1 text-sm text-slate-400 font-normal">Planes de financiamiento</p>
+                                <p class="mt-0.5 text-sm text-slate-400 font-normal">Planes de financiamiento</p>
                             </div>
                             <svg class="h-5 w-5 ml-auto shrink-0 text-slate-500 transition group-hover:translate-x-1 group-hover:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd"/>
                             </svg>
                         </a>
                     </div>
+                </div>
+
+                {{-- Right: Mapa --}}
+                <div class="rounded-2xl overflow-hidden border border-white/[0.08] bg-slate-900 h-full min-h-[420px] lg:min-h-[520px]">
+                    {{--
+                        INSTRUCCIONES PARA EL MAPA:
+                        1. Ve a Google Maps y busca la dirección del negocio
+                        2. Haz clic en "Compartir" → "Insertar mapa"
+                        3. Copia la URL del atributo src del iframe y pégala abajo
+                        El formato del src es: https://www.google.com/maps/embed?pb=...
+                    --}}
+                    <iframe
+                        {{-- Reemplaza este src con el embed de Google Maps de tu dirección --}}
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d120000!2d-99.1332!3d19.4326!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDI1JzU3LjQiTiA5OcKwMDcnNTkuNSJX!5e0!3m2!1ses!2smx!4v1700000000000"
+                        width="100%"
+                        height="100%"
+                        style="border:0; min-height: 420px; filter: grayscale(30%) invert(5%) contrast(110%) brightness(90%);"
+                        allowfullscreen=""
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        title="Ubicación del negocio"
+                        aria-label="Mapa con la ubicación del negocio">
+                    </iframe>
                 </div>
 
             </div>
@@ -752,45 +788,96 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
          FOOTER
          ======================================================== --}}
     <footer class="bg-[#04070f] border-t border-white/[0.06]" role="contentinfo">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-                {{-- Brand --}}
-                <div class="flex items-center gap-3">
-                    <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-600 to-emerald-500 flex items-center justify-center shrink-0" aria-hidden="true">
-                        <svg class="h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M3.375 4.5C2.339 4.5 1.5 5.34 1.5 6.375V13.5h12V6.375c0-1.036-.84-1.875-1.875-1.875h-8.25zM13.5 15h-12v2.625c0 1.035.84 1.875 1.875 1.875H3.75a3 3 0 106 0h2.25a.75.75 0 00.75-.75V15z"/>
-                            <path d="M8.25 19.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0zM15.75 6.75a.75.75 0 00-.75.75v11.25c0 .087.015.17.042.248a3 3 0 015.958.464c.853-.175 1.522-.935 1.464-1.883a18.659 18.659 0 00-3.732-10.104 1.837 1.837 0 00-1.47-.725H15.75z"/>
-                            <path d="M19.5 19.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z"/>
+            {{-- Main footer grid --}}
+            <div class="py-14 grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-16">
+
+                {{-- Col 1: Brand --}}
+                <div class="md:col-span-1">
+                    <a href="{{ $homeUrl }}" class="inline-flex items-center gap-3" aria-label="{{ config('app.name') }}">
+                        <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-emerald-500 flex items-center justify-center shrink-0" aria-hidden="true">
+                            <svg class="h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M3.375 4.5C2.339 4.5 1.5 5.34 1.5 6.375V13.5h12V6.375c0-1.036-.84-1.875-1.875-1.875h-8.25zM13.5 15h-12v2.625c0 1.035.84 1.875 1.875 1.875H3.75a3 3 0 106 0h2.25a.75.75 0 00.75-.75V15z"/>
+                                <path d="M8.25 19.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0zM15.75 6.75a.75.75 0 00-.75.75v11.25c0 .087.015.17.042.248a3 3 0 015.958.464c.853-.175 1.522-.935 1.464-1.883a18.659 18.659 0 00-3.732-10.104 1.837 1.837 0 00-1.47-.725H15.75z"/>
+                                <path d="M19.5 19.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-black text-white text-[15px] leading-none">{{ config('app.name', 'AutoLote') }}</p>
+                            <p class="text-xs text-emerald-400/70 mt-0.5">Autos financiados</p>
+                        </div>
+                    </a>
+                    <p class="mt-4 text-sm text-slate-500 leading-relaxed max-w-xs">
+                        Financiamiento directo, sin banco ni burocracia. Tu próximo auto más cerca de lo que crees.
+                    </p>
+                    {{-- WhatsApp contact --}}
+                    <a href="{{ $waGeneral }}" target="_blank" rel="noopener noreferrer"
+                       class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-emerald-400 hover:text-emerald-300 transition">
+                        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
                         </svg>
-                    </div>
-                    <div>
-                        <p class="font-black text-white text-sm leading-none">{{ config('app.name', 'AutoLote') }}</p>
-                        <p class="text-xs text-slate-500 mt-0.5">Venta y financiamiento de autos</p>
-                    </div>
+                        Escríbenos por WhatsApp
+                    </a>
                 </div>
 
-                {{-- Links --}}
-                <nav class="flex flex-wrap gap-x-6 gap-y-2" aria-label="Navegación del pie de página">
-                    @foreach([
-                        ['label' => 'Inventario', 'href' => $homeUrl . '#autos'],
-                        ['label' => 'Financiamiento', 'href' => $homeUrl . '#financiamiento'],
-                        ['label' => 'Proceso', 'href' => $homeUrl . '#proceso'],
-                        ['label' => 'Contacto', 'href' => $homeUrl . '#contacto'],
-                        ['label' => 'Catálogo', 'href' => $catalogoUrl],
-                    ] as $link)
-                    <a href="{{ $link['href'] }}"
-                       class="text-sm text-slate-400 transition hover:text-white">
-                        {{ $link['label'] }}
-                    </a>
-                    @endforeach
-                </nav>
+                {{-- Col 2: Navegación --}}
+                <div>
+                    <p class="text-[11px] font-semibold tracking-[0.18em] uppercase text-slate-600 mb-4">Navegación</p>
+                    <nav class="space-y-2.5" aria-label="Navegación del pie de página">
+                        @foreach([
+                            ['label' => 'Inicio',         'href' => $homeUrl],
+                            ['label' => 'Ver autos',      'href' => $catalogoUrl],
+                            ['label' => 'Financiamiento', 'href' => $homeUrl . '#financiamiento'],
+                            ['label' => 'Proceso',        'href' => $homeUrl . '#proceso'],
+                            ['label' => 'Contacto',       'href' => $homeUrl . '#contacto'],
+                        ] as $link)
+                        <a href="{{ $link['href'] }}"
+                           class="block text-sm text-slate-400 hover:text-white transition-colors">
+                            {{ $link['label'] }}
+                        </a>
+                        @endforeach
+                    </nav>
+                </div>
 
-                {{-- Legal --}}
+                {{-- Col 3: Contacto --}}
+                <div>
+                    <p class="text-[11px] font-semibold tracking-[0.18em] uppercase text-slate-600 mb-4">Contacto</p>
+                    <ul class="space-y-3 text-sm text-slate-400">
+                        <li class="flex items-start gap-2.5">
+                            <svg class="h-4 w-4 text-slate-600 mt-0.5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd"/>
+                            </svg>
+                            {{-- Actualiza con la dirección real del negocio --}}
+                            <span>Tu Ciudad, Estado, México</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <svg class="h-4 w-4 text-slate-600 mt-0.5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Lun–Sáb · 9:00 AM – 7:00 PM</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <svg class="h-4 w-4 text-slate-600 mt-0.5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                            </svg>
+                            <span>+52 1 000 000 0000</span>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+
+            {{-- Bottom bar --}}
+            <div class="border-t border-white/[0.05] py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <p class="text-xs text-slate-600">
                     &copy; {{ date('Y') }} {{ config('app.name', 'AutoLote') }}. Todos los derechos reservados.
                 </p>
+                <p class="text-xs text-slate-700">
+                    Venta y financiamiento de autos · México
+                </p>
             </div>
+
         </div>
     </footer>
 

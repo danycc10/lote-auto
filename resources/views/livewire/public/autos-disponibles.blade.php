@@ -46,115 +46,239 @@ $homeUrl  = Route::has('public.home') ? route('public.home') : url('/');
     {{-- ======================================================
          CONTENIDO PRINCIPAL
          ====================================================== --}}
-    <main class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+    @php
+        $filtrosActivos = collect([$search ?? '', $marca ?? '', $transmision ?? '', $precioMin ?? '', $precioMax ?? '', $kmMin ?? '', $kmMax ?? '', $anio ?? '', $color ?? ''])->filter(fn($v) => $v !== '' && $v !== null)->count();
+    @endphp
 
-        {{-- FILTROS --}}
-        <div class="mb-8 rounded-2xl border border-white/[0.08] bg-slate-900/70 backdrop-blur-md p-5 md:p-6 shadow-xl shadow-black/30">
+    <style>
+    /* Track dentro del overflow:hidden — handles NO deben desbordar */
+    .noUi-target{background:#475569;border:none;box-shadow:none;height:20px;border-radius:10px}
+    .noUi-connect{background:#3b82f6;border-radius:10px}
+    .noUi-base{border-radius:10px}
+    .noUi-handle{width:20px!important;height:20px!important;right:-10px!important;top:0!important;border-radius:50%!important;background:#fff;border:3px solid #3b82f6!important;box-shadow:0 1px 8px rgba(0,0,0,.5)!important;cursor:grab!important}
+    .noUi-handle:active{cursor:grabbing!important}
+    .noUi-handle::before,.noUi-handle::after{display:none!important}
+    .noUi-tooltip{display:none}
+    </style>
 
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
-                <div class="flex items-center gap-3">
-                    <div class="h-8 w-8 rounded-lg bg-blue-500/15 flex items-center justify-center shrink-0">
-                        <svg class="h-4 w-4 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fill-rule="evenodd" d="M2.628 1.601C5.028 1.206 7.49 1 10 1s4.973.206 7.372.601a.75.75 0 0 1 .628.74v2.288a2.25 2.25 0 0 1-.659 1.59l-4.682 4.683a2.25 2.25 0 0 0-.659 1.59v3.037c0 .684-.31 1.33-.844 1.757l-1.937 1.55A.75.75 0 0 1 8 18.25v-5.757a2.25 2.25 0 0 0-.659-1.591L2.659 6.22A2.25 2.25 0 0 1 2 4.629V2.34a.75.75 0 0 1 .628-.74Z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h2 class="text-base font-bold text-white">Filtros</h2>
-                        <p class="text-xs text-slate-400">Refina tu búsqueda</p>
-                    </div>
-                </div>
+    <main
+        x-data="{ filtrosAbiertos: window.innerWidth >= 1024 }"
+        class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
 
-                <button
-                    wire:click="limpiarFiltros"
-                    type="button"
-                    class="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-semibold text-slate-300 transition hover:bg-white/10 hover:text-white">
-                    <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clip-rule="evenodd"/></svg>
-                    Limpiar filtros
-                </button>
-            </div>
+        {{-- BARRA MÓVIL: toggle filtros --}}
+        <div class="lg:hidden flex items-center justify-between gap-3 mb-4">
+            <button
+                @click="filtrosAbiertos = !filtrosAbiertos"
+                type="button"
+                class="inline-flex items-center gap-2 rounded-xl border border-white/[0.1] bg-slate-900/80 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/[0.08]">
+                <svg class="h-4 w-4 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M2.628 1.601C5.028 1.206 7.49 1 10 1s4.973.206 7.372.601a.75.75 0 0 1 .628.74v2.288a2.25 2.25 0 0 1-.659 1.59l-4.682 4.683a2.25 2.25 0 0 0-.659 1.59v3.037c0 .684-.31 1.33-.844 1.757l-1.937 1.55A.75.75 0 0 1 8 18.25v-5.757a2.25 2.25 0 0 0-.659-1.591L2.659 6.22A2.25 2.25 0 0 1 2 4.629V2.34a.75.75 0 0 1 .628-.74Z" clip-rule="evenodd"/>
+                </svg>
+                Filtros
+                @if($filtrosActivos > 0)
+                <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
+                    {{ $filtrosActivos }}
+                </span>
+                @endif
+                <svg :class="filtrosAbiertos ? 'rotate-180' : ''" class="h-4 w-4 text-slate-500 transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/>
+                </svg>
+            </button>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-3">
-
-                {{-- SEARCH --}}
-                <div class="xl:col-span-2">
-                    <label class="block text-xs font-semibold text-slate-400 mb-1.5">Buscar</label>
-                    <div class="relative">
-                        <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clip-rule="evenodd"/></svg>
-                        <input
-                            type="search"
-                            wire:model.live.debounce.400ms="search"
-                            placeholder="Marca, modelo, año..."
-                            class="w-full rounded-xl border border-white/[0.08] bg-slate-800/80 pl-9 pr-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 focus:outline-none transition">
-                    </div>
-                </div>
-
-                {{-- MARCA --}}
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1.5">Marca</label>
-                    <select
-                        wire:model.live="marca"
-                        class="w-full rounded-xl border border-white/[0.08] bg-slate-800/80 py-2.5 px-3 text-sm text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 focus:outline-none transition">
-                        <option value="" class="bg-slate-900">Todas</option>
-                        @foreach($marcas as $id => $nombre)
-                        <option value="{{ $id }}" class="bg-slate-900">{{ $nombre }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                {{-- TRANSMISION --}}
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1.5">Transmisión</label>
-                    <select
-                        wire:model.live="transmision"
-                        class="w-full rounded-xl border border-white/[0.08] bg-slate-800/80 py-2.5 px-3 text-sm text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 focus:outline-none transition">
-                        <option value="" class="bg-slate-900">Todas</option>
-                        <option value="automatica" class="bg-slate-900">Automática</option>
-                        <option value="manual" class="bg-slate-900">Manual</option>
-                    </select>
-                </div>
-
-                {{-- PRECIO MIN --}}
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1.5">Precio mínimo</label>
-                    <div class="relative">
-                        <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">$</span>
-                        <input
-                            type="number"
-                            wire:model.live.debounce.500ms="precioMin"
-                            placeholder="0"
-                            class="w-full rounded-xl border border-white/[0.08] bg-slate-800/80 pl-6 pr-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 focus:outline-none transition">
-                    </div>
-                </div>
-
-                {{-- PRECIO MAX --}}
-                <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1.5">Precio máximo</label>
-                    <div class="relative">
-                        <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">$</span>
-                        <input
-                            type="number"
-                            wire:model.live.debounce.500ms="precioMax"
-                            placeholder="∞"
-                            class="w-full rounded-xl border border-white/[0.08] bg-slate-800/80 pl-6 pr-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 focus:outline-none transition">
-                    </div>
-                </div>
-            </div>
+            <p class="text-sm text-slate-400">
+                <span class="text-emerald-400 font-semibold tabular-nums">{{ $autos->total() }}</span>
+                resultado{{ $autos->total() !== 1 ? 's' : '' }}
+            </p>
         </div>
 
+        <div class="lg:grid lg:grid-cols-[256px_1fr] lg:gap-8 lg:items-start">
+
+        {{-- ── SIDEBAR FILTROS ──────────────────────────── --}}
+        <aside
+            x-show="filtrosAbiertos"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 -translate-y-2"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 -translate-y-2"
+            class="mb-6 lg:mb-0 lg:sticky lg:top-[calc(68px+1.5rem)]"
+            aria-label="Filtros de búsqueda">
+
+            <div class="rounded-2xl border border-white/[0.14] bg-[#0c1220] shadow-2xl shadow-black/50 overflow-hidden" style="border-left: 2px solid rgba(59,130,246,0.5)">
+
+                {{-- Header sidebar --}}
+                <div class="flex items-center justify-between px-5 py-4 border-b border-white/[0.08] bg-blue-500/[0.06]">
+                    <div class="flex items-center gap-2.5">
+                        <svg class="h-4 w-4 text-blue-400 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M2.628 1.601C5.028 1.206 7.49 1 10 1s4.973.206 7.372.601a.75.75 0 0 1 .628.74v2.288a2.25 2.25 0 0 1-.659 1.59l-4.682 4.683a2.25 2.25 0 0 0-.659 1.59v3.037c0 .684-.31 1.33-.844 1.757l-1.937 1.55A.75.75 0 0 1 8 18.25v-5.757a2.25 2.25 0 0 0-.659-1.591L2.659 6.22A2.25 2.25 0 0 1 2 4.629V2.34a.75.75 0 0 1 .628-.74Z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="text-sm font-bold text-white">Filtros</span>
+                        @if($filtrosActivos > 0)
+                        <span class="inline-flex h-5 px-1.5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
+                            {{ $filtrosActivos }}
+                        </span>
+                        @endif
+                    </div>
+                    @if($filtrosActivos > 0)
+                    <button wire:click="limpiarFiltros" type="button"
+                        class="text-xs font-semibold text-slate-400 hover:text-white transition">
+                        Limpiar
+                    </button>
+                    @endif
+                </div>
+
+                <div class="p-5 space-y-5">
+
+                    {{-- SEARCH --}}
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1.5">Buscar</label>
+                        <div class="relative">
+                            <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clip-rule="evenodd"/></svg>
+                            <input
+                                type="search"
+                                wire:model.live.debounce.400ms="search"
+                                placeholder="Marca, modelo, año..."
+                                class="w-full rounded-xl border border-white/[0.14] bg-slate-800 pl-9 pr-3 py-2.5 text-sm text-white placeholder-slate-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 focus:outline-none transition">
+                        </div>
+                    </div>
+
+                    {{-- MARCA --}}
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1.5">Marca</label>
+                        <select wire:model.live="marca"
+                            class="w-full rounded-xl border border-white/[0.14] bg-slate-800 py-2.5 px-3 text-sm text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 focus:outline-none transition">
+                            <option value="" class="bg-slate-900">Todas las marcas</option>
+                            @foreach($marcas as $id => $nombre)
+                            <option value="{{ $id }}" class="bg-slate-900">{{ $nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- AÑO --}}
+                    @if($anios->isNotEmpty())
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1.5">Año</label>
+                        <select wire:model.live="anio"
+                            class="w-full rounded-xl border border-white/[0.14] bg-slate-800 py-2.5 px-3 text-sm text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 focus:outline-none transition">
+                            <option value="" class="bg-slate-900">Todos los años</option>
+                            @foreach($anios as $a)
+                            <option value="{{ $a }}" class="bg-slate-900">{{ $a }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
+
+                    {{-- TRANSMISION --}}
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1.5">Transmisión</label>
+                        <select wire:model.live="transmision"
+                            class="w-full rounded-xl border border-white/[0.14] bg-slate-800 py-2.5 px-3 text-sm text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 focus:outline-none transition">
+                            <option value="" class="bg-slate-900">Todas</option>
+                            <option value="automatica" class="bg-slate-900">Automática</option>
+                            <option value="manual" class="bg-slate-900">Manual</option>
+                        </select>
+                    </div>
+
+                    {{-- COLOR --}}
+                    @if($colores->isNotEmpty())
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1.5">Color</label>
+                        <select wire:model.live="color"
+                            class="w-full rounded-xl border border-white/[0.14] bg-slate-800 py-2.5 px-3 text-sm text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 focus:outline-none transition">
+                            <option value="" class="bg-slate-900">Todos los colores</option>
+                            @foreach($colores as $c)
+                            <option value="{{ $c }}" class="bg-slate-900">{{ ucfirst($c) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
+
+                    {{-- PRECIO --}}
+                    <div
+                        wire:ignore
+                        x-data="{}"
+                        x-init="
+                            var wr   = $wire;
+                            var rs   = $refs;
+                            var MAX  = {{ (int)$maxPrecio }};
+                            noUiSlider.create(rs.pTrack, {
+                                start: [{{ (int)($precioMin ?: 0) }}, {{ (int)($precioMax ?: $maxPrecio) }}],
+                                connect: true, step: 10000,
+                                range: { min: 0, max: MAX }
+                            });
+                            rs.pTrack.noUiSlider.on('update', function(v) {
+                                rs.pFrom.textContent = parseInt(v[0]).toLocaleString('es-MX');
+                                rs.pTo.textContent   = parseInt(v[1]).toLocaleString('es-MX');
+                            });
+                            rs.pTrack.noUiSlider.on('change', function(v) {
+                                var mn = parseInt(v[0]), mx = parseInt(v[1]);
+                                wr.set('precioMin', mn > 0 ? mn : '');
+                                wr.set('precioMax', mx < MAX ? mx : '');
+                            });
+                        "
+                        @reset-sliders.window="$refs.pTrack.noUiSlider && $refs.pTrack.noUiSlider.set([0, {{ (int)$maxPrecio }}])"
+                    >
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="text-xs font-semibold text-slate-400">Precio</label>
+                            <span class="text-xs text-slate-300 tabular-nums">
+                                $<span x-ref="pFrom">0</span>&nbsp;–&nbsp;$<span x-ref="pTo">{{ number_format((int)$maxPrecio) }}</span>
+                            </span>
+                        </div>
+                        <div x-ref="pTrack" class="mt-4 mx-3"></div>
+                    </div>
+
+                    {{-- KILOMETRAJE --}}
+                    <div
+                        wire:ignore
+                        x-data="{}"
+                        x-init="
+                            var wr   = $wire;
+                            var rs   = $refs;
+                            var MAX  = {{ (int)$maxKm }};
+                            noUiSlider.create(rs.kTrack, {
+                                start: [{{ (int)($kmMin ?: 0) }}, {{ (int)($kmMax ?: $maxKm) }}],
+                                connect: true, step: 1000,
+                                range: { min: 0, max: MAX }
+                            });
+                            rs.kTrack.noUiSlider.on('update', function(v) {
+                                rs.kFrom.textContent = parseInt(v[0]).toLocaleString('es-MX');
+                                rs.kTo.textContent   = parseInt(v[1]).toLocaleString('es-MX');
+                            });
+                            rs.kTrack.noUiSlider.on('change', function(v) {
+                                var mn = parseInt(v[0]), mx = parseInt(v[1]);
+                                wr.set('kmMin', mn > 0 ? mn : '');
+                                wr.set('kmMax', mx < MAX ? mx : '');
+                            });
+                        "
+                        @reset-sliders.window="$refs.kTrack.noUiSlider && $refs.kTrack.noUiSlider.set([0, {{ (int)$maxKm }}])"
+                    >
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="text-xs font-semibold text-slate-400">Kilometraje</label>
+                            <span class="text-xs text-slate-300 tabular-nums">
+                                <span x-ref="kFrom">0</span>&nbsp;–&nbsp;<span x-ref="kTo">{{ number_format((int)$maxKm) }}</span> km
+                            </span>
+                        </div>
+                        <div x-ref="kTrack" class="mt-4 mx-3"></div>
+                    </div>
+
+                </div>
+            </div>
+        </aside>
+
+        {{-- ── COLUMNA RESULTADOS ───────────────────────── --}}
+        <div class="min-w-0">
+
         {{-- RESULTADOS HEADER --}}
-        <div class="flex items-center justify-between mb-6">
+        <div class="hidden lg:flex items-center justify-between mb-6">
             <div>
-                <h2 class="text-xl font-bold text-white">
-                    Autos disponibles
-                </h2>
+                <h2 class="text-xl font-bold text-white">Autos disponibles</h2>
                 <p class="text-sm text-slate-400 mt-0.5">
                     <span class="text-emerald-400 font-semibold tabular-nums">{{ $autos->total() }}</span>
                     resultado{{ $autos->total() !== 1 ? 's' : '' }} encontrado{{ $autos->total() !== 1 ? 's' : '' }}
                 </p>
             </div>
-
-            <div wire:loading
-                 wire:target="search,marca,transmision,precioMin,precioMax,limpiarFiltros"
+            <div wire:loading wire:target="search,marca,transmision,precioMin,precioMax,kmMin,kmMax,anio,color,limpiarFiltros"
                  class="flex items-center gap-2 text-sm text-slate-400">
                 <svg class="h-4 w-4 animate-spin text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
@@ -167,7 +291,7 @@ $homeUrl  = Route::has('public.home') ? route('public.home') : url('/');
         {{-- GRID DE AUTOS --}}
         @if($autos->count())
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6" wire:loading.class="opacity-60 pointer-events-none" wire:target="search,marca,transmision,precioMin,precioMax,limpiarFiltros">
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6" wire:loading.class="opacity-60 pointer-events-none" wire:target="search,marca,transmision,precioMin,precioMax,kmMin,kmMax,anio,color,limpiarFiltros">
 
             @foreach($autos as $auto)
             @php
@@ -335,6 +459,9 @@ $homeUrl  = Route::has('public.home') ? route('public.home') : url('/');
         </div>
 
         @endif
+
+        </div>{{-- fin columna resultados --}}
+        </div>{{-- fin lg:grid --}}
 
     </main>
 

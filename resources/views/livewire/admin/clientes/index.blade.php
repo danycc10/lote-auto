@@ -112,7 +112,7 @@
                                         </div>
                                         <div class="min-w-0">
                                             <p class="text-sm font-semibold text-slate-900 truncate">{{ $cliente->nombre_completo }}</p>
-                                            <p class="text-xs text-slate-400">ID {{ $cliente->id }}@if($cliente->curp) · {{ $cliente->curp }}@endif</p>
+                                            <p class="text-xs text-slate-400">ID {{ $cliente->id }}@if($cliente->curp) · ****{{ substr($cliente->curp, -4) }}@endif</p>
                                         </div>
                                     </div>
                                 </td>

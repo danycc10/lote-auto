@@ -100,6 +100,8 @@ class Index extends Component
 
     public function eliminar(int $id): void
     {
+        abort_unless(auth()->user()?->can('seguridad.roles'), 403);
+
         if ($id === auth()->id()) {
             session()->flash('error', 'No puedes eliminar tu propia cuenta.');
             return;

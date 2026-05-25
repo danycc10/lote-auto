@@ -89,6 +89,8 @@ class TarjetasCobroIndex extends Component
 
     public function toggleActiva(int $id): void
     {
+        abort_unless(auth()->user()?->can('dashboard.ver'), 403);
+
         $tarjeta = TarjetaCobro::findOrFail($id);
         $tarjeta->activa = ! $tarjeta->activa;
         $tarjeta->save();
@@ -96,6 +98,8 @@ class TarjetasCobroIndex extends Component
 
     public function eliminar(int $id): void
     {
+        abort_unless(auth()->user()?->can('dashboard.ver'), 403);
+
         TarjetaCobro::findOrFail($id)->delete();
         session()->flash('success', 'Cuenta eliminada.');
         if ($this->tarjetaId === $id) {

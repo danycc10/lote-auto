@@ -15,6 +15,8 @@ class ReportesExportController extends Controller
 {
     public function export(Request $request)
     {
+        abort_unless(auth()->user()?->can('dashboard.ver'), 403);
+
         $tipo  = $request->input('tipo', 'pagos');
         $desde = $request->input('desde');
         $hasta = $request->input('hasta');

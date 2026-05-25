@@ -11,7 +11,7 @@ class ContratoFinanciamientoArchivoController extends Controller
 {
     public function show(ContratoFinanciamiento $contrato): StreamedResponse
     {
-        abort_unless(auth()->check(), 403);
+        abort_unless(auth()->user()?->can('contratos.ver'), 403);
         abort_if(blank($contrato->ruta_contrato_firmado), 404);
 
         $disk = Storage::disk('private');

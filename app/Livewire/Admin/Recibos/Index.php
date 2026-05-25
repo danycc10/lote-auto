@@ -205,10 +205,9 @@ class Index extends Component
                         ->orWhere('concepto', 'like', "%{$search}%")
                         ->orWhere('observaciones', 'like', "%{$search}%")
                         ->orWhereHas('cliente', function (Builder $cliente) use ($search) {
-                            $cliente->whereRaw(
-                                "CONCAT_WS(' ', nombre, apellido_paterno, apellido_materno) LIKE ?",
-                                ["%{$search}%"]
-                            );
+                            $cliente->where('nombre', 'like', "%{$search}%")
+                                ->orWhere('apellido_paterno', 'like', "%{$search}%")
+                                ->orWhere('apellido_materno', 'like', "%{$search}%");
                         })
                         ->orWhereHas('contrato', function (Builder $contrato) use ($search) {
                             $contrato->where('folio', 'like', "%{$search}%");

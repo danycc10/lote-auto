@@ -75,9 +75,9 @@ class Dashboard extends Component
             $q->where(function ($sub) use ($term) {
                 $sub->where('folio', 'like', $term)
                     ->orWhereHas('cliente', function ($c) use ($term) {
-                        $c->where(DB::raw("CONCAT(nombres, ' ', apellidos)"), 'like', $term)
-                            ->orWhere('nombres', 'like', $term)
-                            ->orWhere('apellidos', 'like', $term)
+                        $c->where('nombre', 'like', $term)
+                            ->orWhere('apellido_paterno', 'like', $term)
+                            ->orWhere('apellido_materno', 'like', $term)
                             ->orWhere('telefono', 'like', $term);
                     })
                     ->orWhereHas('auto', function ($a) use ($term) {

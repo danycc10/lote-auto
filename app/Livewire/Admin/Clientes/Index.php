@@ -97,6 +97,8 @@ class Index extends Component
 
     public function toggleActivo(int $clienteId): void
     {
+        abort_unless(auth()->user()?->can('clientes.editar'), 403);
+
         $cliente = Cliente::findOrFail($clienteId);
 
         $cliente->update([
@@ -108,6 +110,8 @@ class Index extends Component
 
     public function eliminar(int $clienteId): void
     {
+        abort_unless(auth()->user()?->can('clientes.eliminar'), 403);
+
         $cliente = Cliente::findOrFail($clienteId);
 
         $cliente->delete();

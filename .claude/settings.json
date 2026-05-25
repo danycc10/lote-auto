@@ -14,7 +14,14 @@
       "Bash(composer require *)",
       "Bash(npm install *)",
       "Bash(node -e \"require\\('./node_modules/nouislider/package.json'\\); console.log\\('ok - v' + require\\('./node_modules/nouislider/package.json'\\).version\\)\")",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(Get-ChildItem -Path \"c:\\\\laragon\\\\www\\\\lote-autos-finan\" -Force)",
+      "Bash(Select-Object Name, Mode)",
+      "Bash(xargs grep -l \"CSRF\\\\|csrf\")",
+      "Bash(grep -r \"\\\\$\\\\{.*\\\\}|template|eval\" \"c:\\\\laragon\\\\www\\\\lote-autos-finan/resources/views\")",
+      "Bash(grep -E \"protected \\\\$\")",
+      "Bash(xargs grep -l \"upload\\\\|file\\\\|image\")",
+      "Bash(grep -r \"htmlspecialchars\\\\|e\\(\\\\|{{ \\\\$\" \"c:\\\\laragon\\\\www\\\\lote-autos-finan/resources/views/profile/two-factor-authentication-form.blade.php\")"
     ]
   }
 }

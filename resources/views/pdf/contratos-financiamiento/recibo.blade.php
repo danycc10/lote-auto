@@ -248,8 +248,19 @@
     @endif
 
     {{-- ── ENCABEZADO ── --}}
+    @php
+        $ticketLogoPath = \App\Models\Configuracion::obtener('branding.logo_ticket_url', '');
+        $ticketLogoSrc  = $ticketLogoPath
+            ? 'file://' . str_replace('\\', '/', \Illuminate\Support\Facades\Storage::disk('public')->path($ticketLogoPath))
+            : null;
+    @endphp
     <div class="header">
-        <div class="brand-name">{{ config('app.name') }}</div>
+        @if($ticketLogoSrc)
+            <img src="{{ $ticketLogoSrc }}" alt="{{ config('app.name') }}"
+                 style="max-width:60mm; max-height:18mm; display:block; margin:0 auto 4px;">
+        @else
+            <div class="brand-name">{{ config('app.name') }}</div>
+        @endif
         <div class="brand-sub">Recibo de pago</div>
     </div>
 

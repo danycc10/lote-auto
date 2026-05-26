@@ -1,18 +1,105 @@
 @php
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use App\Models\Configuracion;
 
-$whatsapp   = '5210000000000';
-$homeUrl    = Route::has('public.home') ? route('public.home') : url('/');
-$catalogoUrl = Route::has('public.autos') ? route('public.autos') : '#autos';
+$c = fn(string $key, string $default = '') => Configuracion::obtener($key, $default);
 
-$waBase     = 'https://wa.me/' . $whatsapp . '?text=';
-$waGeneral  = $waBase . urlencode('Hola, quiero información sobre los autos disponibles');
-$waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
+$whatsapp           = $c('contact.whatsapp',              '5210000000000');
+$homeUrl            = Route::has('public.home')  ? route('public.home')  : url('/');
+$catalogoUrl        = Route::has('public.autos') ? route('public.autos') : '#autos';
+
+// Identidad
+$tagline            = $c('branding.tagline',           'Autos financiados');
+$descripcionFooter  = $c('branding.descripcion_footer','Financiamiento directo, sin banco ni burocracia. Tu próximo auto más cerca de lo que crees.');
+
+// Hero
+$badgeHero          = $c('branding.badge_hero',         'Autos disponibles hoy');
+$heroTitulo         = $c('branding.hero_titulo',        'Tu próximo auto.');
+$heroAcento         = $c('branding.hero_acento',        'Financiado.');
+$heroDescripcion    = $c('branding.hero_descripcion',   'Explora nuestro inventario, conoce los planes de pago y cotiza en minutos. Sin letra chica, sin trámites complicados.');
+$ctaHeroPrimario    = $c('branding.cta_hero_primario',  'Ver autos disponibles');
+$ctaHeroSecundario  = $c('branding.cta_hero_secundario','Cotizar por WhatsApp');
+
+// Estadísticas
+$stat1Valor = $c('branding.stat_1_valor', '200+');
+$stat1Label = $c('branding.stat_1_label', 'Clientes atendidos');
+$stat2Valor = $c('branding.stat_2_valor', '24h');
+$stat2Label = $c('branding.stat_2_label', 'Respuesta garantizada');
+$stat3Valor = $c('branding.stat_3_valor', '100%');
+$stat3Label = $c('branding.stat_3_label', 'Proceso transparente');
+
+// Banner CTA
+$ctaEyebrow    = $c('branding.cta_eyebrow',    '¿Listo para empezar?');
+$ctaTitulo     = $c('branding.cta_titulo',     'Empieza hoy.');
+$ctaSubtitulo  = $c('branding.cta_subtitulo',  'Sin compromiso.');
+$ctaDescripcion = $c('branding.cta_descripcion','Más de 200 familias ya eligieron su auto con nosotros. Cotiza en minutos, estrena pronto.');
+
+// Beneficios
+$trust1 = $c('branding.trust_1', 'Sin buró');
+$trust2 = $c('branding.trust_2', 'Enganche desde 10%');
+$trust3 = $c('branding.trust_3', 'Plazos hasta 36 meses');
+$trust4 = $c('branding.trust_4', 'Proceso en días');
+
+// Contacto
+$horario   = $c('branding.horario',   'Lun–Sáb · 9:00 AM – 7:00 PM');
+$direccion = $c('branding.direccion', 'Tu Ciudad, Estado, México');
+
+// WhatsApp
+$waMsgGeneral = $c('branding.wa_mensaje_general', 'Hola, quiero información sobre los autos disponibles');
+$waMsgCotizar = $c('branding.wa_mensaje_cotizar',  'Hola, quiero cotizar un auto');
+$waBase    = 'https://wa.me/' . $whatsapp . '?text=';
+$waGeneral = $waBase . urlencode($waMsgGeneral);
+$waCotizar = $waBase . urlencode($waMsgCotizar);
+
+// Barra de anuncio
+$anuncioActivo = (bool) $c('branding.anuncio_activo', '0');
+$anuncioTexto  = $c('branding.anuncio_texto', '');
+
+// Sección Beneficios
+$beneficiosEyebrow   = $c('branding.beneficios_eyebrow',   'Por qué elegirnos');
+$beneficiosTitulo    = $c('branding.beneficios_titulo',    'La forma más sencilla de tener tu auto');
+$beneficiosSubtitulo = $c('branding.beneficios_subtitulo', 'Sin banco, sin burocracia. Financiamiento directo con nosotros.');
+$beneficio1Titulo    = $c('branding.beneficio_1_titulo',   'Inventario verificado');
+$beneficio1Desc      = $c('branding.beneficio_1_desc',     'Unidades en buen estado, con historial revisado. Lo que ves es lo que obtienes.');
+$beneficio2Titulo    = $c('branding.beneficio_2_titulo',   'Planes flexibles');
+$beneficio2Desc      = $c('branding.beneficio_2_desc',     'Enganche y mensualidades adaptadas a tu presupuesto. Cotiza sin compromiso.');
+$beneficio3Titulo    = $c('branding.beneficio_3_titulo',   'Atención directa');
+$beneficio3Desc      = $c('branding.beneficio_3_desc',     'Sin intermediarios. Hablas directo con nosotros por WhatsApp para resolver cualquier duda.');
+
+// Sección Proceso
+$procesoEyebrow   = $c('branding.proceso_eyebrow',   'Proceso');
+$procesoTitulo    = $c('branding.proceso_titulo',    'Tu auto en 4 pasos');
+$procesoSubtitulo = $c('branding.proceso_subtitulo', 'Sin papeleo complicado. Sin esperas largas. Con acompañamiento en cada etapa.');
+$paso1Titulo      = $c('branding.paso_1_titulo',     'Elige tu auto');
+$paso1Desc        = $c('branding.paso_1_desc',       'Explora el catálogo y encuentra el auto que se adapta a ti.');
+$paso2Titulo      = $c('branding.paso_2_titulo',     'Cotiza en WhatsApp');
+$paso2Desc        = $c('branding.paso_2_desc',       'Escríbenos y recibe tu plan de pagos en minutos.');
+$paso3Titulo      = $c('branding.paso_3_titulo',     'Presenta documentos');
+$paso3Desc        = $c('branding.paso_3_desc',       'Solo los básicos. Te guiamos en cada paso del trámite.');
+$paso4Titulo      = $c('branding.paso_4_titulo',     'Estrena tu auto');
+$paso4Desc        = $c('branding.paso_4_desc',       'Entrega rápida. Tu auto listo en días, no en meses.');
+
+// Sección Catálogo
+$autosEyebrow     = $c('branding.autos_eyebrow',     'Inventario');
+$autosTitulo      = $c('branding.autos_titulo',      'Autos disponibles');
+$autosDescripcion = $c('branding.autos_descripcion', 'Unidades listas para cotizar. Escríbenos para conocer el plan que más te conviene.');
+
+// Logo
+$logoUrl = $c('branding.logo_url', '');
+
+// Sección Contacto
+$contactoTitulo      = $c('branding.contacto_titulo',      '¿Tienes dudas?');
+$contactoSubtitulo   = $c('branding.contacto_subtitulo',   'Te ayudamos.');
+$contactoDescripcion = $c('branding.contacto_descripcion', 'Escríbenos y con gusto te asesoramos sobre disponibilidad, planes de pago y más.');
 @endphp
 
-@section('title', 'Inicio')
-@section('meta_description', 'Encuentra tu auto ideal con planes de financiamiento accesibles. Sin complicaciones, respuesta en 24 horas. ' . config('app.name'))
+@php
+    $seoTitulo      = Configuracion::obtener('branding.seo_titulo',      '');
+    $seoDescripcion = Configuracion::obtener('branding.seo_descripcion', 'Encuentra tu auto ideal con planes de financiamiento accesibles. Sin complicaciones, respuesta en 24 horas.');
+@endphp
+@section('title', $seoTitulo ?: 'Inicio')
+@section('meta_description', $seoDescripcion)
 
 {{-- ============================================================
      LANDING PAGE — diseño premium dark fintech automotriz
@@ -20,6 +107,14 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
 <div class="bg-[#06091a] text-white overflow-x-hidden" style="background-color:#06091a">
 
     <x-public-navbar :whatsapp="$whatsapp" />
+
+    {{-- ── Barra de anuncio ── --}}
+    @if($anuncioActivo && $anuncioTexto)
+    <div class="w-full py-2 px-4 text-center text-xs font-semibold text-white"
+         style="background-color: var(--color-primario)">
+        {{ $anuncioTexto }}
+    </div>
+    @endif
 
     {{-- ========================================================
          HERO
@@ -43,28 +138,29 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
                     </span>
-                    Autos disponibles hoy
+                    {{ $badgeHero }}
                 </div>
 
                 {{-- Headline --}}
                 <h1 id="hero-heading"
                     class="anim-d1 mt-6 text-5xl sm:text-6xl lg:text-[4.25rem] font-black leading-[0.93] tracking-tight">
-                    Tu próximo auto.<br>
-                    <span class="bg-gradient-to-r from-blue-400 via-emerald-300 to-emerald-400 bg-clip-text text-transparent">
-                        Financiado.
+                    {{ $heroTitulo }}<br>
+                    <span class="bg-clip-text text-transparent"
+                          style="background-image: linear-gradient(to right, var(--color-primario), var(--color-secundario))">
+                        {{ $heroAcento }}
                     </span>
                 </h1>
 
                 {{-- Description --}}
                 <p class="anim-d2 mt-6 max-w-lg text-lg text-slate-300 leading-relaxed">
-                    Explora nuestro inventario, conoce los planes de pago y cotiza en minutos. Sin letra chica, sin trámites complicados.
+                    {{ $heroDescripcion }}
                 </p>
 
                 {{-- CTAs --}}
                 <div class="anim-d3 mt-8 flex flex-col sm:flex-row gap-3">
                     <a href="#autos"
                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-7 py-4 text-base font-bold text-slate-950 shadow-xl transition-colors duration-200 hover:bg-slate-100 active:scale-[0.97]">
-                        Ver autos disponibles
+                        {{ $ctaHeroPrimario }}
                         <svg class="h-4 w-4 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd"/>
                         </svg>
@@ -75,16 +171,16 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                         <svg class="h-5 w-5 shrink-0 text-emerald-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
                         </svg>
-                        Cotizar por WhatsApp
+                        {{ $ctaHeroSecundario }}
                     </a>
                 </div>
 
                 {{-- Stats --}}
                 <div class="anim-d4 mt-10 hidden sm:grid grid-cols-3 gap-3 max-w-lg">
                     @foreach([
-                        ['value' => '200+', 'label' => 'Clientes atendidos'],
-                        ['value' => '24h',  'label' => 'Respuesta garantizada'],
-                        ['value' => '100%', 'label' => 'Proceso transparente'],
+                        ['value' => $stat1Valor, 'label' => $stat1Label],
+                        ['value' => $stat2Valor, 'label' => $stat2Label],
+                        ['value' => $stat3Valor, 'label' => $stat3Label],
                     ] as $stat)
                     <div class="rounded-xl border border-white/[0.08] bg-white/[0.04] p-4">
                         <p class="text-2xl font-black tabular-nums">{{ $stat['value'] }}</p>
@@ -284,13 +380,12 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
     <section id="financiamiento" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24" aria-labelledby="financiamiento-heading">
 
         <div class="text-center mb-14">
-            <p class="text-xs font-semibold tracking-[0.22em] uppercase text-emerald-400">Por qué elegirnos</p>
+            <p class="text-xs font-semibold tracking-[0.22em] uppercase text-emerald-400">{{ $beneficiosEyebrow }}</p>
             <h2 id="financiamiento-heading" class="mt-3 text-4xl md:text-5xl font-black tracking-tight">
-                La forma más sencilla<br class="hidden sm:block">
-                de tener tu auto
+                {{ $beneficiosTitulo }}
             </h2>
             <p class="mt-4 text-slate-400 max-w-xl mx-auto text-lg">
-                Sin banco, sin burocracia. Financiamiento directo con nosotros.
+                {{ $beneficiosSubtitulo }}
             </p>
         </div>
 
@@ -300,22 +395,22 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                     'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/>',
                     'color' => 'from-blue-600/30 to-blue-500/10',
                     'icon_color' => 'text-blue-400',
-                    'title' => 'Inventario verificado',
-                    'desc'  => 'Unidades en buen estado, con historial revisado. Lo que ves es lo que obtienes.',
+                    'title' => $beneficio1Titulo,
+                    'desc'  => $beneficio1Desc,
                 ],
                 [
                     'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>',
                     'color' => 'from-emerald-600/30 to-emerald-500/10',
                     'icon_color' => 'text-emerald-400',
-                    'title' => 'Planes flexibles',
-                    'desc'  => 'Enganche y mensualidades adaptadas a tu presupuesto. Cotiza sin compromiso.',
+                    'title' => $beneficio2Titulo,
+                    'desc'  => $beneficio2Desc,
                 ],
                 [
                     'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"/>',
                     'color' => 'from-violet-600/30 to-violet-500/10',
                     'icon_color' => 'text-violet-400',
-                    'title' => 'Atención directa',
-                    'desc'  => 'Sin intermediarios. Hablas directo con nosotros por WhatsApp para resolver cualquier duda.',
+                    'title' => $beneficio3Titulo,
+                    'desc'  => $beneficio3Desc,
                 ],
             ] as $benefit)
             <div class="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] p-7 transition-all duration-300 hover:border-white/[0.15] hover:bg-white/[0.05]">
@@ -349,12 +444,12 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
 
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <p class="text-xs font-semibold tracking-[0.22em] uppercase text-emerald-400">Proceso</p>
+                <p class="text-xs font-semibold tracking-[0.22em] uppercase text-emerald-400">{{ $procesoEyebrow }}</p>
                 <h2 id="proceso-heading" class="mt-3 text-4xl md:text-5xl font-black tracking-tight">
-                    Tu auto en 4 pasos
+                    {{ $procesoTitulo }}
                 </h2>
                 <p class="mt-4 text-slate-400 max-w-xl mx-auto">
-                    Sin papeleo complicado. Sin esperas largas. Con acompañamiento en cada etapa.
+                    {{ $procesoSubtitulo }}
                 </p>
             </div>
 
@@ -363,29 +458,29 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                     [
                         'num'   => '01',
                         'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>',
-                        'title' => 'Elige tu auto',
-                        'desc'  => 'Explora el catálogo y encuentra el auto que se adapta a ti.',
+                        'title' => $paso1Titulo,
+                        'desc'  => $paso1Desc,
                         'color' => 'from-blue-600 to-blue-400',
                     ],
                     [
                         'num'   => '02',
                         'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/>',
-                        'title' => 'Cotiza en WhatsApp',
-                        'desc'  => 'Escríbenos y recibe tu plan de pagos en minutos.',
+                        'title' => $paso2Titulo,
+                        'desc'  => $paso2Desc,
                         'color' => 'from-emerald-600 to-emerald-400',
                     ],
                     [
                         'num'   => '03',
                         'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>',
-                        'title' => 'Presenta documentos',
-                        'desc'  => 'Solo los básicos. Te guiamos en cada paso del trámite.',
+                        'title' => $paso3Titulo,
+                        'desc'  => $paso3Desc,
                         'color' => 'from-amber-600 to-amber-400',
                     ],
                     [
                         'num'   => '04',
                         'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>',
-                        'title' => 'Estrena tu auto',
-                        'desc'  => 'Entrega rápida. Tu auto listo en días, no en meses.',
+                        'title' => $paso4Titulo,
+                        'desc'  => $paso4Desc,
                         'color' => 'from-violet-600 to-violet-400',
                     ],
                 ] as $i => $step)
@@ -422,10 +517,10 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
 
         <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5 mb-12">
             <div>
-                <p class="text-xs font-semibold tracking-[0.22em] uppercase text-emerald-400">Inventario</p>
-                <h2 id="autos-heading" class="mt-3 text-4xl md:text-5xl font-black tracking-tight">Autos disponibles</h2>
+                <p class="text-xs font-semibold tracking-[0.22em] uppercase text-emerald-400">{{ $autosEyebrow }}</p>
+                <h2 id="autos-heading" class="mt-3 text-4xl md:text-5xl font-black tracking-tight">{{ $autosTitulo }}</h2>
                 <p class="mt-3 text-slate-400 max-w-xl leading-relaxed">
-                    Unidades listas para cotizar. Escríbenos para conocer el plan que más te conviene.
+                    {{ $autosDescripcion }}
                 </p>
             </div>
             <a href="{{ $catalogoUrl }}"
@@ -565,7 +660,8 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                         </a>
                         <a href="{{ $mensajeWa }}"
                            target="_blank" rel="noopener noreferrer"
-                           class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-3 text-sm font-bold text-white transition hover:bg-emerald-400 active:scale-[0.97]"
+                           class="flex-1 flex items-center justify-center gap-1.5 rounded-xl px-4 py-3 text-sm font-bold text-white transition hover:opacity-90 active:scale-[0.97]"
+                           style="background-color: var(--color-secundario)"
                            aria-label="Preguntar por {{ $tituloAuto }} por WhatsApp">
                             <svg class="h-4 w-4 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
@@ -615,18 +711,18 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
         <div class="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" aria-hidden="true"></div>
 
         <div class="relative max-w-3xl mx-auto px-4 sm:px-6 text-center">
-            <p class="text-xs font-semibold tracking-[0.22em] uppercase text-emerald-400">¿Listo para empezar?</p>
+            <p class="text-xs font-semibold tracking-[0.22em] uppercase text-emerald-400">{{ $ctaEyebrow }}</p>
             <h2 id="cta-heading" class="mt-4 text-4xl sm:text-5xl font-black tracking-tight">
-                Empieza hoy.<br class="hidden sm:block">
-                <span class="text-slate-400">Sin compromiso.</span>
+                {{ $ctaTitulo }}<br class="hidden sm:block">
+                <span class="text-slate-400">{{ $ctaSubtitulo }}</span>
             </h2>
             <p class="mt-5 text-lg text-slate-300 leading-relaxed">
-                Más de 200 familias ya eligieron su auto con nosotros. Cotiza en minutos, estrena pronto.
+                {{ $ctaDescripcion }}
             </p>
 
             {{-- Trust badges --}}
             <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
-                @foreach(['Sin buró', 'Enganche desde 10%', 'Plazos hasta 36 meses', 'Proceso en días'] as $badge)
+                @foreach(array_filter([$trust1, $trust2, $trust3, $trust4]) as $badge)
                 <span class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.06] px-4 py-1.5 text-sm text-slate-300">
                     <svg class="h-3.5 w-3.5 shrink-0 text-emerald-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/>
@@ -639,11 +735,12 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
             <div class="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
                 <a href="#autos"
                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-bold text-slate-950 shadow-xl transition hover:bg-slate-100 active:scale-[0.97]">
-                    Ver autos disponibles
+                    {{ $ctaHeroPrimario }}
                 </a>
                 <a href="{{ $waGeneral }}"
                    target="_blank" rel="noopener noreferrer"
-                   class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-8 py-4 text-base font-bold text-white shadow-xl shadow-emerald-900/30 transition hover:bg-emerald-400 active:scale-[0.97]">
+                   class="inline-flex items-center justify-center gap-2 rounded-xl px-8 py-4 text-base font-bold text-white shadow-xl transition hover:opacity-90 active:scale-[0.97]"
+                   style="background-color: var(--color-secundario)">
                     <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
                     </svg>
@@ -670,11 +767,11 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                 <div>
                     <p class="text-xs font-semibold tracking-[0.22em] uppercase text-emerald-400">Contacto</p>
                     <h2 id="contacto-heading" class="mt-3 text-4xl md:text-5xl font-black tracking-tight">
-                        ¿Tienes dudas?<br>
-                        <span class="text-slate-400">Te ayudamos.</span>
+                        {{ $contactoTitulo }}<br>
+                        <span class="text-slate-400">{{ $contactoSubtitulo }}</span>
                     </h2>
                     <p class="mt-5 text-lg text-slate-300 leading-relaxed max-w-md">
-                        Escríbenos y con gusto te asesoramos sobre disponibilidad, planes de pago y más.
+                        {{ $contactoDescripcion }}
                     </p>
 
                     {{-- Contact info cards --}}
@@ -699,7 +796,7 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                             </div>
                             <div>
                                 <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Horario</p>
-                                <p class="text-base font-bold text-white">Lun–Sáb · 9:00 AM – 7:00 PM</p>
+                                <p class="text-base font-bold text-white">{{ $horario }}</p>
                             </div>
                         </div>
 
@@ -712,8 +809,7 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                             </div>
                             <div>
                                 <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Ubicación</p>
-                                {{-- Actualiza esta dirección con la del negocio --}}
-                                <p class="text-base font-bold text-white">Tu Ciudad, Estado</p>
+                                <p class="text-base font-bold text-white">{{ $direccion }}</p>
                             </div>
                         </div>
                     </div>
@@ -722,7 +818,8 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                     <div class="mt-6 space-y-3">
                         <a href="{{ $waGeneral }}"
                            target="_blank" rel="noopener noreferrer"
-                           class="flex w-full items-center gap-4 rounded-xl bg-emerald-500 px-6 py-4 font-bold text-white transition hover:bg-emerald-400 active:scale-[0.98] group">
+                           class="flex w-full items-center gap-4 rounded-xl px-6 py-4 font-bold text-white transition hover:opacity-90 active:scale-[0.98] group"
+                           style="background-color: var(--color-secundario)">
                             <div class="shrink-0 h-9 w-9 rounded-lg bg-white/20 flex items-center justify-center" aria-hidden="true">
                                 <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
@@ -757,26 +854,29 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                 </div>
 
                 {{-- Right: Mapa --}}
+                @php $mapsEmbed = \App\Models\Configuracion::obtener('contact.maps_embed', ''); @endphp
                 <div class="rounded-2xl overflow-hidden border border-white/[0.08] bg-slate-900 h-full min-h-[420px] lg:min-h-[520px]">
-                    {{--
-                        INSTRUCCIONES PARA EL MAPA:
-                        1. Ve a Google Maps y busca la dirección del negocio
-                        2. Haz clic en "Compartir" → "Insertar mapa"
-                        3. Copia la URL del atributo src del iframe y pégala abajo
-                        El formato del src es: https://www.google.com/maps/embed?pb=...
-                    --}}
-                    <iframe
-                        {{-- Reemplaza este src con el embed de Google Maps de tu dirección --}}
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d120000!2d-99.1332!3d19.4326!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDI1JzU3LjQiTiA5OcKwMDcnNTkuNSJX!5e0!3m2!1ses!2smx!4v1700000000000"
-                        width="100%"
-                        height="100%"
-                        style="border:0; min-height: 420px; filter: grayscale(30%) invert(5%) contrast(110%) brightness(90%);"
-                        allowfullscreen=""
-                        loading="lazy"
-                        referrerpolicy="no-referrer-when-downgrade"
-                        title="Ubicación del negocio"
-                        aria-label="Mapa con la ubicación del negocio">
-                    </iframe>
+                    @if($mapsEmbed)
+                        <iframe
+                            src="{{ $mapsEmbed }}"
+                            width="100%"
+                            height="100%"
+                            style="border:0; min-height: 420px; filter: grayscale(30%) invert(5%) contrast(110%) brightness(90%);"
+                            allowfullscreen=""
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade"
+                            title="Ubicación del negocio"
+                            aria-label="Mapa con la ubicación del negocio">
+                        </iframe>
+                    @else
+                        <div class="flex flex-col items-center justify-center h-full min-h-[420px] gap-4 text-slate-500">
+                            <svg class="h-12 w-12 opacity-30" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
+                            </svg>
+                            <p class="text-sm">Configura la dirección en el panel de administración</p>
+                        </div>
+                    @endif
                 </div>
 
             </div>
@@ -796,20 +896,27 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                 {{-- Col 1: Brand --}}
                 <div class="md:col-span-1">
                     <a href="{{ $homeUrl }}" class="inline-flex items-center gap-3" aria-label="{{ config('app.name') }}">
-                        <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-emerald-500 flex items-center justify-center shrink-0" aria-hidden="true">
-                            <svg class="h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M3.375 4.5C2.339 4.5 1.5 5.34 1.5 6.375V13.5h12V6.375c0-1.036-.84-1.875-1.875-1.875h-8.25zM13.5 15h-12v2.625c0 1.035.84 1.875 1.875 1.875H3.75a3 3 0 106 0h2.25a.75.75 0 00.75-.75V15z"/>
-                                <path d="M8.25 19.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0zM15.75 6.75a.75.75 0 00-.75.75v11.25c0 .087.015.17.042.248a3 3 0 015.958.464c.853-.175 1.522-.935 1.464-1.883a18.659 18.659 0 00-3.732-10.104 1.837 1.837 0 00-1.47-.725H15.75z"/>
-                                <path d="M19.5 19.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z"/>
-                            </svg>
-                        </div>
+                        @if($logoUrl)
+                            <img src="{{ \Illuminate\Support\Facades\Storage::url($logoUrl) }}"
+                                 alt="{{ config('app.name') }}"
+                                 class="h-10 w-auto max-w-[120px] object-contain shrink-0">
+                        @else
+                            <div class="h-10 w-10 rounded-xl flex items-center justify-center shrink-0" aria-hidden="true"
+                                 style="background: linear-gradient(to bottom right, var(--color-primario), var(--color-secundario))">
+                                <svg class="h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M3.375 4.5C2.339 4.5 1.5 5.34 1.5 6.375V13.5h12V6.375c0-1.036-.84-1.875-1.875-1.875h-8.25zM13.5 15h-12v2.625c0 1.035.84 1.875 1.875 1.875H3.75a3 3 0 106 0h2.25a.75.75 0 00.75-.75V15z"/>
+                                    <path d="M8.25 19.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0zM15.75 6.75a.75.75 0 00-.75.75v11.25c0 .087.015.17.042.248a3 3 0 015.958.464c.853-.175 1.522-.935 1.464-1.883a18.659 18.659 0 00-3.732-10.104 1.837 1.837 0 00-1.47-.725H15.75z"/>
+                                    <path d="M19.5 19.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z"/>
+                                </svg>
+                            </div>
+                        @endif
                         <div>
                             <p class="font-black text-white text-[15px] leading-none">{{ config('app.name', 'AutoLote') }}</p>
-                            <p class="text-xs text-emerald-400/70 mt-0.5">Autos financiados</p>
+                            <p class="text-xs mt-0.5" style="color: var(--color-secundario); opacity: 0.75">{{ $tagline }}</p>
                         </div>
                     </a>
                     <p class="mt-4 text-sm text-slate-500 leading-relaxed max-w-xs">
-                        Financiamiento directo, sin banco ni burocracia. Tu próximo auto más cerca de lo que crees.
+                        {{ $descripcionFooter }}
                     </p>
                     {{-- WhatsApp contact --}}
                     <a href="{{ $waGeneral }}" target="_blank" rel="noopener noreferrer"
@@ -819,6 +926,34 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                         </svg>
                         Escríbenos por WhatsApp
                     </a>
+
+                    {{-- Redes sociales --}}
+                    @php
+                        $instagram = \App\Models\Configuracion::obtener('contact.instagram', '');
+                        $facebook  = \App\Models\Configuracion::obtener('contact.facebook', '');
+                    @endphp
+                    @if($instagram || $facebook)
+                    <div class="mt-4 flex items-center gap-3">
+                        @if($instagram)
+                        <a href="{{ $instagram }}" target="_blank" rel="noopener noreferrer"
+                           aria-label="Instagram"
+                           class="h-9 w-9 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-pink-400 transition">
+                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                            </svg>
+                        </a>
+                        @endif
+                        @if($facebook)
+                        <a href="{{ $facebook }}" target="_blank" rel="noopener noreferrer"
+                           aria-label="Facebook"
+                           class="h-9 w-9 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-blue-400 transition">
+                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                        </a>
+                        @endif
+                    </div>
+                    @endif
                 </div>
 
                 {{-- Col 2: Navegación --}}
@@ -848,14 +983,13 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
                             <svg class="h-4 w-4 text-slate-600 mt-0.5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd"/>
                             </svg>
-                            {{-- Actualiza con la dirección real del negocio --}}
-                            <span>Tu Ciudad, Estado, México</span>
+                            <span>{{ $direccion }}</span>
                         </li>
                         <li class="flex items-start gap-2.5">
                             <svg class="h-4 w-4 text-slate-600 mt-0.5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd"/>
                             </svg>
-                            <span>Lun–Sáb · 9:00 AM – 7:00 PM</span>
+                            <span>{{ $horario }}</span>
                         </li>
                         <li class="flex items-start gap-2.5">
                             <svg class="h-4 w-4 text-slate-600 mt-0.5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -888,7 +1022,8 @@ $waCotizar  = $waBase . urlencode('Hola, quiero cotizar un auto');
     <a href="{{ $waGeneral }}"
        target="_blank" rel="noopener noreferrer"
        aria-label="Contactar por WhatsApp"
-       class="group fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-xl shadow-emerald-900/50 transition-all duration-300 hover:scale-110 hover:bg-emerald-400 hover:shadow-emerald-900/60 active:scale-100"
+       class="group fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-xl transition-all duration-300 hover:scale-110 hover:opacity-90 active:scale-100"
+       style="background-color: var(--color-secundario)"
     >
         <svg class="h-7 w-7 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>

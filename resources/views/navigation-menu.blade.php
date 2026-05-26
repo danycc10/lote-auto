@@ -20,14 +20,21 @@
         class="fixed inset-y-0 left-0 z-30 flex w-64 flex-col bg-slate-900 transition-transform duration-300 ease-in-out">
 
         {{-- Brand --}}
+        @php $adminLogoUrl = \App\Models\Configuracion::obtener('branding.logo_url', ''); @endphp
         <div class="flex items-center gap-3 h-14 px-4 border-b border-slate-800 shrink-0">
-            <div class="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center shrink-0">
-                <svg class="h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3.375 4.5C2.339 4.5 1.5 5.34 1.5 6.375V13.5h12V6.375c0-1.036-.84-1.875-1.875-1.875h-8.25zM13.5 15h-12v2.625c0 1.035.84 1.875 1.875 1.875H3.75a3 3 0 106 0h2.25a.75.75 0 00.75-.75V15z"/>
-                    <path d="M8.25 19.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0zM15.75 6.75a.75.75 0 00-.75.75v11.25c0 .087.015.17.042.248a3 3 0 015.958.464c.853-.175 1.522-.935 1.464-1.883a18.659 18.659 0 00-3.732-10.104 1.837 1.837 0 00-1.47-.725H15.75z"/>
-                    <path d="M19.5 19.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z"/>
-                </svg>
-            </div>
+            @if($adminLogoUrl)
+                <img src="{{ \Illuminate\Support\Facades\Storage::url($adminLogoUrl) }}"
+                     alt="{{ config('app.name') }}"
+                     class="h-8 w-auto max-w-[32px] object-contain shrink-0">
+            @else
+                <div class="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center shrink-0">
+                    <svg class="h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3.375 4.5C2.339 4.5 1.5 5.34 1.5 6.375V13.5h12V6.375c0-1.036-.84-1.875-1.875-1.875h-8.25zM13.5 15h-12v2.625c0 1.035.84 1.875 1.875 1.875H3.75a3 3 0 106 0h2.25a.75.75 0 00.75-.75V15z"/>
+                        <path d="M8.25 19.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0zM15.75 6.75a.75.75 0 00-.75.75v11.25c0 .087.015.17.042.248a3 3 0 015.958.464c.853-.175 1.522-.935 1.464-1.883a18.659 18.659 0 00-3.732-10.104 1.837 1.837 0 00-1.47-.725H15.75z"/>
+                        <path d="M19.5 19.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z"/>
+                    </svg>
+                </div>
+            @endif
             <span class="text-white font-semibold text-sm truncate">{{ config('app.name') }}</span>
 
             {{-- Mobile close --}}
@@ -173,6 +180,17 @@
                 <p class="text-[10px] font-semibold text-slate-600 uppercase tracking-widest">Sistema</p>
             </div>
 
+
+            @if(auth()->user()->hasAnyRole(['administrador', 'gerente']))
+            <a href="{{ route('admin.sistema.apariencia') }}" @click="$store.sidebar.open = false"
+                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                    {{ request()->routeIs('admin.sistema.apariencia') ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
+                <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path fill-rule="evenodd" d="M20.599 1.5c-.376 0-.743.111-1.055.32l-5.08 3.385a18.747 18.747 0 0 0-3.471 2.987 10.04 10.04 0 0 1 4.815 4.815 18.748 18.748 0 0 0 2.987-3.472l3.386-5.079A1.902 1.902 0 0 0 20.599 1.5Zm-8.3 14.025a18.76 18.76 0 0 0 1.896-1.207 8.026 8.026 0 0 0-4.513-4.513A18.75 18.75 0 0 0 8.475 11.7l-.278.5a5.26 5.26 0 0 1 3.601 3.602l.502-.278ZM6.75 13.5A3.75 3.75 0 0 0 3 17.25a1.5 1.5 0 0 1-1.601 1.497.75.75 0 0 0-.7 1.024A5.25 5.25 0 0 0 9.75 17.25v-.008a5.25 5.25 0 0 0-3-4.742Z" clip-rule="evenodd"/>
+                </svg>
+                Apariencia
+            </a>
+            @endif
 
             <a href="{{ route('admin.sistema.configuracion') }}" @click="$store.sidebar.open = false"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors

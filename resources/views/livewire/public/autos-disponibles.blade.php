@@ -54,14 +54,10 @@ $logoUrl  = \App\Models\Configuracion::obtener('branding.logo_url', '');
     @endphp
 
     <style>
-    /* Track dentro del overflow:hidden — handles NO deben desbordar */
-    .noUi-target{background:#475569;border:none;box-shadow:none;height:20px;border-radius:10px}
-    .noUi-connect{background:#3b82f6;border-radius:10px}
-    .noUi-base{border-radius:10px}
-    .noUi-handle{width:20px!important;height:20px!important;right:-10px!important;top:0!important;border-radius:50%!important;background:#fff;border:3px solid #3b82f6!important;box-shadow:0 1px 8px rgba(0,0,0,.5)!important;cursor:grab!important}
-    .noUi-handle:active{cursor:grabbing!important}
-    .noUi-handle::before,.noUi-handle::after{display:none!important}
-    .noUi-tooltip{display:none}
+    /* Quita las flechas de los inputs number en los filtros */
+    .filtro-number::-webkit-outer-spin-button,
+    .filtro-number::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .filtro-number { -moz-appearance: textfield; }
     </style>
 
     <main
@@ -198,71 +194,63 @@ $logoUrl  = \App\Models\Configuracion::obtener('branding.logo_url', '');
                     @endif
 
                     {{-- PRECIO --}}
-                    <div
-                        wire:ignore
-                        x-data="{}"
-                        x-init="
-                            var wr   = $wire;
-                            var rs   = $refs;
-                            var MAX  = {{ (int)$maxPrecio }};
-                            noUiSlider.create(rs.pTrack, {
-                                start: [{{ (int)($precioMin ?: 0) }}, {{ (int)($precioMax ?: $maxPrecio) }}],
-                                connect: true, step: 10000,
-                                range: { min: 0, max: MAX }
-                            });
-                            rs.pTrack.noUiSlider.on('update', function(v) {
-                                rs.pFrom.textContent = parseInt(v[0]).toLocaleString('es-MX');
-                                rs.pTo.textContent   = parseInt(v[1]).toLocaleString('es-MX');
-                            });
-                            rs.pTrack.noUiSlider.on('change', function(v) {
-                                var mn = parseInt(v[0]), mx = parseInt(v[1]);
-                                wr.set('precioMin', mn > 0 ? mn : '');
-                                wr.set('precioMax', mx < MAX ? mx : '');
-                            });
-                        "
-                        @reset-sliders.window="$refs.pTrack.noUiSlider && $refs.pTrack.noUiSlider.set([0, {{ (int)$maxPrecio }}])"
-                    >
-                        <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
                             <label class="text-xs font-semibold text-slate-400">Precio</label>
-                            <span class="text-xs text-slate-300 tabular-nums">
-                                $<span x-ref="pFrom">0</span>&nbsp;–&nbsp;$<span x-ref="pTo">{{ number_format((int)$maxPrecio) }}</span>
+                            @if($precioMin || $precioMax)
+                            <span class="text-[11px] text-blue-400 tabular-nums">
+                                @if($precioMin && $precioMax)
+                                    ${{ number_format((int)$precioMin) }} – ${{ number_format((int)$precioMax) }}
+                                @elseif($precioMin)
+                                    desde ${{ number_format((int)$precioMin) }}
+                                @else
+                                    hasta ${{ number_format((int)$precioMax) }}
+                                @endif
                             </span>
+                            @endif
                         </div>
-                        <div x-ref="pTrack" class="mt-4 mx-3"></div>
+                        <div class="flex items-center gap-2">
+                            <div class="relative flex-1">
+                                <span class="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs">$</span>
+                                <input type="number" wire:model.live.debounce.600ms="precioMin"
+                                       placeholder="Mínimo" min="0"
+                                       class="filtro-number w-full rounded-xl border border-white/[0.14] bg-slate-800 pl-5 pr-2 py-2.5 text-sm text-white placeholder-slate-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 focus:outline-none transition">
+                            </div>
+                            <span class="text-slate-600 shrink-0">–</span>
+                            <div class="relative flex-1">
+                                <span class="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs">$</span>
+                                <input type="number" wire:model.live.debounce.600ms="precioMax"
+                                       placeholder="Máximo" min="0"
+                                       class="filtro-number w-full rounded-xl border border-white/[0.14] bg-slate-800 pl-5 pr-2 py-2.5 text-sm text-white placeholder-slate-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 focus:outline-none transition">
+                            </div>
+                        </div>
                     </div>
 
                     {{-- KILOMETRAJE --}}
-                    <div
-                        wire:ignore
-                        x-data="{}"
-                        x-init="
-                            var wr   = $wire;
-                            var rs   = $refs;
-                            var MAX  = {{ (int)$maxKm }};
-                            noUiSlider.create(rs.kTrack, {
-                                start: [{{ (int)($kmMin ?: 0) }}, {{ (int)($kmMax ?: $maxKm) }}],
-                                connect: true, step: 1000,
-                                range: { min: 0, max: MAX }
-                            });
-                            rs.kTrack.noUiSlider.on('update', function(v) {
-                                rs.kFrom.textContent = parseInt(v[0]).toLocaleString('es-MX');
-                                rs.kTo.textContent   = parseInt(v[1]).toLocaleString('es-MX');
-                            });
-                            rs.kTrack.noUiSlider.on('change', function(v) {
-                                var mn = parseInt(v[0]), mx = parseInt(v[1]);
-                                wr.set('kmMin', mn > 0 ? mn : '');
-                                wr.set('kmMax', mx < MAX ? mx : '');
-                            });
-                        "
-                        @reset-sliders.window="$refs.kTrack.noUiSlider && $refs.kTrack.noUiSlider.set([0, {{ (int)$maxKm }}])"
-                    >
-                        <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
                             <label class="text-xs font-semibold text-slate-400">Kilometraje</label>
-                            <span class="text-xs text-slate-300 tabular-nums">
-                                <span x-ref="kFrom">0</span>&nbsp;–&nbsp;<span x-ref="kTo">{{ number_format((int)$maxKm) }}</span> km
+                            @if($kmMin || $kmMax)
+                            <span class="text-[11px] text-blue-400 tabular-nums">
+                                @if($kmMin && $kmMax)
+                                    {{ number_format((int)$kmMin) }} – {{ number_format((int)$kmMax) }} km
+                                @elseif($kmMin)
+                                    desde {{ number_format((int)$kmMin) }} km
+                                @else
+                                    hasta {{ number_format((int)$kmMax) }} km
+                                @endif
                             </span>
+                            @endif
                         </div>
-                        <div x-ref="kTrack" class="mt-4 mx-3"></div>
+                        <div class="flex items-center gap-2">
+                            <input type="number" wire:model.live.debounce.600ms="kmMin"
+                                   placeholder="Mín km" min="0"
+                                   class="filtro-number flex-1 w-full rounded-xl border border-white/[0.14] bg-slate-800 px-3 py-2.5 text-sm text-white placeholder-slate-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 focus:outline-none transition">
+                            <span class="text-slate-600 shrink-0">–</span>
+                            <input type="number" wire:model.live.debounce.600ms="kmMax"
+                                   placeholder="Máx km" min="0"
+                                   class="filtro-number flex-1 w-full rounded-xl border border-white/[0.14] bg-slate-800 px-3 py-2.5 text-sm text-white placeholder-slate-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 focus:outline-none transition">
+                        </div>
                     </div>
 
                 </div>

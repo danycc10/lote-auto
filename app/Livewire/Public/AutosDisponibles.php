@@ -48,7 +48,6 @@ class AutosDisponibles extends Component
         ]);
 
         $this->resetPage();
-        $this->dispatch('reset-sliders');
     }
 
     public function render()

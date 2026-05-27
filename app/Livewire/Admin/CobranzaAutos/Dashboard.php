@@ -284,6 +284,10 @@ protected function pagosBase()
         $this->seleccionados = (clone $this->cuotasBase())
             ->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
             ->whereDate('fecha_vencimiento', '<', today())
+            ->where(function ($q) {
+                $q->whereNull('notificado_correo_at')
+                  ->orWhereDate('notificado_correo_at', '<', today());
+            })
             ->pluck('id')
             ->map(fn ($id) => (string) $id)
             ->toArray();
@@ -308,14 +312,20 @@ protected function pagosBase()
             ->whereIn('id', $this->cuotasParaEnviar)
             ->get();
 
-        $enviados  = 0;
-        $sinCorreo = 0;
+        $enviados         = 0;
+        $sinCorreo        = 0;
+        $yaNotificadosHoy = 0;
 
         foreach ($cuotas as $cuota) {
             $cliente = $cuota->contrato?->cliente;
 
             if (! $cliente?->correo) {
                 $sinCorreo++;
+                continue;
+            }
+
+            if ($cuota->notificado_correo_at?->isToday()) {
+                $yaNotificadosHoy++;
                 continue;
             }
 
@@ -339,6 +349,8 @@ protected function pagosBase()
                 )
             );
 
+            $cuota->update(['notificado_correo_at' => now()]);
+
             $enviados++;
         }
 
@@ -349,12 +361,13 @@ protected function pagosBase()
 
         $this->cerrarModal();
 
-        $msg = "Correo(s) enviado(s): {$enviados}";
-        if ($sinCorreo) {
-            $msg .= " · Sin correo: {$sinCorreo}";
-        }
+        $parts = [];
+        if ($enviados > 0)         { $parts[] = "Enviados: {$enviados}"; }
+        if ($yaNotificadosHoy > 0) { $parts[] = "Ya notificados hoy: {$yaNotificadosHoy}"; }
+        if ($sinCorreo > 0)        { $parts[] = "Sin correo: {$sinCorreo}"; }
 
-        $this->dispatch('toast', type: $enviados > 0 ? 'success' : 'warning', message: $msg);
+        $type = $enviados > 0 ? 'success' : ($yaNotificadosHoy > 0 ? 'warning' : 'error');
+        $this->dispatch('toast', type: $type, message: implode(' · ', $parts));
     }
 
     protected function modalDestinatarios(): array
@@ -368,12 +381,13 @@ protected function pagosBase()
             ->orderBy('fecha_vencimiento')
             ->get()
             ->map(fn ($c) => [
-                'nombre'  => $c->contrato?->cliente?->nombre_completo ?? '—',
-                'correo'  => $c->contrato?->cliente?->correo ?: null,
-                'cuota'   => $c->numero,
-                'folio'   => $c->contrato?->folio ?? '—',
-                'monto'   => number_format((float) ($c->saldo ?: $c->monto), 2),
-                'dias'    => (int) now()->diffInDays(Carbon::parse($c->fecha_vencimiento)),
+                'nombre'          => $c->contrato?->cliente?->nombre_completo ?? '—',
+                'correo'          => $c->contrato?->cliente?->correo ?: null,
+                'cuota'           => $c->numero,
+                'folio'           => $c->contrato?->folio ?? '—',
+                'monto'           => number_format((float) ($c->saldo ?: $c->monto), 2),
+                'dias'            => (int) now()->diffInDays(Carbon::parse($c->fecha_vencimiento)),
+                'notificado_hoy'  => $c->notificado_correo_at?->isToday() ?? false,
             ])
             ->toArray();
     }

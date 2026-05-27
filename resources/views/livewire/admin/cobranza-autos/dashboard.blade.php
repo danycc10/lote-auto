@@ -307,9 +307,10 @@
             <div class="space-y-1.5 max-h-[600px] overflow-y-auto pr-0.5">
                 @forelse($cuotasVencidas as $cuota)
                     @php
-                        $diasAtraso     = (int) now()->diffInDays(\Carbon\Carbon::parse($cuota->fecha_vencimiento));
-                        $montoPendiente = (float) ($cuota->saldo ?? $cuota->monto);
-                        $tel            = preg_replace('/[^0-9]/', '', $cuota->contrato?->cliente?->telefono ?? '');
+                        $diasAtraso      = (int) now()->diffInDays(\Carbon\Carbon::parse($cuota->fecha_vencimiento));
+                        $montoPendiente  = (float) ($cuota->saldo ?? $cuota->monto);
+                        $notificadoHoy   = $cuota->notificado_correo_at?->isToday() ?? false;
+                        $tel             = preg_replace('/[^0-9]/', '', $cuota->contrato?->cliente?->telefono ?? '');
                         if (strlen($tel) === 10) { $tel = '52' . $tel; }
                         $waMsg = str_replace(
                             ['{nombre}', '{folio}', '{numero_cuota}', '{fecha_vencimiento}', '{dias_atraso}', '{monto_pendiente}'],
@@ -327,7 +328,7 @@
                         $isSelected = in_array((string) $cuota->id, $seleccionados);
                     @endphp
                     <div class="flex items-center gap-2.5 p-2.5 rounded-lg border transition
-                                {{ $isSelected ? 'border-indigo-300 bg-indigo-50/60' : 'border-red-200 bg-red-50/30 hover:bg-red-50/60' }}">
+                                {{ $isSelected ? 'border-indigo-300 bg-indigo-50/60' : ($notificadoHoy ? 'border-emerald-200 bg-emerald-50/40' : 'border-red-200 bg-red-50/30 hover:bg-red-50/60') }}">
                         <input type="checkbox" wire:model="seleccionados" value="{{ $cuota->id }}"
                                class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer shrink-0">
                         <div class="min-w-0 flex-1">
@@ -338,6 +339,14 @@
                                 Cuota #{{ $cuota->numero }}
                                 · {{ $cuota->contrato?->folio ?? '' }}
                                 · <span class="text-red-600 font-medium">{{ $diasAtraso }}d</span>
+                                @if($notificadoHoy)
+                                · <span class="inline-flex items-center gap-0.5 text-emerald-600 font-medium">
+                                    <svg class="h-2.5 w-2.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                                    </svg>
+                                    Notificado hoy
+                                </span>
+                                @endif
                             </p>
                         </div>
                         <div class="shrink-0 flex items-center gap-1.5">
@@ -351,6 +360,15 @@
                             </div>
                             {{-- Botón correo individual --}}
                             @if($cuota->contrato?->cliente?->correo)
+                            @if($notificadoHoy)
+                            <button wire:click="abrirModalIndividual({{ $cuota->id }})" type="button"
+                                    title="Notificado hoy — click para reenviar"
+                                    class="inline-flex items-center justify-center h-7 w-7 rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition shrink-0">
+                                <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                            @else
                             <button wire:click="abrirModalIndividual({{ $cuota->id }})" type="button"
                                     title="Enviar recordatorio por correo"
                                     class="inline-flex items-center justify-center h-7 w-7 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition shrink-0">
@@ -358,6 +376,7 @@
                                     <path d="M3.105 2.288a.75.75 0 00-.826.95l1.414 4.926A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.086l-1.414 4.926a.75.75 0 00.826.95 28.897 28.897 0 0015.293-7.155.75.75 0 000-1.114A28.897 28.897 0 003.105 2.288z"/>
                                 </svg>
                             </button>
+                            @endif
                             @else
                             <span title="Sin correo registrado"
                                   class="inline-flex items-center justify-center h-7 w-7 rounded-lg border border-slate-100 bg-slate-50 text-slate-300 cursor-not-allowed shrink-0">
@@ -551,20 +570,30 @@
 
             {{-- Destinatarios --}}
             <div class="px-6 py-4 max-h-72 overflow-y-auto space-y-2">
-                @php $conCorreo = 0; $sinCorreo = 0; @endphp
+                @php $conCorreo = 0; $sinCorreo = 0; $notifHoy = 0; @endphp
                 @foreach($modalDestinatarios as $dest)
-                    @php $dest['correo'] ? $conCorreo++ : $sinCorreo++ @endphp
+                    @php
+                        if (!$dest['correo'])           { $sinCorreo++; }
+                        elseif ($dest['notificado_hoy']) { $notifHoy++; }
+                        else                             { $conCorreo++; }
+                    @endphp
                     <div class="flex items-center gap-3 rounded-xl p-3 border
-                                {{ $dest['correo'] ? 'border-slate-200 bg-slate-50' : 'border-amber-200 bg-amber-50' }}">
+                                {{ !$dest['correo'] ? 'border-amber-200 bg-amber-50' : ($dest['notificado_hoy'] ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 bg-slate-50') }}">
                         <div class="h-8 w-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold
                                     {{ $dest['correo'] ? 'bg-indigo-100 text-indigo-700' : 'bg-amber-100 text-amber-700' }}">
                             {{ mb_strtoupper(mb_substr($dest['nombre'], 0, 1)) }}
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="text-sm font-semibold text-slate-800 truncate">{{ $dest['nombre'] }}</p>
-                            <p class="text-xs truncate {{ $dest['correo'] ? 'text-slate-500' : 'text-amber-600 font-medium' }}">
-                                {{ $dest['correo'] ?? 'Sin correo registrado — se omitirá' }}
+                            @if(!$dest['correo'])
+                            <p class="text-xs truncate text-amber-600 font-medium">Sin correo registrado — se omitirá</p>
+                            @elseif($dest['notificado_hoy'])
+                            <p class="text-xs truncate text-emerald-600 font-medium">
+                                {{ $dest['correo'] }} · Ya notificado hoy — se omitirá
                             </p>
+                            @else
+                            <p class="text-xs truncate text-slate-500">{{ $dest['correo'] }}</p>
+                            @endif
                         </div>
                         <div class="text-right shrink-0">
                             <p class="text-xs font-semibold text-slate-700">Cuota #{{ $dest['cuota'] }}</p>
@@ -576,15 +605,21 @@
 
             {{-- Resumen --}}
             @if(count($modalDestinatarios) > 0)
-            <div class="mx-6 mb-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 flex items-center justify-between gap-4">
+            <div class="mx-6 mb-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
                 <div class="flex items-center gap-1.5">
                     <span class="h-2 w-2 rounded-full bg-indigo-500 shrink-0"></span>
                     <span class="text-xs text-slate-600">Se enviarán: <strong class="text-indigo-700">{{ $conCorreo }}</strong></span>
                 </div>
+                @if($notifHoy > 0)
+                <div class="flex items-center gap-1.5">
+                    <span class="h-2 w-2 rounded-full bg-emerald-500 shrink-0"></span>
+                    <span class="text-xs text-emerald-700">Ya notificados hoy: <strong>{{ $notifHoy }}</strong></span>
+                </div>
+                @endif
                 @if($sinCorreo > 0)
                 <div class="flex items-center gap-1.5">
                     <span class="h-2 w-2 rounded-full bg-amber-400 shrink-0"></span>
-                    <span class="text-xs text-amber-700">Se omitirán: <strong>{{ $sinCorreo }}</strong></span>
+                    <span class="text-xs text-amber-700">Sin correo: <strong>{{ $sinCorreo }}</strong></span>
                 </div>
                 @endif
             </div>

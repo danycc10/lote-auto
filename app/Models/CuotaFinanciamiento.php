@@ -24,6 +24,7 @@ class CuotaFinanciamiento extends Model
         'estatus',
         'fecha_pago',
         'observaciones',
+        'notificado_correo_at',
     ];
 
     protected $casts = [
@@ -37,6 +38,7 @@ class CuotaFinanciamiento extends Model
         'recargo_aplicado' => 'decimal:2',
         'saldo' => 'decimal:2',
         'fecha_pago' => 'datetime',
+        'notificado_correo_at' => 'datetime',
     ];
 
     public function contrato(): BelongsTo

@@ -14,6 +14,10 @@ class ConfiguracionIndex extends Component
     public string $instagram  = '';
     public string $facebook   = '';
 
+    public string $notifCorreoAsunto = '';
+    public string $notifCorreoCuerpo = '';
+    public string $notifWaMensaje    = '';
+
     public function mount(): void
     {
         abort_unless(auth()->user()?->can('seguridad.roles'), 403);
@@ -23,6 +27,10 @@ class ConfiguracionIndex extends Component
         $this->mapsEmbed            = Configuracion::obtener('contact.maps_embed', '');
         $this->instagram            = Configuracion::obtener('contact.instagram', '');
         $this->facebook             = Configuracion::obtener('contact.facebook', '');
+
+        $this->notifCorreoAsunto = Configuracion::obtener('notif.correo_asunto', '');
+        $this->notifCorreoCuerpo = Configuracion::obtener('notif.correo_cuerpo', '');
+        $this->notifWaMensaje    = Configuracion::obtener('notif.wa_mensaje', '');
     }
 
     public function toggleFinanciamiento(): void
@@ -60,6 +68,25 @@ class ConfiguracionIndex extends Component
         Configuracion::establecer('contact.facebook', $this->facebook);
 
         $this->dispatch('toast', type: 'success', message: 'Configuración de contacto guardada.');
+    }
+
+    public function guardarPlantillasNotif(): void
+    {
+        $this->validate([
+            'notifCorreoAsunto' => ['required', 'string', 'max:200'],
+            'notifCorreoCuerpo' => ['required', 'string', 'max:2000'],
+            'notifWaMensaje'    => ['required', 'string', 'max:500'],
+        ], [
+            'notifCorreoAsunto.required' => 'El asunto es obligatorio.',
+            'notifCorreoCuerpo.required' => 'El cuerpo del correo es obligatorio.',
+            'notifWaMensaje.required'    => 'El mensaje de WhatsApp es obligatorio.',
+        ]);
+
+        Configuracion::establecer('notif.correo_asunto', $this->notifCorreoAsunto);
+        Configuracion::establecer('notif.correo_cuerpo', $this->notifCorreoCuerpo);
+        Configuracion::establecer('notif.wa_mensaje',    $this->notifWaMensaje);
+
+        $this->dispatch('toast', type: 'success', message: 'Plantillas de notificación guardadas.');
     }
 
     public function render()

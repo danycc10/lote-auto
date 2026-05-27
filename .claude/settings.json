@@ -26,7 +26,8 @@
       "Bash(composer --version)",
       "Bash(Select-String -Path \"c:\\\\laragon\\\\www\\\\lote-autos-finan\\\\composer.lock\" -Pattern '\"name\": \"laravel-lang' -CaseSensitive)",
       "Bash(composer audit *)",
-      "Bash(mkdir -p \"c:/laragon/www/lote-autos-finan/.vscode\")"
+      "Bash(mkdir -p \"c:/laragon/www/lote-autos-finan/.vscode\")",
+      "Bash(Get-ChildItem -Path \"c:\\\\laragon\\\\www\\\\lote-autos-finan\\\\routes\" -File)"
     ],
     "additionalDirectories": [
       "c:\\laragon\\www\\lote-autos-finan"

@@ -273,30 +273,116 @@
 
         {{-- Cuotas vencidas --}}
         <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-5">
-            <div class="mb-4">
-                <h2 class="text-sm font-semibold text-slate-900">Cuotas vencidas</h2>
-                <p class="text-xs text-slate-500 mt-0.5">Pendientes prioritarias de cobranza.</p>
+
+            {{-- Header con acciones --}}
+            <div class="flex items-start justify-between gap-2 mb-3">
+                <div>
+                    <h2 class="text-sm font-semibold text-slate-900">Cuotas vencidas</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Selecciona para enviar recordatorio.</p>
+                </div>
+                <button wire:click="seleccionarAtrasadas" type="button"
+                        class="shrink-0 text-xs font-medium text-indigo-600 hover:text-indigo-800 transition">
+                    Seleccionar todas
+                </button>
             </div>
 
-            <div class="space-y-2">
+            {{-- Barra de acción en lote --}}
+            @if(count($seleccionados) > 0)
+            <div class="flex items-center justify-between gap-2 mb-3 rounded-lg bg-indigo-50 border border-indigo-200 px-3 py-2">
+                <p class="text-xs font-semibold text-indigo-800">{{ count($seleccionados) }} cuota(s)</p>
+                <div class="flex items-center gap-2">
+                    <button wire:click="limpiarSeleccion" type="button"
+                            class="text-xs text-indigo-500 hover:text-indigo-700 transition">Limpiar</button>
+                    <button wire:click="abrirModalLote" type="button"
+                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-indigo-600 text-xs font-semibold text-white hover:bg-indigo-700 disabled:opacity-60 transition">
+                        <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M3.105 2.288a.75.75 0 00-.826.95l1.414 4.926A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.086l-1.414 4.926a.75.75 0 00.826.95 28.897 28.897 0 0015.293-7.155.75.75 0 000-1.114A28.897 28.897 0 003.105 2.288z"/>
+                        </svg>
+                        Enviar correo
+                    </button>
+                </div>
+            </div>
+            @endif
+
+            <div class="space-y-1.5 max-h-[600px] overflow-y-auto pr-0.5">
                 @forelse($cuotasVencidas as $cuota)
-                    <div class="flex items-center justify-between gap-4 p-3 rounded-lg border border-red-200 bg-red-50/40 hover:bg-red-50/70 transition">
-                        <div class="min-w-0">
+                    @php
+                        $diasAtraso     = (int) now()->diffInDays(\Carbon\Carbon::parse($cuota->fecha_vencimiento));
+                        $montoPendiente = (float) ($cuota->saldo ?? $cuota->monto);
+                        $tel            = preg_replace('/[^0-9]/', '', $cuota->contrato?->cliente?->telefono ?? '');
+                        if (strlen($tel) === 10) { $tel = '52' . $tel; }
+                        $waMsg = str_replace(
+                            ['{nombre}', '{folio}', '{numero_cuota}', '{fecha_vencimiento}', '{dias_atraso}', '{monto_pendiente}'],
+                            [
+                                $cuota->contrato?->cliente?->nombre_completo ?? '',
+                                $cuota->contrato?->folio ?? '',
+                                $cuota->numero,
+                                \Carbon\Carbon::parse($cuota->fecha_vencimiento)->format('d/m/Y'),
+                                $diasAtraso,
+                                number_format($montoPendiente, 2),
+                            ],
+                            $waMensajePlantilla
+                        );
+                        $waUrl = $tel ? 'https://wa.me/' . $tel . '?text=' . urlencode($waMsg) : null;
+                        $isSelected = in_array((string) $cuota->id, $seleccionados);
+                    @endphp
+                    <div class="flex items-center gap-2.5 p-2.5 rounded-lg border transition
+                                {{ $isSelected ? 'border-indigo-300 bg-indigo-50/60' : 'border-red-200 bg-red-50/30 hover:bg-red-50/60' }}">
+                        <input type="checkbox" wire:model="seleccionados" value="{{ $cuota->id }}"
+                               class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer shrink-0">
+                        <div class="min-w-0 flex-1">
                             <p class="text-sm font-semibold text-slate-900 truncate">
-                                {{ $cuota->contrato?->cliente?->nombres }} {{ $cuota->contrato?->cliente?->apellidos }}
+                                {{ $cuota->contrato?->cliente?->nombre_completo ?? '—' }}
                             </p>
                             <p class="text-xs text-slate-500 truncate">
-                                {{ $cuota->contrato?->auto?->marca?->nombre ?? '—' }}
-                                · Cuota #{{ $cuota->numero }}
+                                Cuota #{{ $cuota->numero }}
+                                · {{ $cuota->contrato?->folio ?? '' }}
+                                · <span class="text-red-600 font-medium">{{ $diasAtraso }}d</span>
                             </p>
                         </div>
-                        <div class="text-right shrink-0">
-                            <p class="text-xs text-red-600 font-medium">
-                                {{ \Carbon\Carbon::parse($cuota->fecha_vencimiento)->format('d/m/Y') }}
-                            </p>
-                            <p class="text-sm font-bold text-red-700 tabular-nums">
-                                ${{ number_format((float) ($cuota->saldo ?? $cuota->monto), 2) }}
-                            </p>
+                        <div class="shrink-0 flex items-center gap-1.5">
+                            <div class="text-right">
+                                <p class="text-xs text-red-600 font-medium tabular-nums">
+                                    ${{ number_format($montoPendiente, 2) }}
+                                </p>
+                                <p class="text-[10px] text-slate-400">
+                                    {{ \Carbon\Carbon::parse($cuota->fecha_vencimiento)->format('d/m/Y') }}
+                                </p>
+                            </div>
+                            {{-- Botón correo individual --}}
+                            @if($cuota->contrato?->cliente?->correo)
+                            <button wire:click="abrirModalIndividual({{ $cuota->id }})" type="button"
+                                    title="Enviar recordatorio por correo"
+                                    class="inline-flex items-center justify-center h-7 w-7 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition shrink-0">
+                                <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M3.105 2.288a.75.75 0 00-.826.95l1.414 4.926A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.086l-1.414 4.926a.75.75 0 00.826.95 28.897 28.897 0 0015.293-7.155.75.75 0 000-1.114A28.897 28.897 0 003.105 2.288z"/>
+                                </svg>
+                            </button>
+                            @else
+                            <span title="Sin correo registrado"
+                                  class="inline-flex items-center justify-center h-7 w-7 rounded-lg border border-slate-100 bg-slate-50 text-slate-300 cursor-not-allowed shrink-0">
+                                <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M3.105 2.288a.75.75 0 00-.826.95l1.414 4.926A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.086l-1.414 4.926a.75.75 0 00.826.95 28.897 28.897 0 0015.293-7.155.75.75 0 000-1.114A28.897 28.897 0 003.105 2.288z"/>
+                                </svg>
+                            </span>
+                            @endif
+
+                            {{-- Botón WA --}}
+                            @if($waUrl)
+                            <a href="{{ $waUrl }}" target="_blank" rel="noopener"
+                               title="Enviar recordatorio por WhatsApp"
+                               class="inline-flex items-center justify-center h-7 w-7 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition shrink-0">
+                                <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/>
+                                </svg>
+                            </a>
+                            @else
+                            <span class="inline-flex items-center justify-center h-7 w-7 rounded-lg border border-slate-100 bg-slate-50 text-slate-300 cursor-not-allowed shrink-0" title="Sin teléfono registrado">
+                                <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/>
+                                </svg>
+                            </span>
+                            @endif
                         </div>
                     </div>
                 @empty
@@ -354,7 +440,7 @@
                             </td>
                             <td class="px-5 py-3.5">
                                 <p class="font-medium text-slate-900">
-                                    {{ $contrato->cliente?->nombres }} {{ $contrato->cliente?->apellidos }}
+                                    {{ $contrato->cliente?->nombre_completo ?? '—' }}
                                 </p>
                                 <p class="text-xs text-slate-500 mt-0.5">{{ $contrato->cliente?->telefono ?? 'Sin teléfono' }}</p>
                             </td>
@@ -425,6 +511,108 @@
         </div>
         @endif
     </div>
+
+    {{-- ── Modal de confirmación de envío ── --}}
+    @if($mostrarModal)
+    <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+         x-data x-init="document.body.style.overflow='hidden'"
+         x-effect="$wire.mostrarModal || (document.body.style.overflow='')">
+
+        {{-- Overlay --}}
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+             wire:click="cerrarModal"></div>
+
+        {{-- Card --}}
+        <div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100">
+
+            {{-- Header --}}
+            <div class="flex items-center gap-3 px-6 py-5 border-b border-slate-100">
+                <div class="h-10 w-10 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
+                    <svg class="h-5 w-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M3.105 2.288a.75.75 0 00-.826.95l1.414 4.926A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.086l-1.414 4.926a.75.75 0 00.826.95 28.897 28.897 0 0015.293-7.155.75.75 0 000-1.114A28.897 28.897 0 003.105 2.288z"/>
+                    </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-base font-semibold text-slate-900">Confirmar envío de correos</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                        {{ count($cuotasParaEnviar) }} cuota(s) seleccionada(s)
+                    </p>
+                </div>
+                <button wire:click="cerrarModal" type="button"
+                        class="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition shrink-0">
+                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
+                    </svg>
+                </button>
+            </div>
+
+            {{-- Destinatarios --}}
+            <div class="px-6 py-4 max-h-72 overflow-y-auto space-y-2">
+                @php $conCorreo = 0; $sinCorreo = 0; @endphp
+                @foreach($modalDestinatarios as $dest)
+                    @php $dest['correo'] ? $conCorreo++ : $sinCorreo++ @endphp
+                    <div class="flex items-center gap-3 rounded-xl p-3 border
+                                {{ $dest['correo'] ? 'border-slate-200 bg-slate-50' : 'border-amber-200 bg-amber-50' }}">
+                        <div class="h-8 w-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold
+                                    {{ $dest['correo'] ? 'bg-indigo-100 text-indigo-700' : 'bg-amber-100 text-amber-700' }}">
+                            {{ mb_strtoupper(mb_substr($dest['nombre'], 0, 1)) }}
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-sm font-semibold text-slate-800 truncate">{{ $dest['nombre'] }}</p>
+                            <p class="text-xs truncate {{ $dest['correo'] ? 'text-slate-500' : 'text-amber-600 font-medium' }}">
+                                {{ $dest['correo'] ?? 'Sin correo registrado — se omitirá' }}
+                            </p>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <p class="text-xs font-semibold text-slate-700">Cuota #{{ $dest['cuota'] }}</p>
+                            <p class="text-xs text-red-600 font-medium tabular-nums">${{ $dest['monto'] }}</p>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- Resumen --}}
+            @if(count($modalDestinatarios) > 0)
+            <div class="mx-6 mb-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-1.5">
+                    <span class="h-2 w-2 rounded-full bg-indigo-500 shrink-0"></span>
+                    <span class="text-xs text-slate-600">Se enviarán: <strong class="text-indigo-700">{{ $conCorreo }}</strong></span>
+                </div>
+                @if($sinCorreo > 0)
+                <div class="flex items-center gap-1.5">
+                    <span class="h-2 w-2 rounded-full bg-amber-400 shrink-0"></span>
+                    <span class="text-xs text-amber-700">Se omitirán: <strong>{{ $sinCorreo }}</strong></span>
+                </div>
+                @endif
+            </div>
+            @endif
+
+            {{-- Footer --}}
+            <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-100 bg-slate-50/70">
+                <button wire:click="cerrarModal" type="button"
+                        class="px-4 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-100 transition">
+                    Cancelar
+                </button>
+                <button wire:click="confirmarEnvio" type="button"
+                        wire:loading.attr="disabled" wire:target="confirmarEnvio"
+                        class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-indigo-600 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60 transition shadow-sm">
+                    <svg wire:loading wire:target="confirmarEnvio" class="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    <svg wire:loading.remove wire:target="confirmarEnvio" class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M3.105 2.288a.75.75 0 00-.826.95l1.414 4.926A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.086l-1.414 4.926a.75.75 0 00.826.95 28.897 28.897 0 0015.293-7.155.75.75 0 000-1.114A28.897 28.897 0 003.105 2.288z"/>
+                    </svg>
+                    Enviar {{ $conCorreo }} correo(s)
+                </button>
+            </div>
+
+        </div>
+    </div>
+    @endif
 
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

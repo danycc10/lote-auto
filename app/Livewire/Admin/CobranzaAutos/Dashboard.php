@@ -2,11 +2,14 @@
 
 namespace App\Livewire\Admin\CobranzaAutos;
 
+use App\Mail\RecordatorioPagoMail;
+use App\Models\Configuracion;
 use App\Models\ContratoFinanciamiento;
 use App\Models\CuotaFinanciamiento;
 use App\Models\PagoFinanciamiento;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -20,6 +23,10 @@ class Dashboard extends Component
     public ?string $fechaHasta = null;
 
     public int $perPage = 10;
+
+    public array $seleccionados     = [];
+    public array $cuotasParaEnviar = [];
+    public bool  $mostrarModal     = false;
 
     protected $queryString = [
         'q' => ['except' => ''],
@@ -191,7 +198,7 @@ protected function pagosBase()
             ->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
             ->whereDate('fecha_vencimiento', '<', today())
             ->orderBy('fecha_vencimiento')
-            ->limit(10)
+            ->limit(50)
             ->get();
     }
 
@@ -249,17 +256,141 @@ protected function pagosBase()
         ];
     }
 
+    public function abrirModalIndividual(int $cuotaId): void
+    {
+        $this->cuotasParaEnviar = [(string) $cuotaId];
+        $this->mostrarModal     = true;
+    }
+
+    public function abrirModalLote(): void
+    {
+        if (empty($this->seleccionados)) {
+            $this->dispatch('toast', type: 'error', message: 'Selecciona al menos una cuota.');
+            return;
+        }
+
+        $this->cuotasParaEnviar = $this->seleccionados;
+        $this->mostrarModal     = true;
+    }
+
+    public function cerrarModal(): void
+    {
+        $this->mostrarModal     = false;
+        $this->cuotasParaEnviar = [];
+    }
+
+    public function seleccionarAtrasadas(): void
+    {
+        $this->seleccionados = (clone $this->cuotasBase())
+            ->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+            ->whereDate('fecha_vencimiento', '<', today())
+            ->pluck('id')
+            ->map(fn ($id) => (string) $id)
+            ->toArray();
+    }
+
+    public function limpiarSeleccion(): void
+    {
+        $this->seleccionados = [];
+    }
+
+    public function confirmarEnvio(): void
+    {
+        if (empty($this->cuotasParaEnviar)) {
+            $this->cerrarModal();
+            return;
+        }
+
+        $asunto = Configuracion::obtener('notif.correo_asunto', 'Recordatorio de pago — Cuota #{numero_cuota} / Contrato {folio}');
+        $cuerpo = Configuracion::obtener('notif.correo_cuerpo', "Estimado/a {nombre},\n\nLa cuota #{numero_cuota} de su contrato {folio} venció el {fecha_vencimiento} ({dias_atraso} días de atraso). Monto pendiente: \${monto_pendiente}.\n\nPor favor comuníquese con nosotros.");
+
+        $cuotas = CuotaFinanciamiento::with(['contrato.cliente'])
+            ->whereIn('id', $this->cuotasParaEnviar)
+            ->get();
+
+        $enviados  = 0;
+        $sinCorreo = 0;
+
+        foreach ($cuotas as $cuota) {
+            $cliente = $cuota->contrato?->cliente;
+
+            if (! $cliente?->correo) {
+                $sinCorreo++;
+                continue;
+            }
+
+            $diasAtraso     = (int) now()->diffInDays(Carbon::parse($cuota->fecha_vencimiento));
+            $montoPendiente = (float) ($cuota->saldo ?: $cuota->monto);
+
+            $vars = [
+                '{nombre}'            => $cliente->nombre_completo,
+                '{folio}'             => $cuota->contrato->folio,
+                '{numero_cuota}'      => $cuota->numero,
+                '{fecha_vencimiento}' => Carbon::parse($cuota->fecha_vencimiento)->format('d/m/Y'),
+                '{dias_atraso}'       => $diasAtraso,
+                '{monto_pendiente}'   => number_format($montoPendiente, 2),
+                '{monto_cuota}'       => number_format((float) $cuota->monto, 2),
+            ];
+
+            Mail::to($cliente->correo)->send(
+                new RecordatorioPagoMail(
+                    str_replace(array_keys($vars), array_values($vars), $asunto),
+                    str_replace(array_keys($vars), array_values($vars), $cuerpo),
+                )
+            );
+
+            $enviados++;
+        }
+
+        // Limpiar selección solo si fue envío masivo
+        if (count($this->cuotasParaEnviar) > 1 || count($this->seleccionados) > 0) {
+            $this->seleccionados = [];
+        }
+
+        $this->cerrarModal();
+
+        $msg = "Correo(s) enviado(s): {$enviados}";
+        if ($sinCorreo) {
+            $msg .= " · Sin correo: {$sinCorreo}";
+        }
+
+        $this->dispatch('toast', type: $enviados > 0 ? 'success' : 'warning', message: $msg);
+    }
+
+    protected function modalDestinatarios(): array
+    {
+        if (empty($this->cuotasParaEnviar)) {
+            return [];
+        }
+
+        return CuotaFinanciamiento::with(['contrato.cliente'])
+            ->whereIn('id', $this->cuotasParaEnviar)
+            ->orderBy('fecha_vencimiento')
+            ->get()
+            ->map(fn ($c) => [
+                'nombre'  => $c->contrato?->cliente?->nombre_completo ?? '—',
+                'correo'  => $c->contrato?->cliente?->correo ?: null,
+                'cuota'   => $c->numero,
+                'folio'   => $c->contrato?->folio ?? '—',
+                'monto'   => number_format((float) ($c->saldo ?: $c->monto), 2),
+                'dias'    => (int) now()->diffInDays(Carbon::parse($c->fecha_vencimiento)),
+            ])
+            ->toArray();
+    }
+
     public function render()
     {
         $contratos = $this->contratosQuery()->paginate($this->perPage);
 
         return view('livewire.admin.cobranza-autos.dashboard', [
-            'contratos' => $contratos,
-            'kpis' => $this->kpis,
+            'contratos'            => $contratos,
+            'kpis'                 => $this->kpis,
             'proximosVencimientos' => $this->proximosVencimientos,
-            'cuotasVencidas' => $this->cuotasVencidas,
-            'contratosTopAtraso' => $this->contratosTopAtraso,
-            'cobranzaPorDia' => $this->cobranzaPorDia,
+            'cuotasVencidas'       => $this->cuotasVencidas,
+            'contratosTopAtraso'   => $this->contratosTopAtraso,
+            'cobranzaPorDia'       => $this->cobranzaPorDia,
+            'waMensajePlantilla'   => Configuracion::obtener('notif.wa_mensaje', 'Hola {nombre}, tiene pagos vencidos por ${monto_atrasado} en su contrato {folio}. Por favor comuníquese con nosotros.'),
+            'modalDestinatarios'   => $this->mostrarModal ? $this->modalDestinatarios() : [],
         ])->layout('layouts.app');
     }
 }

@@ -248,7 +248,7 @@ Route::middleware(['auth', 'verified'])
                 ->name('reportes.export');
 
             Route::get('/administracion/tarjetas-cobro', TarjetasCobroIndex::class)
-                ->middleware('permission:dashboard.ver')
+                ->middleware('permission:seguridad.roles')
                 ->name('administracion.tarjetas-cobro');
         });
     });

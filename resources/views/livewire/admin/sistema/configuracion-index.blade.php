@@ -248,4 +248,74 @@
             </div>
         </div>
 
+        {{-- Plantillas de notificación --}}
+        <div class="space-y-4">
+            <h2 class="text-xs font-medium text-slate-400 uppercase tracking-wider">Plantillas de notificación de mora</h2>
+            <p class="text-xs text-slate-500 -mt-2">
+                Variables disponibles:
+                <code class="bg-slate-100 px-1 rounded text-slate-600">{nombre}</code>
+                <code class="bg-slate-100 px-1 rounded text-slate-600">{folio}</code>
+                <code class="bg-slate-100 px-1 rounded text-slate-600">{numero_cuota}</code>
+                <code class="bg-slate-100 px-1 rounded text-slate-600">{fecha_vencimiento}</code>
+                <code class="bg-slate-100 px-1 rounded text-slate-600">{dias_atraso}</code>
+                <code class="bg-slate-100 px-1 rounded text-slate-600">{monto_pendiente}</code>
+                <code class="bg-slate-100 px-1 rounded text-slate-600">{monto_cuota}</code>
+            </p>
+
+            <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-5">
+
+                {{-- Asunto correo --}}
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">
+                        Asunto del correo
+                    </label>
+                    <input type="text" wire:model="notifCorreoAsunto" maxlength="200"
+                           placeholder="Recordatorio de pago - Contrato {folio}"
+                           class="block w-full rounded-lg border border-slate-300 py-2 px-3 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 @error('notifCorreoAsunto') border-red-400 bg-red-50 @enderror">
+                    @error('notifCorreoAsunto') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+
+                {{-- Cuerpo correo --}}
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">
+                        Cuerpo del correo
+                    </label>
+                    <textarea wire:model="notifCorreoCuerpo" rows="5" maxlength="2000"
+                              placeholder="Estimado/a {nombre}, le recordamos que tiene {cuotas_vencidas} cuota(s) vencida(s)..."
+                              class="block w-full rounded-lg border border-slate-300 py-2 px-3 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-y @error('notifCorreoCuerpo') border-red-400 bg-red-50 @enderror"></textarea>
+                    @error('notifCorreoCuerpo') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    <p class="mt-1 text-xs text-slate-400">Puedes usar saltos de línea. Se envía como correo HTML.</p>
+                </div>
+
+                {{-- Mensaje WA --}}
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">
+                        Mensaje de WhatsApp
+                        <span class="text-slate-400 font-normal">(máx. 500 caracteres)</span>
+                    </label>
+                    <div class="relative">
+                        <textarea wire:model="notifWaMensaje" rows="3" maxlength="500"
+                                  placeholder="Hola {nombre}, tiene pagos vencidos por ${monto_atrasado}..."
+                                  class="block w-full rounded-lg border border-slate-300 py-2 px-3 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none pb-6 @error('notifWaMensaje') border-red-400 bg-red-50 @enderror"></textarea>
+                        <span class="absolute right-3 bottom-2 text-xs text-slate-400 tabular-nums">{{ strlen($notifWaMensaje) }}/500</span>
+                    </div>
+                    @error('notifWaMensaje') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+
+                <div class="flex justify-end pt-2 border-t border-slate-100">
+                    <button wire:click="guardarPlantillasNotif"
+                            wire:loading.attr="disabled"
+                            wire:target="guardarPlantillasNotif"
+                            type="button"
+                            class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-60 transition">
+                        <svg wire:loading wire:target="guardarPlantillasNotif" class="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        Guardar plantillas
+                    </button>
+                </div>
+            </div>
+        </div>
+
 </div>

@@ -198,7 +198,6 @@ protected function pagosBase()
             ->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
             ->whereDate('fecha_vencimiento', '<', today())
             ->orderBy('fecha_vencimiento')
-            ->limit(50)
             ->get();
     }
 

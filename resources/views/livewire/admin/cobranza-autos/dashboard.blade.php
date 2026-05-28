@@ -197,7 +197,7 @@
                         <div class="flex items-start justify-between gap-2">
                             <div class="min-w-0">
                                 <p class="text-sm font-semibold text-slate-900 truncate">
-                                    {{ $contrato->cliente?->nombres }} {{ $contrato->cliente?->apellidos }}
+                                    {{ $contrato->cliente?->nombre_completo ?? '—' }}
                                 </p>
                                 <p class="text-xs text-slate-500 mt-0.5 truncate">
                                     {{ $contrato->auto?->marca?->nombre ?? '—' }}
@@ -231,22 +231,19 @@
         </div>
     </div>
 
-    {{-- Vencimientos + Cuotas vencidas --}}
-    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-
-        {{-- Próximos vencimientos --}}
-        <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-5">
-            <div class="mb-4">
-                <h2 class="text-sm font-semibold text-slate-900">Próximos vencimientos</h2>
-                <p class="text-xs text-slate-500 mt-0.5">Cuotas que vencen en los siguientes 7 días.</p>
-            </div>
+    {{-- Próximos vencimientos (ancho completo, compacto) --}}
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-5">
+        <div class="mb-4">
+            <h2 class="text-sm font-semibold text-slate-900">Próximos vencimientos</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Cuotas que vencen en los siguientes 7 días.</p>
+        </div>
 
             <div class="space-y-2">
                 @forelse($proximosVencimientos as $cuota)
                     <div class="flex items-center justify-between gap-4 p-3 rounded-lg border border-slate-200 hover:bg-slate-50/60 transition">
                         <div class="min-w-0">
                             <p class="text-sm font-semibold text-slate-900 truncate">
-                                {{ $cuota->contrato?->cliente?->nombres }} {{ $cuota->contrato?->cliente?->apellidos }}
+                                {{ $cuota->contrato?->cliente?->nombre_completo ?? '—' }}
                             </p>
                             <p class="text-xs text-slate-500 truncate">
                                 {{ $cuota->contrato?->auto?->marca?->nombre ?? '—' }}
@@ -269,12 +266,12 @@
                     </div>
                 @endforelse
             </div>
-        </div>
+    </div>
 
-        {{-- Cuotas vencidas --}}
-        <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-5">
+    {{-- Cuotas vencidas — sección full-width --}}
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-5">
 
-            {{-- Header con acciones --}}
+        {{-- Header con acciones --}}
             <div class="flex items-start justify-between gap-2 mb-3">
                 <div>
                     <h2 class="text-sm font-semibold text-slate-900">Cuotas vencidas</h2>
@@ -410,7 +407,6 @@
                     </div>
                 @endforelse
             </div>
-        </div>
     </div>
 
     {{-- Tabla de contratos --}}

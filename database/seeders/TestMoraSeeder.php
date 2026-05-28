@@ -92,7 +92,7 @@ class TestMoraSeeder extends Seeder
                 'dias_gracia'             => 3,
                 'tipo_recargo'            => null,
                 'valor_recargo'           => 0,
-                'estatus'                 => $esLiquidado ? 'liquidado' : ($mesesAtras > 0 ? 'atrasado' : 'activo'),
+                'estatus'                 => $esLiquidado ? 'liquidado' : 'activo',
                 'observaciones'           => 'Dato de prueba — ' . $caso['desc'],
             ]);
 

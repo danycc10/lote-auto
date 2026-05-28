@@ -28,7 +28,13 @@
       "Bash(composer audit *)",
       "Bash(mkdir -p \"c:/laragon/www/lote-autos-finan/.vscode\")",
       "Bash(Get-ChildItem -Path \"c:\\\\laragon\\\\www\\\\lote-autos-finan\\\\routes\" -File)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(php -r ' *)",
+      "Bash(grep -r \"lote-autos-finan\" \"C:\\\\laragon\\\\etc\\\\nginx\\\\sites-enabled\" 2>/dev/null | head -5; ls \"C:\\\\laragon\\\\etc\\\\nginx\\\\sites-enabled\" 2>/dev/null | head -10)",
+      "Read(//c/laragon/etc/nginx/sites-enabled/**)",
+      "Bash(ls \"C:\\\\laragon\\\\etc\\\\apache2\\\\sites-enabled\" 2>/dev/null | head -10)",
+      "Read(//c/laragon/etc/apache2/sites-enabled/**)",
+      "Bash(powershell -Command \"\\(Get-Content 'c:\\\\laragon\\\\www\\\\lote-autos-finan\\\\.env'\\) -replace 'APP_URL=http://localhost:8000', 'APP_URL=http://lote-autos-finan.test' | Set-Content 'c:\\\\laragon\\\\www\\\\lote-autos-finan\\\\.env'\")"
     ],
     "additionalDirectories": [
       "c:\\laragon\\www\\lote-autos-finan"

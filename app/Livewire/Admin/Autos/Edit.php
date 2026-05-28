@@ -8,6 +8,7 @@ use App\Models\MarcaAuto;
 use App\Models\ModeloAuto;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -126,9 +127,10 @@ class Edit extends Component
             ->get();
     }
 
-    public function getImagenesActualesProperty()
+    #[Computed]
+    public function imagenesActuales()
     {
-        return $this->auto->imagenes()
+        return ImagenAuto::where('auto_id', $this->auto->id)
             ->orderByDesc('es_portada')
             ->orderBy('orden')
             ->get();

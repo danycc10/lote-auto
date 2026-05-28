@@ -46,7 +46,7 @@ class TestMoraSeeder extends Seeder
                 'telefono'         => $caso['tel'],
                 'correo'           => $caso['correo'],
                 'curp'             => $this->curp($caso['ap'], $i),
-                'rfc'              => strtoupper(substr($caso['ap'], 0, 4)) . '8501' . str_pad($i + 1, 2, '0', STR_PAD_LEFT) . 'AB' . ($i + 1),
+                'rfc'              => $this->rfc($caso['ap'], $i),
                 'direccion'        => 'Calle de Prueba ' . (($i + 1) * 10),
                 'ciudad'           => ['Ciudad de México', 'Guadalajara', 'Monterrey', 'Puebla', 'León'][$i % 5],
                 'estado'           => ['CDMX', 'Jalisco', 'Nuevo León', 'Puebla', 'Guanajuato'][$i % 5],
@@ -163,9 +163,22 @@ class TestMoraSeeder extends Seeder
         $this->command->info('Seeder de prueba completado.');
     }
 
+    private function ascii(string $str): string
+    {
+        $out = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $str) ?: $str;
+        return preg_replace('/[^A-Za-z]/', '', $out);
+    }
+
+    private function rfc(string $apellido, int $idx): string
+    {
+        $base = strtoupper(substr($this->ascii($apellido), 0, 4));
+        return str_pad($base, 4, 'X') . '8501' . str_pad($idx + 1, 2, '0', STR_PAD_LEFT) . 'AB' . ($i + 1 ?? $idx);
+    }
+
     private function curp(string $apellido, int $idx): string
     {
-        $base = strtoupper(substr($apellido, 0, 4));
+        $ascii = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $apellido) ?: $apellido;
+        $base  = strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $ascii), 0, 4));
         return str_pad($base, 4, 'X') . '8501' . str_pad($idx + 1, 2, '0', STR_PAD_LEFT) . 'H' . 'NLE' . 'RZB' . str_pad($idx, 2, '0', STR_PAD_LEFT);
     }
 }

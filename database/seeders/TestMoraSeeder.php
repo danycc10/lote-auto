@@ -154,8 +154,8 @@ class TestMoraSeeder extends Seeder
                 ]);
             }
 
-            // Marcar auto como vendido
-            $auto->update(['estatus' => 'vendido']);
+            // Marcar auto como financiado
+            $auto->update(['estatus' => 'financiado']);
 
             $this->command->line("  ✓ {$caso['nombre']} {$caso['ap']} — {$caso['desc']}");
         }

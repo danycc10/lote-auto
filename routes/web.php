@@ -40,6 +40,7 @@ use App\Http\Controllers\Admin\ReportesExportController;
 
 use App\Livewire\Admin\Administracion\Index as AdministracionIndex;
 use App\Livewire\Admin\Administracion\TarjetasCobroIndex;
+use App\Livewire\Admin\Catalogos\MarcasModelosIndex;
 use App\Livewire\Admin\Sistema\Index as SistemaIndex;
 use App\Livewire\Admin\Sistema\AuditoriaIndex;
 use App\Livewire\Admin\Sistema\ConfiguracionIndex as SistemaConfiguracionIndex;
@@ -150,6 +151,10 @@ Route::middleware(['auth', 'verified'])
         Route::get('/autos', AutosIndex::class)
             ->middleware('permission:autos.ver')
             ->name('autos.index');
+
+        Route::get('/catalogos/marcas-modelos', MarcasModelosIndex::class)
+            ->middleware('permission:autos.ver')
+            ->name('catalogos.marcas-modelos');
 
         Route::get('/autos/create', AutosCreate::class)
             ->middleware('permission:autos.crear')

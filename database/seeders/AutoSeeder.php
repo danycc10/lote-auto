@@ -175,29 +175,31 @@ class AutoSeeder extends Seeder
                 continue;
             }
 
-            Auto::updateOrCreate(
-                [
-                    'codigo_inventario' => $this->generarCodigo($marca->nombre, $modelo->nombre, $item['anio']),
-                ],
-                [
-                    'marca_auto_id' => $marca->id,
-                    'modelo_auto_id' => $modelo->id,
-                    'vin' => $this->generarVin(),
-                    'placa' => null,
-                    'anio' => $item['anio'],
-                    'version' => $item['version'],
-                    'color' => $item['color'],
-                    'kilometraje' => $item['kilometraje'],
-                    'transmision' => $item['transmision'],
-                    'tipo_combustible' => $item['tipo_combustible'],
-                    'precio_contado' => $item['precio_contado'],
-                    'precio_financiado' => $item['precio_financiado'],
-                    'estatus' => $item['estatus'],
-                    'descripcion' => $item['descripcion'],
-                    'destacado' => $item['destacado'],
-                    'activo' => true,
-                ]
-            );
+            $codigo = $this->generarCodigo($marca->nombre, $modelo->nombre, $item['anio']);
+            $auto   = Auto::firstOrNew(['codigo_inventario' => $codigo]);
+
+            if (! $auto->exists) {
+                $auto->uuid = (string) Str::uuid();
+                $auto->vin  = $this->generarVin();
+            }
+
+            $auto->fill([
+                'marca_auto_id'    => $marca->id,
+                'modelo_auto_id'   => $modelo->id,
+                'placa'            => null,
+                'anio'             => $item['anio'],
+                'version'          => $item['version'],
+                'color'            => $item['color'],
+                'kilometraje'      => $item['kilometraje'],
+                'transmision'      => $item['transmision'],
+                'tipo_combustible' => $item['tipo_combustible'],
+                'precio_contado'   => $item['precio_contado'],
+                'precio_financiado'=> $item['precio_financiado'],
+                'estatus'          => $item['estatus'],
+                'descripcion'      => $item['descripcion'],
+                'destacado'        => $item['destacado'],
+                'activo'           => true,
+            ])->save();
         }
     }
 

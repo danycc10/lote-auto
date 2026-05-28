@@ -18,11 +18,12 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
 
-               $this->call([
+        $this->call([
             MarcaAutoSeeder::class,
             ModeloAutoSeeder::class,
             AutoSeeder::class,
-                       RolesPermisosSeeder::class,
+            AdminUserSeeder::class,
+            RolesPermisosSeeder::class,
         ]);
     }
 }

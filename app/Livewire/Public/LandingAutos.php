@@ -17,19 +17,28 @@ class LandingAutos extends Component
             ->limit(6)
             ->get();
 
-        $heroAutos = Auto::query()
+        $base = Auto::query()
             ->with(['marca', 'modelo', 'imagenPortada', 'imagenes'])
             ->where('estatus', 'disponible')
             ->where('activo', true)
-            ->whereHas('imagenes')
+            ->whereHas('imagenes');
+
+        $destacados = (clone $base)
+            ->where('destacado', true)
             ->latest()
-            ->limit(8)
+            ->limit(5)
             ->get()
-            ->filter(fn ($auto) =>
-                optional($auto->imagenPortada)->ruta || optional($auto->imagenes->first())->ruta
-            )
-            ->take(5)
-            ->values();
+            ->filter(fn ($a) => optional($a->imagenPortada)->ruta || optional($a->imagenes->first())->ruta);
+
+        $relleno = (clone $base)
+            ->where('destacado', false)
+            ->whereNotIn('id', $destacados->pluck('id'))
+            ->latest()
+            ->limit(5 - $destacados->count())
+            ->get()
+            ->filter(fn ($a) => optional($a->imagenPortada)->ruta || optional($a->imagenes->first())->ruta);
+
+        $heroAutos = $destacados->concat($relleno)->take(5)->values();
 
         return view('livewire.public.landing-autos', [
             'autosDestacados' => $autosDestacados,

@@ -2,146 +2,170 @@
 
 namespace Database\Seeders;
 
+use App\Models\Auto;
 use App\Models\Cliente;
 use App\Models\ContratoFinanciamiento;
 use App\Models\CuotaFinanciamiento;
-use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class TestMoraSeeder extends Seeder
 {
     public function run(): void
     {
-        $clientes = [
-            [
-                'nombre'           => 'Roberto',
-                'apellido_paterno' => 'Martínez',
-                'apellido_materno' => 'López',
-                'telefono'         => '5551234001',
-                'correo'           => 'roberto.martinez@ejemplo.com',
-                'curp'             => 'MALR850101HDFRZB01',
-                'rfc'              => 'MALR850101AB1',
-                'direccion'        => 'Calle Reforma 12',
-                'ciudad'           => 'Ciudad de México',
-                'estado'           => 'CDMX',
-                'codigo_postal'    => '06600',
-                'activo'           => true,
-            ],
-            [
-                'nombre'           => 'Sofía',
-                'apellido_paterno' => 'Hernández',
-                'apellido_materno' => 'Ruiz',
-                'telefono'         => '5559872002',
-                'correo'           => 'sofia.hernandez@ejemplo.com',
-                'curp'             => 'HERS920315MDFRNF02',
-                'rfc'              => 'HERS920315CD2',
-                'direccion'        => 'Av. Insurgentes 450',
-                'ciudad'           => 'Guadalajara',
-                'estado'           => 'Jalisco',
-                'codigo_postal'    => '44100',
-                'activo'           => true,
-            ],
-            [
-                'nombre'           => 'Miguel',
-                'apellido_paterno' => 'Torres',
-                'apellido_materno' => 'Vega',
-                'telefono'         => '8111234003',
-                'correo'           => '',  // sin correo — para probar ese caso
-                'curp'             => 'TOVM780620HNLRRG03',
-                'rfc'              => 'TOVM780620EF3',
-                'direccion'        => 'Blvd. Díaz Ordaz 800',
-                'ciudad'           => 'Monterrey',
-                'estado'           => 'Nuevo León',
-                'codigo_postal'    => '64000',
-                'activo'           => true,
-            ],
+        // Necesita autos disponibles
+        $autos = Auto::where('estatus', 'disponible')->where('activo', true)->take(5)->get();
+
+        if ($autos->isEmpty()) {
+            $this->command->warn('No hay autos disponibles. Corre AutoSeeder primero.');
+            return;
+        }
+
+        // Escenarios: [nombre, apellido_p, meses_atraso, plazo, estatus_contrato]
+        $casos = [
+            ['nombre' => 'Roberto',  'ap' => 'Martínez', 'am' => 'López',    'tel' => '5551234001', 'correo' => 'roberto.martinez@test.com',  'meses_atraso' => 3,  'plazo' => 24, 'desc' => '3 cuotas vencidas'],
+            ['nombre' => 'Sofía',    'ap' => 'Hernández','am' => 'Ruiz',     'tel' => '5559872002', 'correo' => 'sofia.hernandez@test.com',   'meses_atraso' => 1,  'plazo' => 18, 'desc' => '1 cuota vencida'],
+            ['nombre' => 'Miguel',   'ap' => 'Torres',   'am' => 'Vega',     'tel' => '8111234003', 'correo' => '',                           'meses_atraso' => 2,  'plazo' => 36, 'desc' => '2 cuotas vencidas, sin correo'],
+            ['nombre' => 'Laura',    'ap' => 'Ramírez',  'am' => 'Fuentes',  'tel' => '6641234004', 'correo' => 'laura.ramirez@test.com',     'meses_atraso' => 0,  'plazo' => 24, 'desc' => 'Al corriente'],
+            ['nombre' => 'Carlos',   'ap' => 'Jiménez',  'am' => 'Cruz',     'tel' => '5556781005', 'correo' => 'carlos.jimenez@test.com',    'meses_atraso' => -1, 'plazo' => 12, 'desc' => 'Liquidado'],
         ];
 
-        // Contratos: auto_id, atraso en meses, cuotas vencidas a crear
-        $contratos = [
-            ['auto_id' => 1, 'monto' => 45000, 'meses_atraso' => 3],
-            ['auto_id' => 2, 'monto' => 38000, 'meses_atraso' => 1],
-            ['auto_id' => 3, 'monto' => 62000, 'meses_atraso' => 2],
-        ];
+        foreach ($casos as $i => $caso) {
+            $auto = $autos->get($i % $autos->count());
 
-        foreach ($clientes as $i => $datosCliente) {
-            $cliente = Cliente::create($datosCliente);
+            // Idempotente: saltar si ya existe por correo / teléfono
+            $existente = Cliente::where('telefono', $caso['tel'])->first();
+            if ($existente) {
+                $this->command->line("  Saltando {$caso['nombre']} {$caso['ap']} (ya existe)");
+                continue;
+            }
 
-            $cfg      = $contratos[$i];
-            $folio    = 'CF-TEST-' . str_pad($i + 1, 3, '0', STR_PAD_LEFT);
-            $montoCuota = round($cfg['monto'] / 24, 2);
+            $cliente = Cliente::create([
+                'nombre'           => $caso['nombre'],
+                'apellido_paterno' => $caso['ap'],
+                'apellido_materno' => $caso['am'],
+                'telefono'         => $caso['tel'],
+                'correo'           => $caso['correo'],
+                'curp'             => $this->curp($caso['ap'], $i),
+                'rfc'              => strtoupper(substr($caso['ap'], 0, 4)) . '8501' . str_pad($i + 1, 2, '0', STR_PAD_LEFT) . 'AB' . ($i + 1),
+                'direccion'        => 'Calle de Prueba ' . (($i + 1) * 10),
+                'ciudad'           => ['Ciudad de México', 'Guadalajara', 'Monterrey', 'Puebla', 'León'][$i % 5],
+                'estado'           => ['CDMX', 'Jalisco', 'Nuevo León', 'Puebla', 'Guanajuato'][$i % 5],
+                'codigo_postal'    => str_pad(6600 + $i * 100, 5, '0', STR_PAD_LEFT),
+                'activo'           => true,
+            ]);
+
+            $folio      = 'CF-TEST-' . str_pad($i + 1, 3, '0', STR_PAD_LEFT);
+            $precio     = (float) $auto->precio_financiado ?: 200000;
+            $enganche   = round($precio * 0.20, 2);
+            $financiado = round($precio * 0.80, 2);
+            $cuota      = round($financiado / $caso['plazo'], 2);
+            $mesesAtras = max($caso['meses_atraso'], 0);
+
+            // Fecha de contrato: lo suficientemente atrás para que existan cuotas vencidas
+            $inicioMeses = $mesesAtras + 2;
+            $fechaContrato   = now()->subMonths($inicioMeses)->toDateString();
+            $fechaPrimerPago = now()->subMonths($mesesAtras > 0 ? $mesesAtras : 1)->startOfMonth()->toDateString();
+
+            $esLiquidado = $caso['meses_atraso'] === -1;
 
             $contrato = ContratoFinanciamiento::create([
                 'folio'                   => $folio,
-                'auto_id'                 => $cfg['auto_id'],
+                'auto_id'                 => $auto->id,
                 'cliente_id'              => $cliente->id,
                 'vendedor_id'             => null,
-                'fecha_contrato'          => now()->subMonths($cfg['meses_atraso'] + 2)->toDateString(),
-                'fecha_primer_pago'       => now()->subMonths($cfg['meses_atraso'])->startOfMonth()->toDateString(),
-                'precio_contado'          => $cfg['monto'],
-                'precio_venta'            => $cfg['monto'],
-                'enganche'                => round($cfg['monto'] * 0.20, 2),
+                'fecha_contrato'          => $fechaContrato,
+                'fecha_primer_pago'       => $fechaPrimerPago,
+                'precio_contado'          => (float) $auto->precio_contado ?: $precio * 0.9,
+                'precio_venta'            => $precio,
+                'enganche'                => $enganche,
                 'comision_apertura'       => 0,
                 'monto_seguro'            => 0,
-                'monto_gps'              => 0,
-                'monto_financiado'        => round($cfg['monto'] * 0.80, 2),
+                'monto_gps'               => 0,
+                'monto_financiado'        => $financiado,
                 'tasa_interes'            => 0,
-                'plazo'                   => 24,
+                'plazo'                   => $caso['plazo'],
                 'frecuencia'              => 'mensual',
-                'monto_cuota'             => $montoCuota,
-                'total_pagar'             => $montoCuota * 24,
-                'total_pagado'            => 0,
-                'saldo_actual'            => $montoCuota * 24,
+                'monto_cuota'             => $cuota,
+                'total_pagar'             => $cuota * $caso['plazo'],
+                'total_pagado'            => $esLiquidado ? $cuota * $caso['plazo'] : 0,
+                'saldo_actual'            => $esLiquidado ? 0 : $cuota * $caso['plazo'],
                 'dias_gracia'             => 3,
                 'tipo_recargo'            => null,
                 'valor_recargo'           => 0,
-                'estatus'                 => 'activo',
-                'observaciones'           => 'Contrato de prueba para demo de cobranza.',
+                'estatus'                 => $esLiquidado ? 'liquidado' : ($mesesAtras > 0 ? 'atrasado' : 'activo'),
+                'observaciones'           => 'Dato de prueba — ' . $caso['desc'],
             ]);
 
-            // Crear cuotas vencidas (1 por cada mes de atraso)
-            for ($n = 1; $n <= $cfg['meses_atraso']; $n++) {
-                $fechaVenc = now()->subMonths($cfg['meses_atraso'] - $n + 1)->startOfMonth()->toDateString();
+            // ── Cuotas ────────────────────────────────────────────
+            if ($esLiquidado) {
+                // Todas pagadas
+                for ($n = 1; $n <= $caso['plazo']; $n++) {
+                    CuotaFinanciamiento::create([
+                        'contrato_financiamiento_id' => $contrato->id,
+                        'numero'          => $n,
+                        'fecha_vencimiento' => now()->subMonths($caso['plazo'] - $n + 1)->startOfMonth()->toDateString(),
+                        'monto_capital'   => $cuota,
+                        'monto_interes'   => 0,
+                        'monto_extra'     => 0,
+                        'monto'           => $cuota,
+                        'monto_pagado'    => $cuota,
+                        'recargo_aplicado'=> 0,
+                        'saldo'           => 0,
+                        'estatus'         => 'pagada',
+                        'fecha_pago'      => now()->subMonths($caso['plazo'] - $n + 1)->startOfMonth()->addDays(2),
+                        'observaciones'   => null,
+                    ]);
+                }
+            } else {
+                // Cuotas vencidas
+                for ($n = 1; $n <= $mesesAtras; $n++) {
+                    CuotaFinanciamiento::create([
+                        'contrato_financiamiento_id' => $contrato->id,
+                        'numero'          => $n,
+                        'fecha_vencimiento' => now()->subMonths($mesesAtras - $n + 1)->startOfMonth()->toDateString(),
+                        'monto_capital'   => $cuota,
+                        'monto_interes'   => 0,
+                        'monto_extra'     => 0,
+                        'monto'           => $cuota,
+                        'monto_pagado'    => 0,
+                        'recargo_aplicado'=> 0,
+                        'saldo'           => $cuota,
+                        'estatus'         => 'vencida',
+                        'fecha_pago'      => null,
+                        'observaciones'   => null,
+                    ]);
+                }
 
+                // Cuota próxima pendiente
                 CuotaFinanciamiento::create([
                     'contrato_financiamiento_id' => $contrato->id,
-                    'numero'                     => $n,
-                    'fecha_vencimiento'          => $fechaVenc,
-                    'monto_capital'              => $montoCuota,
-                    'monto_interes'              => 0,
-                    'monto_extra'               => 0,
-                    'monto'                      => $montoCuota,
-                    'monto_pagado'               => 0,
-                    'recargo_aplicado'           => 0,
-                    'saldo'                      => $montoCuota,
-                    'estatus'                    => 'vencida',
-                    'fecha_pago'                 => null,
-                    'observaciones'              => null,
+                    'numero'          => $mesesAtras + 1,
+                    'fecha_vencimiento' => now()->addDays(7)->toDateString(),
+                    'monto_capital'   => $cuota,
+                    'monto_interes'   => 0,
+                    'monto_extra'     => 0,
+                    'monto'           => $cuota,
+                    'monto_pagado'    => 0,
+                    'recargo_aplicado'=> 0,
+                    'saldo'           => $cuota,
+                    'estatus'         => 'pendiente',
+                    'fecha_pago'      => null,
+                    'observaciones'   => null,
                 ]);
             }
 
-            // Una cuota próxima (pendiente, no vencida) para dar contexto
-            CuotaFinanciamiento::create([
-                'contrato_financiamiento_id' => $contrato->id,
-                'numero'                     => $cfg['meses_atraso'] + 1,
-                'fecha_vencimiento'          => now()->addDays(5)->toDateString(),
-                'monto_capital'              => $montoCuota,
-                'monto_interes'              => 0,
-                'monto_extra'               => 0,
-                'monto'                      => $montoCuota,
-                'monto_pagado'               => 0,
-                'recargo_aplicado'           => 0,
-                'saldo'                      => $montoCuota,
-                'estatus'                    => 'pendiente',
-                'fecha_pago'                 => null,
-                'observaciones'              => null,
-            ]);
+            // Marcar auto como vendido
+            $auto->update(['estatus' => 'vendido']);
+
+            $this->command->line("  ✓ {$caso['nombre']} {$caso['ap']} — {$caso['desc']}");
         }
 
-        $this->command->info('✓ 3 clientes de prueba creados con contratos y cuotas vencidas.');
-        $this->command->info('  Roberto Martínez  → 3 cuotas vencidas | roberto.martinez@ejemplo.com');
-        $this->command->info('  Sofía Hernández   → 1 cuota vencida  | sofia.hernandez@ejemplo.com');
-        $this->command->info('  Miguel Torres     → 2 cuotas vencidas | sin correo (caso de prueba)');
+        $this->command->info('Seeder de prueba completado.');
+    }
+
+    private function curp(string $apellido, int $idx): string
+    {
+        $base = strtoupper(substr($apellido, 0, 4));
+        return str_pad($base, 4, 'X') . '8501' . str_pad($idx + 1, 2, '0', STR_PAD_LEFT) . 'H' . 'NLE' . 'RZB' . str_pad($idx, 2, '0', STR_PAD_LEFT);
     }
 }

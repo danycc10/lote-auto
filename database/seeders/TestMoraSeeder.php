@@ -172,13 +172,12 @@ class TestMoraSeeder extends Seeder
     private function rfc(string $apellido, int $idx): string
     {
         $base = strtoupper(substr($this->ascii($apellido), 0, 4));
-        return str_pad($base, 4, 'X') . '8501' . str_pad($idx + 1, 2, '0', STR_PAD_LEFT) . 'AB' . ($i + 1 ?? $idx);
+        return str_pad($base, 4, 'X') . '8501' . str_pad($idx + 1, 2, '0', STR_PAD_LEFT) . 'AB' . ($idx + 1);
     }
 
     private function curp(string $apellido, int $idx): string
     {
-        $ascii = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $apellido) ?: $apellido;
-        $base  = strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $ascii), 0, 4));
+        $base = strtoupper(substr($this->ascii($apellido), 0, 4));
         return str_pad($base, 4, 'X') . '8501' . str_pad($idx + 1, 2, '0', STR_PAD_LEFT) . 'H' . 'NLE' . 'RZB' . str_pad($idx, 2, '0', STR_PAD_LEFT);
     }
 }

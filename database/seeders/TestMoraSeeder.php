@@ -32,29 +32,32 @@ class TestMoraSeeder extends Seeder
         foreach ($casos as $i => $caso) {
             $auto = $autos->get($i % $autos->count());
 
-            // Idempotente: saltar si ya existe por correo / teléfono
-            $existente = Cliente::where('telefono', $caso['tel'])->first();
-            if ($existente) {
-                $this->command->line("  Saltando {$caso['nombre']} {$caso['ap']} (ya existe)");
+            $folio = 'CF-TEST-' . str_pad($i + 1, 3, '0', STR_PAD_LEFT);
+
+            // Idempotente: reusar cliente si existe, saltar si el contrato ya existe
+            $cliente = Cliente::where('telefono', $caso['tel'])->first();
+            if (! $cliente) {
+                $cliente = Cliente::create([
+                    'nombre'           => $caso['nombre'],
+                    'apellido_paterno' => $caso['ap'],
+                    'apellido_materno' => $caso['am'],
+                    'telefono'         => $caso['tel'],
+                    'correo'           => $caso['correo'],
+                    'curp'             => $this->curp($caso['ap'], $i),
+                    'rfc'              => $this->rfc($caso['ap'], $i),
+                    'direccion'        => 'Calle de Prueba ' . (($i + 1) * 10),
+                    'ciudad'           => ['Ciudad de México', 'Guadalajara', 'Monterrey', 'Puebla', 'León'][$i % 5],
+                    'estado'           => ['CDMX', 'Jalisco', 'Nuevo León', 'Puebla', 'Guanajuato'][$i % 5],
+                    'codigo_postal'    => str_pad(6600 + $i * 100, 5, '0', STR_PAD_LEFT),
+                    'activo'           => true,
+                ]);
+            }
+
+            if (ContratoFinanciamiento::where('folio', $folio)->exists()) {
+                $this->command->line("  Saltando {$caso['nombre']} {$caso['ap']} (contrato {$folio} ya existe)");
                 continue;
             }
 
-            $cliente = Cliente::create([
-                'nombre'           => $caso['nombre'],
-                'apellido_paterno' => $caso['ap'],
-                'apellido_materno' => $caso['am'],
-                'telefono'         => $caso['tel'],
-                'correo'           => $caso['correo'],
-                'curp'             => $this->curp($caso['ap'], $i),
-                'rfc'              => $this->rfc($caso['ap'], $i),
-                'direccion'        => 'Calle de Prueba ' . (($i + 1) * 10),
-                'ciudad'           => ['Ciudad de México', 'Guadalajara', 'Monterrey', 'Puebla', 'León'][$i % 5],
-                'estado'           => ['CDMX', 'Jalisco', 'Nuevo León', 'Puebla', 'Guanajuato'][$i % 5],
-                'codigo_postal'    => str_pad(6600 + $i * 100, 5, '0', STR_PAD_LEFT),
-                'activo'           => true,
-            ]);
-
-            $folio      = 'CF-TEST-' . str_pad($i + 1, 3, '0', STR_PAD_LEFT);
             $precio     = (float) $auto->precio_financiado ?: 200000;
             $enganche   = round($precio * 0.20, 2);
             $financiado = round($precio * 0.80, 2);

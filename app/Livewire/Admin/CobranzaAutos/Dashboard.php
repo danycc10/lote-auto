@@ -95,7 +95,7 @@ class Dashboard extends Component
         });
 
         $query->when($this->estatus === 'activos', function ($q) {
-            $q->where('estatus', 'activo');
+            $q->whereIn('estatus', ['activo', 'atrasado']);
         });
 
         $query->when($this->estatus === 'liquidados', function ($q) {
@@ -103,7 +103,7 @@ class Dashboard extends Component
         });
 
         $query->when($this->estatus === 'atrasados', function ($q) {
-            $q->where('estatus', 'activo')
+            $q->whereIn('estatus', ['activo', 'atrasado'])
                 ->whereHas('cuotas', function ($cuota) {
                     $cuota->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
                         ->where('estatus', '!=', 'cancelada')
@@ -119,7 +119,7 @@ class Dashboard extends Component
         return CuotaFinanciamiento::query()
             ->where('estatus', '!=', 'cancelada')
             ->whereHas('contrato', function ($q) {
-                $q->where('estatus', 'activo');
+                $q->whereIn('estatus', ['activo', 'atrasado']);
             });
     }
 
@@ -153,11 +153,11 @@ protected function pagosBase()
             ->sum('monto');
 
         $contratosActivos = ContratoFinanciamiento::query()
-            ->where('estatus', 'activo')
+            ->whereIn('estatus', ['activo', 'atrasado'])
             ->count();
 
         $contratosConAtraso = ContratoFinanciamiento::query()
-            ->where('estatus', 'activo')
+            ->whereIn('estatus', ['activo', 'atrasado'])
             ->whereHas('cuotas', function ($q) use ($today) {
                 $q->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
                     ->where('estatus', '!=', 'cancelada')
@@ -205,7 +205,7 @@ protected function pagosBase()
     {
         return ContratoFinanciamiento::query()
             ->with(['cliente', 'auto.marca', 'auto.modelo'])
-            ->where('estatus', 'activo')
+            ->whereIn('estatus', ['activo', 'atrasado'])
             ->whereHas('cuotas', function ($q) {
                 $q->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
                     ->where('estatus', '!=', 'cancelada')

@@ -853,31 +853,8 @@ $contactoDescripcion = $c('branding.contacto_descripcion', 'Escríbenos y con gu
                     </div>
                 </div>
 
-                {{-- Right: Mapa --}}
-                @php $mapsEmbed = \App\Models\Configuracion::obtener('contact.maps_embed', ''); @endphp
-                <div class="rounded-2xl overflow-hidden border border-white/[0.08] bg-slate-900 h-full min-h-[420px] lg:min-h-[520px]">
-                    @if($mapsEmbed)
-                        <iframe
-                            src="{{ $mapsEmbed }}"
-                            width="100%"
-                            height="100%"
-                            style="border:0; min-height: 420px; filter: grayscale(30%) invert(5%) contrast(110%) brightness(90%);"
-                            allowfullscreen=""
-                            loading="lazy"
-                            referrerpolicy="no-referrer-when-downgrade"
-                            title="Ubicación del negocio"
-                            aria-label="Mapa con la ubicación del negocio">
-                        </iframe>
-                    @else
-                        <div class="flex flex-col items-center justify-center h-full min-h-[420px] gap-4 text-slate-500">
-                            <svg class="h-12 w-12 opacity-30" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
-                            </svg>
-                            <p class="text-sm">Configura la dirección en el panel de administración</p>
-                        </div>
-                    @endif
-                </div>
+                {{-- Right: Formulario de contacto --}}
+                <livewire:public.formulario-contacto />
 
             </div>
         </div>

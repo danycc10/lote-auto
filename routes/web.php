@@ -40,6 +40,7 @@ use App\Http\Controllers\Admin\ReportesExportController;
 
 use App\Http\Controllers\Admin\CotizadorPdfController;
 use App\Livewire\Admin\Cotizador\Index as CotizadorIndex;
+use App\Livewire\Admin\Prospectos\Index as ProspectosIndex;
 use App\Livewire\Admin\Administracion\Index as AdministracionIndex;
 use App\Livewire\Admin\Administracion\TarjetasCobroIndex;
 use App\Livewire\Admin\Catalogos\MarcasModelosIndex;
@@ -120,6 +121,11 @@ Route::middleware(['auth', 'verified'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+
+        // ── Prospectos ───────────────────────────────────────────────
+        Route::get('/prospectos', ProspectosIndex::class)
+            ->middleware('permission:clientes.ver')
+            ->name('prospectos.index');
 
         // ── Cotizador ────────────────────────────────────────────────
         Route::get('/cotizador', CotizadorIndex::class)

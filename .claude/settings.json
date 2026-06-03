@@ -39,7 +39,9 @@
       "Bash(Get-ChildItem -Path \"c:\\\\laragon\\\\www\\\\lote-autos-finan\")",
       "Bash(Select-Object Name, PSIsContainer)",
       "Bash(xargs grep -l \"^class.*extends\")",
-      "Bash(php -r \"require 'vendor/autoload.php'; echo 'OK';\")"
+      "Bash(php -r \"require 'vendor/autoload.php'; echo 'OK';\")",
+      "Bash(php -l app/Livewire/Public/FormularioContacto.php)",
+      "Bash(php -l app/Mail/NuevoProspectoMail.php)"
     ],
     "additionalDirectories": [
       "c:\\laragon\\www\\lote-autos-finan"

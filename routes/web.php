@@ -38,6 +38,8 @@ use App\Livewire\Admin\Finanzas\LogsFinancierosIndex;
 use App\Livewire\Admin\Reportes\Index as ReportesIndex;
 use App\Http\Controllers\Admin\ReportesExportController;
 
+use App\Http\Controllers\Admin\CotizadorPdfController;
+use App\Livewire\Admin\Cotizador\Index as CotizadorIndex;
 use App\Livewire\Admin\Administracion\Index as AdministracionIndex;
 use App\Livewire\Admin\Administracion\TarjetasCobroIndex;
 use App\Livewire\Admin\Catalogos\MarcasModelosIndex;
@@ -118,6 +120,15 @@ Route::middleware(['auth', 'verified'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+
+        // ── Cotizador ────────────────────────────────────────────────
+        Route::get('/cotizador', CotizadorIndex::class)
+            ->middleware('permission:contratos.ver')
+            ->name('cotizador');
+
+        Route::get('/cotizador/pdf', [CotizadorPdfController::class, 'show'])
+            ->middleware('permission:contratos.ver')
+            ->name('cotizador.pdf');
 
         // ── Siempre disponibles ──────────────────────────────────────
         Route::get('/administracion', AdministracionIndex::class)

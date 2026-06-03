@@ -2,12 +2,14 @@
 
 namespace App\Services\Financiamiento;
 
+use App\Mail\PagoConfirmadoMail;
 use App\Models\ContratoFinanciamiento;
 use App\Models\CuotaFinanciamiento;
 use App\Models\PagoFinanciamiento;
 use App\Models\ReciboFinanciamiento;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use RuntimeException;
 
 class RegistrarPagoFinanciamientoService
@@ -28,6 +30,7 @@ class RegistrarPagoFinanciamientoService
         ?string $formaPago = null,
         ?string $referencia = null,
         ?int $tarjetaCobroId = null,
+        float $recargo = 0,
     ): array {
         return DB::transaction(function () use (
             $contrato,
@@ -39,6 +42,7 @@ class RegistrarPagoFinanciamientoService
             $formaPago,
             $referencia,
             $tarjetaCobroId,
+            $recargo,
         ) {
             $fechaPago = $fechaPago ?: now()->toDateString();
 
@@ -74,6 +78,20 @@ class RegistrarPagoFinanciamientoService
 
                 if ($cuotaBloqueada->estatus === 'pagada') {
                     throw new RuntimeException('Esta cuota ya está pagada.');
+                }
+
+                // Aplicar recargo a la cuota antes de validar montos
+                $recargo = round(max(0, $recargo), 2);
+                if ($recargo > 0) {
+                    $cuotaBloqueada->recargo_aplicado = round((float) ($cuotaBloqueada->recargo_aplicado ?? 0) + $recargo, 2);
+                    $cuotaBloqueada->monto            = round((float) $cuotaBloqueada->monto + $recargo, 2);
+                    $cuotaBloqueada->saldo            = round((float) ($cuotaBloqueada->saldo ?? $cuotaBloqueada->monto) + $recargo, 2);
+                    $cuotaBloqueada->save();
+
+                    // Actualizar también los totales del contrato
+                    $contratoBloqueado->total_pagar  = round((float) $contratoBloqueado->total_pagar + $recargo, 2);
+                    $contratoBloqueado->saldo_actual = round((float) $contratoBloqueado->saldo_actual + $recargo, 2);
+                    $contratoBloqueado->save();
                 }
 
                 $saldoCuota = (float) ($cuotaBloqueada->saldo ?? 0);
@@ -210,12 +228,32 @@ class RegistrarPagoFinanciamientoService
                 );
             }
 
-            return [
-                'pago' => $pago->fresh(),
-                'recibo' => $recibo->fresh(),
+            $resultado = [
+                'pago'     => $pago->fresh(),
+                'recibo'   => $recibo->fresh(),
                 'contrato' => $contratoBloqueado->fresh(),
-                'cuota' => $cuotaBloqueada?->fresh(),
+                'cuota'    => $cuotaBloqueada?->fresh(),
             ];
+
+            return $resultado;
         });
+
+        // Enviar confirmación al cliente fuera de la transacción (no bloquea el commit)
+        $this->enviarConfirmacionCliente($resultado['pago'], $resultado['recibo']);
+
+        return $resultado;
+    }
+
+    private function enviarConfirmacionCliente(PagoFinanciamiento $pago, ReciboFinanciamiento $recibo): void
+    {
+        try {
+            $correo = $pago->contrato?->cliente?->correo;
+
+            if ($correo) {
+                Mail::to($correo)->queue(new PagoConfirmadoMail($pago, $recibo));
+            }
+        } catch (\Throwable) {
+            // El correo no debe bloquear ni revertir el pago
+        }
     }
 }

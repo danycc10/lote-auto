@@ -158,16 +158,19 @@ class RegistrarPago extends Component
             ->findOrFail($this->cuota_id);
 
         try {
+            $recargo = $this->incluirRecargo ? (float) $this->recargoSugerido : 0;
+
             $resultado = $service->ejecutar(
-                $this->contrato,
-                (float) str_replace(',', '', (string) $this->monto),
-                $cuota,
-                $this->fecha_pago,
-                $this->concepto,
-                $this->observaciones,
-                $this->forma_pago,
-                $this->referencia,
-                $this->tarjeta_cobro_id ? (int) $this->tarjeta_cobro_id : null,
+                contrato: $this->contrato,
+                monto: (float) str_replace(',', '', (string) $this->monto) - $recargo,
+                cuota: $cuota,
+                fechaPago: $this->fecha_pago,
+                concepto: $this->concepto,
+                observaciones: $this->observaciones,
+                formaPago: $this->forma_pago,
+                referencia: $this->referencia,
+                tarjetaCobroId: $this->tarjeta_cobro_id ? (int) $this->tarjeta_cobro_id : null,
+                recargo: $recargo,
             );
         } catch (\RuntimeException $e) {
             $this->addError('monto', $e->getMessage());

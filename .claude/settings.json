@@ -34,7 +34,12 @@
       "Read(//c/laragon/etc/nginx/sites-enabled/**)",
       "Bash(ls \"C:\\\\laragon\\\\etc\\\\apache2\\\\sites-enabled\" 2>/dev/null | head -10)",
       "Read(//c/laragon/etc/apache2/sites-enabled/**)",
-      "Bash(powershell -Command \"\\(Get-Content 'c:\\\\laragon\\\\www\\\\lote-autos-finan\\\\.env'\\) -replace 'APP_URL=http://localhost:8000', 'APP_URL=http://lote-autos-finan.test' | Set-Content 'c:\\\\laragon\\\\www\\\\lote-autos-finan\\\\.env'\")"
+      "Bash(powershell -Command \"\\(Get-Content 'c:\\\\laragon\\\\www\\\\lote-autos-finan\\\\.env'\\) -replace 'APP_URL=http://localhost:8000', 'APP_URL=http://lote-autos-finan.test' | Set-Content 'c:\\\\laragon\\\\www\\\\lote-autos-finan\\\\.env'\")",
+      "Bash(Sort-Object)",
+      "Bash(Get-ChildItem -Path \"c:\\\\laragon\\\\www\\\\lote-autos-finan\")",
+      "Bash(Select-Object Name, PSIsContainer)",
+      "Bash(xargs grep -l \"^class.*extends\")",
+      "Bash(php -r \"require 'vendor/autoload.php'; echo 'OK';\")"
     ],
     "additionalDirectories": [
       "c:\\laragon\\www\\lote-autos-finan"

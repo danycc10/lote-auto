@@ -8,6 +8,11 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// Libera autos cuyos apartados vencieron. Requiere cron en el servidor:
-// * * * * * php /ruta/artisan schedule:run >> /dev/null 2>&1
+// Requiere cron en el servidor:
+// * * * * * cd /ruta/proyecto && php artisan schedule:run >> /dev/null 2>&1
+
+// Marca cuotas como vencidas (respeta días de gracia) y actualiza estatus de contratos
+Schedule::command('cuotas:marcar-vencidas')->dailyAt('00:05');
+
+// Libera autos cuyos apartados vencieron
 Schedule::command('apartados:vencer')->dailyAt('01:00');

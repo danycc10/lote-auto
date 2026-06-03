@@ -16,3 +16,6 @@ Schedule::command('cuotas:marcar-vencidas')->dailyAt('00:05');
 
 // Libera autos cuyos apartados vencieron
 Schedule::command('apartados:vencer')->dailyAt('01:00');
+
+// Envía recordatorios 3 días antes del vencimiento y notificación el día que vence
+Schedule::command('cuotas:notificar-vencimientos')->dailyAt('08:00');

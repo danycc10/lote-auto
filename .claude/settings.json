@@ -41,7 +41,9 @@
       "Bash(xargs grep -l \"^class.*extends\")",
       "Bash(php -r \"require 'vendor/autoload.php'; echo 'OK';\")",
       "Bash(php -l app/Livewire/Public/FormularioContacto.php)",
-      "Bash(php -l app/Mail/NuevoProspectoMail.php)"
+      "Bash(php -l app/Mail/NuevoProspectoMail.php)",
+      "Bash(php -l app/Console/Commands/NotificarVencimientosCuotasCommand.php)",
+      "Bash(php -l app/Mail/NotificacionVencimientoCuotaMail.php)"
     ],
     "additionalDirectories": [
       "c:\\laragon\\www\\lote-autos-finan"

@@ -170,13 +170,38 @@ protected function pagosBase()
             ->whereDate('fecha_vencimiento', '<', $today)
             ->count();
 
+        $pctMorosidad = $contratosActivos > 0
+            ? round($contratosConAtraso / $contratosActivos * 100, 1)
+            : 0;
+
+        $diasPromedioAtraso = (int) round(
+            (clone $this->cuotasBase())
+                ->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+                ->whereDate('fecha_vencimiento', '<', $today)
+                ->avg(DB::raw('DATEDIFF(CURDATE(), fecha_vencimiento)')) ?? 0
+        );
+
+        $cuotasCriticasCount = (clone $this->cuotasBase())
+            ->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+            ->whereDate('fecha_vencimiento', '<', $today->copy()->subDays(30))
+            ->count();
+
+        $montoCritico = (clone $this->cuotasBase())
+            ->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+            ->whereDate('fecha_vencimiento', '<', $today->copy()->subDays(30))
+            ->sum(DB::raw('COALESCE(saldo, monto)'));
+
         return [
-            'total_vencido' => $totalVencido,
-            'total_por_vencer' => $totalPorVencer,
-            'cobrado_mes' => $cobradoMes,
-            'contratos_activos' => $contratosActivos,
-            'contratos_con_atraso' => $contratosConAtraso,
-            'cuotas_vencidas' => $cuotasVencidas,
+            'total_vencido'         => $totalVencido,
+            'total_por_vencer'      => $totalPorVencer,
+            'cobrado_mes'           => $cobradoMes,
+            'contratos_activos'     => $contratosActivos,
+            'contratos_con_atraso'  => $contratosConAtraso,
+            'cuotas_vencidas'       => $cuotasVencidas,
+            'pct_morosidad'         => $pctMorosidad,
+            'dias_promedio_atraso'  => $diasPromedioAtraso,
+            'cuotas_criticas_count' => $cuotasCriticasCount,
+            'monto_critico'         => $montoCritico,
         ];
     }
 
@@ -198,6 +223,35 @@ protected function pagosBase()
             ->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
             ->whereDate('fecha_vencimiento', '<', today())
             ->orderBy('fecha_vencimiento')
+            ->get();
+    }
+
+    public function getAlertasCriticasProperty()
+    {
+        return ContratoFinanciamiento::query()
+            ->with(['cliente', 'auto.marca', 'auto.modelo'])
+            ->whereIn('estatus', ['activo', 'atrasado'])
+            ->whereHas('cuotas', function ($q) {
+                $q->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+                    ->where('estatus', '!=', 'cancelada')
+                    ->whereDate('fecha_vencimiento', '<', today()->subDays(30));
+            })
+            ->withSum([
+                'cuotas as monto_critico' => function ($q) {
+                    $q->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+                        ->where('estatus', '!=', 'cancelada')
+                        ->whereDate('fecha_vencimiento', '<', today()->subDays(30));
+                }
+            ], DB::raw('COALESCE(saldo, monto)'))
+            ->withMin([
+                'cuotas as fecha_mas_antigua' => function ($q) {
+                    $q->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+                        ->where('estatus', '!=', 'cancelada')
+                        ->whereDate('fecha_vencimiento', '<', today()->subDays(30));
+                }
+            ], 'fecha_vencimiento')
+            ->orderByDesc('monto_critico')
+            ->limit(5)
             ->get();
     }
 
@@ -401,6 +455,7 @@ protected function pagosBase()
             'proximosVencimientos' => $this->proximosVencimientos,
             'cuotasVencidas'       => $this->cuotasVencidas,
             'contratosTopAtraso'   => $this->contratosTopAtraso,
+            'alertasCriticas'      => $this->alertasCriticas,
             'cobranzaPorDia'       => $this->cobranzaPorDia,
             'waMensajePlantilla'   => Configuracion::obtener('notif.wa_mensaje', 'Hola {nombre}, tiene pagos vencidos por ${monto_atrasado} en su contrato {folio}. Por favor comuníquese con nosotros.'),
             'modalDestinatarios'   => $this->mostrarModal ? $this->modalDestinatarios() : [],

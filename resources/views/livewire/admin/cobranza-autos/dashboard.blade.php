@@ -18,6 +18,41 @@
         </a>
     </div>
 
+    {{-- Banner alertas críticas (>30 días) --}}
+    @if($kpis['cuotas_criticas_count'] > 0)
+    <div class="rounded-xl border border-red-300 bg-red-50 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+        <div class="flex items-center gap-3 flex-1 min-w-0">
+            <div class="shrink-0 h-9 w-9 rounded-lg bg-red-100 flex items-center justify-center">
+                <svg class="h-5 w-5 text-red-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clip-rule="evenodd"/>
+                </svg>
+            </div>
+            <div class="min-w-0">
+                <p class="text-sm font-bold text-red-800">
+                    {{ $kpis['cuotas_criticas_count'] }} cuota(s) con más de 30 días vencida(s)
+                </p>
+                <p class="text-xs text-red-600 mt-0.5">
+                    Monto en riesgo crítico: <strong>${{ number_format($kpis['monto_critico'], 2) }}</strong>
+                    @foreach($alertasCriticas->take(3) as $a)
+                        · {{ $a->cliente?->nombre_completo ?? '—' }}
+                        ({{ (int) now()->diffInDays(\Carbon\Carbon::parse($a->fecha_mas_antigua)) }}d)
+                    @endforeach
+                    @if($alertasCriticas->count() > 3)
+                        · y {{ $alertasCriticas->count() - 3 }} más
+                    @endif
+                </p>
+            </div>
+        </div>
+        <button wire:click="$set('estatus', 'atrasados')"
+                class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-600 text-xs font-semibold text-white hover:bg-red-700 transition">
+            Ver atrasados
+            <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd"/>
+            </svg>
+        </button>
+    </div>
+    @endif
+
     {{-- Filtros --}}
     <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
@@ -161,6 +196,89 @@
                 <div class="h-10 w-10 rounded-lg bg-orange-50 flex items-center justify-center shrink-0">
                     <svg class="h-5 w-5 text-orange-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                         <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {{-- KPIs fila 2: morosidad + días promedio + críticas --}}
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+        {{-- % Morosidad --}}
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+            <div class="flex items-start justify-between gap-4 mb-3">
+                <div class="min-w-0">
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Tasa de morosidad</p>
+                    <p class="mt-2 text-2xl font-semibold tabular-nums
+                        {{ $kpis['pct_morosidad'] >= 30 ? 'text-red-600' : ($kpis['pct_morosidad'] >= 15 ? 'text-amber-600' : 'text-slate-900') }}">
+                        {{ number_format($kpis['pct_morosidad'], 1) }}%
+                    </p>
+                    <p class="text-xs text-slate-400 mt-0.5">
+                        {{ $kpis['contratos_con_atraso'] }} de {{ $kpis['contratos_activos'] }} contratos
+                    </p>
+                </div>
+                <div class="h-10 w-10 rounded-lg {{ $kpis['pct_morosidad'] >= 30 ? 'bg-red-50' : 'bg-slate-50' }} flex items-center justify-center shrink-0">
+                    <svg class="h-5 w-5 {{ $kpis['pct_morosidad'] >= 30 ? 'text-red-600' : 'text-slate-400' }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" d="M2.25 13.5a8.25 8.25 0 018.25-8.25.75.75 0 01.75.75v6.75H18a.75.75 0 01.75.75 8.25 8.25 0 01-16.5 0z" clip-rule="evenodd"/>
+                        <path fill-rule="evenodd" d="M12.75 3a.75.75 0 01.75-.75 8.25 8.25 0 018.25 8.25.75.75 0 01-.75.75h-7.5a.75.75 0 01-.75-.75V3z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+            </div>
+            {{-- Barra de progreso --}}
+            <div class="w-full bg-slate-100 rounded-full h-1.5">
+                <div class="h-1.5 rounded-full transition-all
+                    {{ $kpis['pct_morosidad'] >= 30 ? 'bg-red-500' : ($kpis['pct_morosidad'] >= 15 ? 'bg-amber-500' : 'bg-emerald-500') }}"
+                     style="width: {{ min(100, $kpis['pct_morosidad']) }}%">
+                </div>
+            </div>
+        </div>
+
+        {{-- Días promedio de atraso --}}
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+            <div class="flex items-start justify-between gap-4">
+                <div class="min-w-0">
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Días promedio atraso</p>
+                    <p class="mt-2 text-2xl font-semibold tabular-nums
+                        {{ $kpis['dias_promedio_atraso'] >= 30 ? 'text-red-600' : ($kpis['dias_promedio_atraso'] >= 15 ? 'text-amber-600' : 'text-slate-900') }}">
+                        {{ $kpis['dias_promedio_atraso'] }}d
+                    </p>
+                    <p class="text-xs text-slate-400 mt-0.5">
+                        @if($kpis['dias_promedio_atraso'] >= 30) Alta gravedad
+                        @elseif($kpis['dias_promedio_atraso'] >= 15) Atención requerida
+                        @elseif($kpis['dias_promedio_atraso'] > 0) Atraso leve
+                        @else Sin atrasos
+                        @endif
+                    </p>
+                </div>
+                <div class="h-10 w-10 rounded-lg {{ $kpis['dias_promedio_atraso'] >= 30 ? 'bg-red-50' : 'bg-amber-50' }} flex items-center justify-center shrink-0">
+                    <svg class="h-5 w-5 {{ $kpis['dias_promedio_atraso'] >= 30 ? 'text-red-600' : 'text-amber-600' }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        {{-- Cuotas críticas >30 días --}}
+        <div class="bg-white rounded-xl border {{ $kpis['cuotas_criticas_count'] > 0 ? 'border-red-300 bg-red-50/40' : 'border-slate-200' }} shadow-sm p-5">
+            <div class="flex items-start justify-between gap-4">
+                <div class="min-w-0">
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Críticas &gt;30 días</p>
+                    <p class="mt-2 text-2xl font-semibold tabular-nums {{ $kpis['cuotas_criticas_count'] > 0 ? 'text-red-600' : 'text-slate-900' }}">
+                        {{ $kpis['cuotas_criticas_count'] }}
+                    </p>
+                    @if($kpis['monto_critico'] > 0)
+                    <p class="text-xs text-red-500 mt-0.5 font-medium tabular-nums">
+                        ${{ number_format($kpis['monto_critico'], 2) }} en riesgo
+                    </p>
+                    @else
+                    <p class="text-xs text-emerald-600 mt-0.5">Sin cuotas críticas</p>
+                    @endif
+                </div>
+                <div class="h-10 w-10 rounded-lg {{ $kpis['cuotas_criticas_count'] > 0 ? 'bg-red-100' : 'bg-slate-50' }} flex items-center justify-center shrink-0">
+                    <svg class="h-5 w-5 {{ $kpis['cuotas_criticas_count'] > 0 ? 'text-red-600' : 'text-slate-400' }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clip-rule="evenodd"/>
                     </svg>
                 </div>
             </div>
@@ -332,12 +450,21 @@
                             <p class="text-sm font-semibold text-slate-900 truncate">
                                 {{ $cuota->contrato?->cliente?->nombre_completo ?? '—' }}
                             </p>
-                            <p class="text-xs text-slate-500 truncate">
-                                Cuota #{{ $cuota->numero }}
-                                · {{ $cuota->contrato?->folio ?? '' }}
-                                · <span class="text-red-600 font-medium">{{ $diasAtraso }}d</span>
+                            <p class="text-xs text-slate-500 truncate flex items-center gap-1 flex-wrap">
+                                <span>Cuota #{{ $cuota->numero }} · {{ $cuota->contrato?->folio ?? '' }}</span>
+                                @if($diasAtraso > 30)
+                                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 font-bold text-[10px]">
+                                        ⚠ {{ $diasAtraso }}d crítico
+                                    </span>
+                                @elseif($diasAtraso > 15)
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 font-semibold text-[10px]">
+                                        {{ $diasAtraso }}d
+                                    </span>
+                                @else
+                                    <span class="text-amber-600 font-medium">{{ $diasAtraso }}d</span>
+                                @endif
                                 @if($notificadoHoy)
-                                · <span class="inline-flex items-center gap-0.5 text-emerald-600 font-medium">
+                                <span class="inline-flex items-center gap-0.5 text-emerald-600 font-medium">
                                     <svg class="h-2.5 w-2.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
                                     </svg>

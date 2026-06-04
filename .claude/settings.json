@@ -43,7 +43,8 @@
       "Bash(php -l app/Livewire/Public/FormularioContacto.php)",
       "Bash(php -l app/Mail/NuevoProspectoMail.php)",
       "Bash(php -l app/Console/Commands/NotificarVencimientosCuotasCommand.php)",
-      "Bash(php -l app/Mail/NotificacionVencimientoCuotaMail.php)"
+      "Bash(php -l app/Mail/NotificacionVencimientoCuotaMail.php)",
+      "Bash(php -l app/Livewire/Admin/CobranzaAutos/Dashboard.php)"
     ],
     "additionalDirectories": [
       "c:\\laragon\\www\\lote-autos-finan"

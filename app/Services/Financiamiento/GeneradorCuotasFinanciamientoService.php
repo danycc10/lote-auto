@@ -2,6 +2,7 @@
 
 namespace App\Services\Financiamiento;
 
+use App\Enums\CuotaEstatus;
 use App\Models\ContratoFinanciamiento;
 use App\Models\CuotaFinanciamiento;
 use Carbon\Carbon;
@@ -57,7 +58,7 @@ class GeneradorCuotasFinanciamientoService
                     'monto_pagado' => 0,
                     'recargo_aplicado' => 0,
                     'saldo' => round($capital + $interes + $montoExtra, 2),
-                    'estatus' => 'pendiente',
+                    'estatus' => CuotaEstatus::Pendiente->value,
                     'fecha_pago' => null,
                     'observaciones' => null,
                 ]);

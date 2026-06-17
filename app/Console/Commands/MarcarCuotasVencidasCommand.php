@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\ContratoEstatus;
+use App\Enums\CuotaEstatus;
 use App\Models\ContratoFinanciamiento;
 use App\Models\CuotaFinanciamiento;
 use Carbon\Carbon;
@@ -18,7 +20,7 @@ class MarcarCuotasVencidasCommand extends Command
 
         $cuotas = CuotaFinanciamiento::query()
             ->with(['contrato:id,dias_gracia,estatus'])
-            ->whereIn('estatus', ['pendiente', 'parcial'])
+            ->whereIn('estatus', [CuotaEstatus::Pendiente->value, CuotaEstatus::Parcial->value])
             ->whereDate('fecha_vencimiento', '<', $hoy)
             ->get();
 
@@ -30,7 +32,7 @@ class MarcarCuotasVencidasCommand extends Command
             $fechaLimite = Carbon::parse($cuota->fecha_vencimiento)->addDays($diasGracia);
 
             if ($hoy->gt($fechaLimite)) {
-                $cuota->estatus = 'vencida';
+                $cuota->estatus = CuotaEstatus::Vencida->value;
                 $cuota->saveQuietly();
                 $marcadas++;
                 $contratosAfectados->push($cuota->contrato_financiamiento_id);
@@ -43,7 +45,13 @@ class MarcarCuotasVencidasCommand extends Command
         foreach ($idsUnicos as $id) {
             $contrato = ContratoFinanciamiento::find($id);
 
-            if ($contrato && ! in_array($contrato->estatus, ['liquidado', 'cancelado', 'recuperado'], true)) {
+            $estatusFinales = [
+                ContratoEstatus::Liquidado->value,
+                ContratoEstatus::Cancelado->value,
+                ContratoEstatus::Recuperado->value,
+            ];
+
+            if ($contrato && ! in_array($contrato->estatus, $estatusFinales, true)) {
                 $contrato->recalcularEstatus();
                 $contrato->saveQuietly();
             }

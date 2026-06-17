@@ -2,6 +2,7 @@
 
 namespace App\Services\Financiamiento;
 
+use App\Enums\CuotaEstatus;
 use App\Models\ContratoFinanciamiento;
 use App\Models\CuotaFinanciamiento;
 use Carbon\Carbon;
@@ -26,8 +27,8 @@ class EstadoCuentaFinanciamientoService
         $historiales = $contrato->historiales->sortByDesc('created_at')->take(20)->values();
 
         $hoy = now()->startOfDay();
-        $pagadas = $cuotas->where('estatus', 'pagada');
-        $pendientes = $cuotas->whereIn('estatus', ['pendiente', 'parcial', 'vencida']);
+        $pagadas = $cuotas->where('estatus', CuotaEstatus::Pagada->value);
+        $pendientes = $cuotas->whereIn('estatus', [CuotaEstatus::Pendiente->value, CuotaEstatus::Parcial->value, CuotaEstatus::Vencida->value]);
         $vencidas = $cuotas->filter(fn (CuotaFinanciamiento $cuota) => $this->isVencida($cuota, $hoy));
         $proximaCuota = $pendientes->sortBy('fecha_vencimiento')->first();
 
@@ -68,7 +69,7 @@ class EstadoCuentaFinanciamientoService
         $gracia = (int) ($cuota->contrato?->dias_gracia ?? 0);
         $fechaLimite = $vence->copy()->addDays($gracia);
 
-        if ($cuota->estatus === 'pagada' || $hoy->lessThanOrEqualTo($fechaLimite)) {
+        if ($cuota->estatus === CuotaEstatus::Pagada->value || $hoy->lessThanOrEqualTo($fechaLimite)) {
             return 0;
         }
 
@@ -100,7 +101,7 @@ class EstadoCuentaFinanciamientoService
 
     protected function isVencida(CuotaFinanciamiento $cuota, Carbon $hoy): bool
     {
-        if ($cuota->estatus === 'pagada' || $cuota->estatus === 'cancelada') {
+        if ($cuota->estatus === CuotaEstatus::Pagada->value || $cuota->estatus === CuotaEstatus::Cancelada->value) {
             return false;
         }
 

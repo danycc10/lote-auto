@@ -2,6 +2,7 @@
 
 namespace App\Services\Financiamiento;
 
+use App\Enums\CuotaEstatus;
 use App\Models\CuotaFinanciamiento;
 use App\Models\HistorialFinanciamiento;
 use App\Models\ReciboFinanciamiento;
@@ -70,7 +71,7 @@ class CancelarReciboFinanciamientoService
                 $existeCuotaPosteriorPagada = CuotaFinanciamiento::query()
                     ->where('contrato_financiamiento_id', $contrato->id)
                     ->where('numero', '>', $cuota->numero)
-                    ->whereIn('estatus', ['pagada', 'parcial'])
+                    ->whereIn('estatus', [CuotaEstatus::Pagada->value, CuotaEstatus::Parcial->value])
                     ->exists();
 
                 if ($existeCuotaPosteriorPagada) {
@@ -112,13 +113,13 @@ class CancelarReciboFinanciamientoService
                 $cuota->saldo = max(0, (float) $cuota->monto - $nuevoMontoPagado);
 
                 if ($nuevoMontoPagado <= 0) {
-                    $cuota->estatus = 'pendiente';
+                    $cuota->estatus = CuotaEstatus::Pendiente->value;
                     $cuota->fecha_pago = null;
                 } elseif ($nuevoMontoPagado < (float) $cuota->monto) {
-                    $cuota->estatus = 'parcial';
+                    $cuota->estatus = CuotaEstatus::Parcial->value;
                     $cuota->fecha_pago = null;
                 } else {
-                    $cuota->estatus = 'pagada';
+                    $cuota->estatus = CuotaEstatus::Pagada->value;
                 }
 
                 if (array_key_exists('observaciones', $cuota->getAttributes())) {

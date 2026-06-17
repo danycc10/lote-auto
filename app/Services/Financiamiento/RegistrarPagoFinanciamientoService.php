@@ -2,6 +2,8 @@
 
 namespace App\Services\Financiamiento;
 
+use App\Enums\ContratoEstatus;
+use App\Enums\CuotaEstatus;
 use App\Mail\PagoConfirmadoMail;
 use App\Models\ContratoFinanciamiento;
 use App\Models\CuotaFinanciamiento;
@@ -59,7 +61,13 @@ class RegistrarPagoFinanciamientoService
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            if (in_array($contratoBloqueado->estatus, ['cancelado', 'reestructurado', 'recuperado'], true)) {
+            $estatusBloqueantes = [
+                ContratoEstatus::Cancelado->value,
+                ContratoEstatus::Reestructurado->value,
+                ContratoEstatus::Recuperado->value,
+            ];
+
+            if (in_array($contratoBloqueado->estatus, $estatusBloqueantes, true)) {
                 throw new RuntimeException('No se puede registrar pago en un contrato con estatus: ' . $contratoBloqueado->estatus);
             }
 
@@ -72,11 +80,11 @@ class RegistrarPagoFinanciamientoService
                     ->lockForUpdate()
                     ->firstOrFail();
 
-                if ($cuotaBloqueada->estatus === 'cancelada') {
+                if ($cuotaBloqueada->estatus === CuotaEstatus::Cancelada->value) {
                     throw new RuntimeException('No se puede pagar una cuota cancelada.');
                 }
 
-                if ($cuotaBloqueada->estatus === 'pagada') {
+                if ($cuotaBloqueada->estatus === CuotaEstatus::Pagada->value) {
                     throw new RuntimeException('Esta cuota ya está pagada.');
                 }
 
@@ -142,13 +150,13 @@ class RegistrarPagoFinanciamientoService
                 $cuotaBloqueada->saldo = max(0, $montoCuota - $nuevoMontoPagado);
 
                 if ($nuevoMontoPagado <= 0) {
-                    $cuotaBloqueada->estatus = 'pendiente';
+                    $cuotaBloqueada->estatus = CuotaEstatus::Pendiente->value;
                     $cuotaBloqueada->fecha_pago = null;
                 } elseif ($nuevoMontoPagado < $montoCuota) {
-                    $cuotaBloqueada->estatus = 'parcial';
+                    $cuotaBloqueada->estatus = CuotaEstatus::Parcial->value;
                     $cuotaBloqueada->fecha_pago = $fechaPago;
                 } else {
-                    $cuotaBloqueada->estatus = 'pagada';
+                    $cuotaBloqueada->estatus = CuotaEstatus::Pagada->value;
                     $cuotaBloqueada->fecha_pago = $fechaPago;
                 }
 

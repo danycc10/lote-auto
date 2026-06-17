@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\ContratoEstatus;
+use App\Enums\CuotaEstatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -110,11 +112,11 @@ class ContratoFinanciamiento extends Model
     public function recalcularEstatus(): void
     {
         if ((float) $this->saldo_actual <= 0) {
-            $this->estatus = 'liquidado';
+            $this->estatus = ContratoEstatus::Liquidado->value;
             return;
         }
 
-        $tieneVencidas = $this->cuotas()->where('estatus', 'vencida')->exists();
-        $this->estatus = $tieneVencidas ? 'atrasado' : 'activo';
+        $tieneVencidas = $this->cuotas()->where('estatus', CuotaEstatus::Vencida->value)->exists();
+        $this->estatus = $tieneVencidas ? ContratoEstatus::Atrasado->value : ContratoEstatus::Activo->value;
     }
 }

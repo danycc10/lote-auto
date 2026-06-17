@@ -61,8 +61,9 @@ class FormularioContacto extends Component
             if ($correo) {
                 Mail::to($correo)->queue(new NuevoProspectoMail($prospecto));
             }
-        } catch (\Throwable) {
-            // No bloquea el envío del formulario si falla el correo
+        } catch (\Throwable $e) {
+            // No bloquea el envío del formulario si falla el correo, pero sí queda registrado.
+            report($e);
         }
     }
 

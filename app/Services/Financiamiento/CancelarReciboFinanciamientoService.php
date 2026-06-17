@@ -195,6 +195,6 @@ class CancelarReciboFinanciamientoService
             );
 
             return $recibo->fresh(['contrato', 'cuota', 'pago']);
-        });
+        }, 3);
     }
 }

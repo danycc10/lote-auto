@@ -32,7 +32,7 @@ class RegistrarPagoFinanciamientoService
         ?int $tarjetaCobroId = null,
         float $recargo = 0,
     ): array {
-        return DB::transaction(function () use (
+        $resultado = DB::transaction(function () use (
             $contrato,
             $monto,
             $cuota,
@@ -236,7 +236,7 @@ class RegistrarPagoFinanciamientoService
             ];
 
             return $resultado;
-        });
+        }, 3);
 
         // Enviar confirmación al cliente fuera de la transacción (no bloquea el commit)
         $this->enviarConfirmacionCliente($resultado['pago'], $resultado['recibo']);
@@ -252,8 +252,9 @@ class RegistrarPagoFinanciamientoService
             if ($correo) {
                 Mail::to($correo)->queue(new PagoConfirmadoMail($pago, $recibo));
             }
-        } catch (\Throwable) {
-            // El correo no debe bloquear ni revertir el pago
+        } catch (\Throwable $e) {
+            // El correo no debe bloquear ni revertir el pago, pero sí queda registrado.
+            report($e);
         }
     }
 }

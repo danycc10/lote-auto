@@ -56,6 +56,7 @@ class NotificarVencimientosCuotasCommand extends Command
                 $enviados++;
             } catch (\Throwable $e) {
                 $this->warn("Error enviando recordatorio cuota #{$cuota->id}: {$e->getMessage()}");
+                report($e);
             }
         }
 
@@ -95,6 +96,7 @@ class NotificarVencimientosCuotasCommand extends Command
                 $enviados++;
             } catch (\Throwable $e) {
                 $this->warn("Error enviando vencimiento cuota #{$cuota->id}: {$e->getMessage()}");
+                report($e);
             }
         }
 

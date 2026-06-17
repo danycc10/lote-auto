@@ -56,6 +56,7 @@ abstract class FinanciamientoTestCase extends TestCase
         ]);
 
         $autoId = DB::table('autos')->insertGetId([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
             'marca_auto_id' => $marcaId,
             'modelo_auto_id' => $modeloId,
             'anio' => 2020,

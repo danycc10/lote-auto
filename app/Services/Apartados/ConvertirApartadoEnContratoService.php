@@ -3,6 +3,7 @@
 namespace App\Services\Apartados;
 
 use App\Models\ApartadoAuto;
+use App\Models\Auto;
 use App\Models\ContratoFinanciamiento;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -43,13 +44,39 @@ class ConvertirApartadoEnContratoService
     public function finalizarConversion(ApartadoAuto $apartado, ContratoFinanciamiento $contrato): ApartadoAuto
     {
         return DB::transaction(function () use ($apartado, $contrato) {
-            $apartado->refresh();
             $contrato->refresh();
+
+            // Bloquear el apartado dentro de la transacción para evitar doble conversión (TOCTOU).
+            $apartado = ApartadoAuto::query()
+                ->whereKey($apartado->id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
             if ($apartado->estatus !== 'activo') {
                 throw ValidationException::withMessages([
                     'apartado' => 'El apartado ya no está activo.',
                 ]);
+            }
+
+            if ($apartado->contratoFinanciamiento()->exists()) {
+                throw ValidationException::withMessages([
+                    'apartado' => 'Este apartado ya fue convertido a contrato.',
+                ]);
+            }
+
+            $auto = null;
+
+            if ($apartado->auto_id) {
+                $auto = Auto::query()
+                    ->whereKey($apartado->auto_id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                if ($auto->estatus !== 'apartado') {
+                    throw ValidationException::withMessages([
+                        'apartado' => 'El auto ya no se encuentra en estatus apartado.',
+                    ]);
+                }
             }
 
             $contrato->update([
@@ -61,13 +88,13 @@ class ConvertirApartadoEnContratoService
                 'saldo_pendiente' => 0,
             ]);
 
-            if ($apartado->auto) {
-                $apartado->auto->update([
+            if ($auto) {
+                $auto->update([
                     'estatus' => 'financiado',
                 ]);
             }
 
             return $apartado->fresh(['auto', 'cliente', 'contratoFinanciamiento']);
-        });
+        }, 3);
     }
 }

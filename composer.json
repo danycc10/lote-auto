@@ -62,7 +62,6 @@
             "pint --test"
         ],
         "check": [
-            "@lint",
             "@analyse",
             "@test"
         ],

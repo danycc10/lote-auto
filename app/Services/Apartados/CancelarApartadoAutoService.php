@@ -2,6 +2,7 @@
 
 namespace App\Services\Apartados;
 
+use App\Enums\ApartadoEstatus;
 use App\Models\ApartadoAuto;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -13,7 +14,7 @@ class CancelarApartadoAutoService
         return DB::transaction(function () use ($apartado, $motivoCancelacion) {
             $apartado->loadMissing('auto', 'contratoFinanciamiento');
 
-            if ($apartado->estatus !== 'activo') {
+            if ($apartado->estatus !== ApartadoEstatus::Activo->value) {
                 throw ValidationException::withMessages([
                     'apartado' => 'Solo se pueden cancelar apartados activos.',
                 ]);
@@ -26,7 +27,7 @@ class CancelarApartadoAutoService
             }
 
             $apartado->update([
-                'estatus' => 'cancelado',
+                'estatus' => ApartadoEstatus::Cancelado->value,
                 'cancelado_at' => now(),
                 'motivo_cancelacion' => $motivoCancelacion,
             ]);

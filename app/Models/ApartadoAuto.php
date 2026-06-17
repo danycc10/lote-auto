@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ApartadoEstatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -73,12 +74,12 @@ class ApartadoAuto extends Model
 
     public function scopeActivos($query)
     {
-        return $query->where('estatus', 'activo');
+        return $query->where('estatus', ApartadoEstatus::Activo->value);
     }
 
     public function estaVigente(): bool
     {
-        return $this->estatus === 'activo'
+        return $this->estatus === ApartadoEstatus::Activo->value
             && $this->fecha_vencimiento
             && $this->fecha_vencimiento->greaterThanOrEqualTo(now()->startOfDay());
     }

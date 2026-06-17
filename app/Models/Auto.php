@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ApartadoEstatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -79,7 +80,7 @@ class Auto extends Model
     public function apartadoActivo(): HasOne
     {
         return $this->hasOne(ApartadoAuto::class, 'auto_id')
-            ->where('estatus', 'activo')
+            ->where('estatus', ApartadoEstatus::Activo->value)
             ->latestOfMany();
     }
 

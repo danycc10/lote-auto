@@ -2,6 +2,7 @@
 
 namespace App\Services\Apartados;
 
+use App\Enums\ApartadoEstatus;
 use App\Models\ApartadoAuto;
 use Illuminate\Support\Facades\DB;
 
@@ -13,19 +14,19 @@ class VencerApartadosAutoService
 
         ApartadoAuto::query()
             ->with('auto')
-            ->where('estatus', 'activo')
+            ->where('estatus', ApartadoEstatus::Activo->value)
             ->whereDate('fecha_vencimiento', '<', now()->toDateString())
             ->chunkById(100, function ($apartados) use (&$total) {
                 foreach ($apartados as $apartado) {
                     DB::transaction(function () use ($apartado, &$total) {
                         $apartado->refresh();
 
-                        if ($apartado->estatus !== 'activo') {
+                        if ($apartado->estatus !== ApartadoEstatus::Activo->value) {
                             return;
                         }
 
                         $apartado->update([
-                            'estatus' => 'vencido',
+                            'estatus' => ApartadoEstatus::Vencido->value,
                         ]);
 
                         if ($apartado->auto && $apartado->auto->estatus === 'apartado') {

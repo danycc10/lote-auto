@@ -2,6 +2,7 @@
 
 namespace App\Services\Apartados;
 
+use App\Enums\ApartadoEstatus;
 use App\Models\ApartadoAuto;
 use App\Models\Auto;
 use App\Models\ContratoFinanciamiento;
@@ -14,7 +15,7 @@ class ConvertirApartadoEnContratoService
     {
         $apartado->loadMissing(['auto', 'cliente', 'contratoFinanciamiento']);
 
-        if ($apartado->estatus !== 'activo') {
+        if ($apartado->estatus !== ApartadoEstatus::Activo->value) {
             throw ValidationException::withMessages([
                 'apartado' => 'Solo se pueden convertir apartados activos.',
             ]);
@@ -52,7 +53,7 @@ class ConvertirApartadoEnContratoService
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            if ($apartado->estatus !== 'activo') {
+            if ($apartado->estatus !== ApartadoEstatus::Activo->value) {
                 throw ValidationException::withMessages([
                     'apartado' => 'El apartado ya no está activo.',
                 ]);
@@ -84,7 +85,7 @@ class ConvertirApartadoEnContratoService
             ]);
 
             $apartado->update([
-                'estatus' => 'convertido',
+                'estatus' => ApartadoEstatus::Convertido->value,
                 'saldo_pendiente' => 0,
             ]);
 

@@ -2,6 +2,7 @@
 
 namespace App\Services\Apartados;
 
+use App\Enums\ApartadoEstatus;
 use App\Models\ApartadoAuto;
 use App\Models\Auto;
 use Illuminate\Support\Facades\Auth;
@@ -23,7 +24,7 @@ class CrearApartadoAutoService
             }
 
             $yaTieneApartadoActivo = $auto->apartados()
-                ->where('estatus', 'activo')
+                ->where('estatus', ApartadoEstatus::Activo->value)
                 ->exists();
 
             if ($yaTieneApartadoActivo) {
@@ -50,7 +51,7 @@ class CrearApartadoAutoService
                 'telefono_cliente_temporal' => $data['telefono_cliente_temporal'] ?? null,
                 'correo_cliente_temporal' => $data['correo_cliente_temporal'] ?? null,
                 'observaciones' => $data['observaciones'] ?? null,
-                'estatus' => 'activo',
+                'estatus' => ApartadoEstatus::Activo->value,
             ]);
 
             $auto->update([

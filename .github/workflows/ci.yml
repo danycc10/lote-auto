@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_sqlite, sqlite3, gd, bcmath, intl
+          coverage: none
+
+      - name: Copiar .env
+        run: cp .env.example .env
+
+      - name: Instalar dependencias
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Generar APP_KEY
+        run: php artisan key:generate
+
+      # Gate duro: análisis estático (no debe introducir errores nuevos sobre el baseline)
+      - name: PHPStan
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+
+      # Gate duro: suite de pruebas
+      - name: Tests
+        run: php artisan test
+
+      # Informativo: estilo de código (aún no se ha hecho el pint pass del repo completo)
+      - name: Pint (estilo, no bloqueante)
+        run: vendor/bin/pint --test
+        continue-on-error: true

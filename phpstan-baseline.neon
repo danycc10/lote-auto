@@ -1,0 +1,697 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$dias_gracia\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/MarcarCuotasVencidasCommand.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>dias_gracia" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Console/Commands/MarcarCuotasVencidasCommand.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$cliente\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Console/Commands/NotificarVencimientosCuotasCommand.php
+
+		-
+			message: '#^Method App\\Exports\\ReporteApartadosExport\:\:query\(\) has invalid return type Laravel\\Scout\\Builder\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Exports/ReporteApartadosExport.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>nombre_completo" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Exports/ReporteApartadosExport.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>telefono" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Exports/ReporteApartadosExport.php
+
+		-
+			message: '#^Method App\\Exports\\ReporteContratosExport\:\:query\(\) has invalid return type Laravel\\Scout\\Builder\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Exports/ReporteContratosExport.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>nombre_completo" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Exports/ReporteContratosExport.php
+
+		-
+			message: '#^Method App\\Exports\\ReporteCuotasVencidasExport\:\:query\(\) has invalid return type Laravel\\Scout\\Builder\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Exports/ReporteCuotasVencidasExport.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>folio" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Exports/ReporteCuotasVencidasExport.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>nombre_completo" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Exports/ReporteCuotasVencidasExport.php
+
+		-
+			message: '#^Method App\\Exports\\ReporteInventarioExport\:\:query\(\) has invalid return type Laravel\\Scout\\Builder\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Exports/ReporteInventarioExport.php
+
+		-
+			message: '#^Property App\\Exports\\ReporteInventarioExport\:\:\$desde is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: app/Exports/ReporteInventarioExport.php
+
+		-
+			message: '#^Property App\\Exports\\ReporteInventarioExport\:\:\$hasta is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: app/Exports/ReporteInventarioExport.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>nombre" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Exports/ReporteInventarioExport.php
+
+		-
+			message: '#^Method App\\Exports\\ReportePagosExport\:\:query\(\) has invalid return type Laravel\\Scout\\Builder\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Exports/ReportePagosExport.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>folio" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Exports/ReportePagosExport.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>nombre_completo" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Exports/ReportePagosExport.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>numero" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Exports/ReportePagosExport.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$nombre\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/Admin/CotizadorPdfController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>nombre" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Controllers/Admin/CotizadorPdfController.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\Administracion\\TarjetasCobroIndex\:\:\$tarjetas\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/Administracion/TarjetasCobroIndex.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\ApartadosAutos\\Create\:\:\$autosDisponibles\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/ApartadosAutos/Create.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\ApartadosAutos\\Create\:\:\$clientesDisponibles\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/ApartadosAutos/Create.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\Autos\\Edit\:\:\$imagenesActuales\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/Autos/Edit.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\Autos\\Index\:\:\$autos\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/Autos/Index.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\Autos\\Index\:\:\$marcas\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/Autos/Index.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Cliente\:\:\$curp\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/Clientes/Edit.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Cliente\:\:\$rfc\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/Clientes/Edit.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\Clientes\\Index\:\:\$clientes\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/Clientes/Index.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\CobranzaAutos\\Dashboard\:\:\$alertasCriticas\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/CobranzaAutos/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\CobranzaAutos\\Dashboard\:\:\$cobranzaPorDia\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/CobranzaAutos/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\CobranzaAutos\\Dashboard\:\:\$contratosTopAtraso\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/CobranzaAutos/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\CobranzaAutos\\Dashboard\:\:\$cuotasVencidas\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/CobranzaAutos/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\CobranzaAutos\\Dashboard\:\:\$kpis\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/CobranzaAutos/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\CobranzaAutos\\Dashboard\:\:\$proximosVencimientos\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/CobranzaAutos/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$cliente\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Livewire/Admin/CobranzaAutos/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$folio\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Livewire/Admin/CobranzaAutos/Dashboard.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\CuotaFinanciamiento\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Livewire/Admin/CobranzaAutos/Dashboard.php
+
+		-
+			message: '#^Parameter \#2 \$replace of function str_replace expects array\<string\>\|string, array\<int, mixed\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Livewire/Admin/CobranzaAutos/Dashboard.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>folio" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Livewire/Admin/CobranzaAutos/Dashboard.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>nombre_completo" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Livewire/Admin/CobranzaAutos/Dashboard.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\ContratosFinanciamiento\\Create\:\:\$autos\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/ContratosFinanciamiento/Create.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\ContratosFinanciamiento\\Create\:\:\$clientes\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/ContratosFinanciamiento/Create.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Auto\:\:\$label\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/ContratosFinanciamiento/Create.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$precio_contado\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Livewire/Admin/ContratosFinanciamiento/Create.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$precio_financiado\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/ContratosFinanciamiento/Create.php
+
+		-
+			message: '#^Comparison operation "\>" between int\<1, max\> and 0 is always true\.$#'
+			identifier: greater.alwaysTrue
+			count: 1
+			path: app/Livewire/Admin/ContratosFinanciamiento/Create.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\ContratosFinanciamiento\\Edit\:\:\$autos\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/ContratosFinanciamiento/Edit.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\ContratosFinanciamiento\\Edit\:\:\$clientes\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/ContratosFinanciamiento/Edit.php
+
+		-
+			message: '#^Comparison operation "\>" between int\<1, max\> and 0 is always true\.$#'
+			identifier: greater.alwaysTrue
+			count: 1
+			path: app/Livewire/Admin/ContratosFinanciamiento/Edit.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\ContratosFinanciamiento\\Index\:\:\$contratos\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/ContratosFinanciamiento/Index.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\ContratosFinanciamiento\\RegistrarPago\:\:\$cuotaSeleccionada\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Livewire/Admin/ContratosFinanciamiento/RegistrarPago.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\ContratosFinanciamiento\\RegistrarPago\:\:\$cuotasDisponibles\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Livewire/Admin/ContratosFinanciamiento/RegistrarPago.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\ContratosFinanciamiento\\RegistrarPago\:\:\$recargoSugerido\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Livewire/Admin/ContratosFinanciamiento/RegistrarPago.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\ContratosFinanciamiento\\RegistrarPago\:\:\$tarjetasDisponibles\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/ContratosFinanciamiento/RegistrarPago.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\Cotizador\\Index\:\:\$auto\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Livewire/Admin/Cotizador/Index.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\Cotizador\\Index\:\:\$cuotaMensual\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Livewire/Admin/Cotizador/Index.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\Cotizador\\Index\:\:\$montoFinanciado\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Livewire/Admin/Cotizador/Index.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\Cotizador\\Index\:\:\$precioVenta\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Livewire/Admin/Cotizador/Index.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\Cotizador\\Index\:\:\$tablaAmortizacion\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/Cotizador/Index.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\Cotizador\\Index\:\:\$totalIntereses\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/Cotizador/Index.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\Cotizador\\Index\:\:\$totalPagar\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Livewire/Admin/Cotizador/Index.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Auto\:\:\$imagenPortada\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/Cotizador/Index.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$nombre\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Livewire/Admin/Cotizador/Index.php
+
+		-
+			message: '#^Call to an undefined method App\\Livewire\\Admin\\Cotizador\\Index\:\:unsetComputedProperties\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Livewire/Admin/Cotizador/Index.php
+
+		-
+			message: '#^Relation ''imagenPortada'' is not found in App\\Models\\Auto model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Livewire/Admin/Cotizador/Index.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>nombre" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Livewire/Admin/Cotizador/Index.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>precio_financiado" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Livewire/Admin/Cotizador/Index.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$anio\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/Prospectos/Index.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$nombre\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Livewire/Admin/Prospectos/Index.php
+
+		-
+			message: '#^Call to an undefined method App\\Livewire\\Admin\\Prospectos\\Index\:\:unsetComputedProperties\(\)\.$#'
+			identifier: method.notFound
+			count: 5
+			path: app/Livewire/Admin/Prospectos/Index.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>nombre" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 4
+			path: app/Livewire/Admin/Prospectos/Index.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Admin\\Recibos\\Index\:\:\$recibos\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/Recibos/Index.php
+
+		-
+			message: '#^Match arm comparison between ''cancelado'' and ''cancelado'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/Livewire/Admin/Recibos/Show.php
+
+		-
+			message: '#^Offset 0 on non\-empty\-list\<string\> on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Livewire/Admin/Seguridad/RolesPermisosManager.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Admin/Usuarios/Index.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Livewire/Admin/Usuarios/Index.php
+
+		-
+			message: '#^Relation ''imagenPortada'' is not found in App\\Models\\Auto model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Livewire/Public/AutoDetalle.php
+
+		-
+			message: '#^Relation ''imagenPortada'' is not found in App\\Models\\Auto model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Livewire/Public/AutosDisponibles.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Auto\:\:\$imagenPortada\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Livewire/Public/LandingAutos.php
+
+		-
+			message: '#^Relation ''imagenPortada'' is not found in App\\Models\\Auto model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Livewire/Public/LandingAutos.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>anio" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Mail/CotizacionMail.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>nombre" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Mail/CotizacionMail.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$folio\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Mail/NotificacionVencimientoCuotaMail.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>folio" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Mail/NotificacionVencimientoCuotaMail.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$nombre_completo\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/ApartadoAuto.php
+
+		-
+			message: '#^Right side of && is always true\.$#'
+			identifier: booleanAnd.rightAlwaysTrue
+			count: 1
+			path: app/Models/ApartadoAuto.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$nombre\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Auto.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>nombre" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Models/Auto.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$nombre_completo\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/ContratoFinanciamiento.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>nombre_completo" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Models/ContratoFinanciamiento.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$estatus\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Apartados/CancelarApartadoAutoService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$estatus\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Apartados/ConvertirApartadoEnContratoService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$estatus\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Apartados/VencerApartadosAutoService.php
+
+		-
+			message: '#^Call to static method read\(\) on an unknown class Intervention\\Image\\Laravel\\Facades\\Image\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Services/Autos/ImagenAutoService.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Http\\Request\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Services/Financiamiento/AuditoriaFinancieraService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$cancelado_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Financiamiento/CancelarReciboFinanciamientoService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$estatus\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Financiamiento/CancelarReciboFinanciamientoService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 5
+			path: app/Services/Financiamiento/CancelarReciboFinanciamientoService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$observaciones\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Financiamiento/CancelarReciboFinanciamientoService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$saldo_actual\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Financiamiento/CancelarReciboFinanciamientoService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$total_pagado\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Financiamiento/CancelarReciboFinanciamientoService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$total_pagar\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Financiamiento/CancelarReciboFinanciamientoService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:recalcularEstatus\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Services/Financiamiento/CancelarReciboFinanciamientoService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$dias_gracia\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Financiamiento/EstadoCuentaFinanciamientoService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tipo_recargo\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Financiamiento/EstadoCuentaFinanciamientoService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$valor_recargo\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Services/Financiamiento/EstadoCuentaFinanciamientoService.php
+
+		-
+			message: '#^Method App\\Services\\Financiamiento\\EstadoCuentaFinanciamientoService\:\:diasAtraso\(\) should return int but returns float\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/Financiamiento/EstadoCuentaFinanciamientoService.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: int, Closure\(App\\Models\\CuotaFinanciamiento\)\: int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/Financiamiento/EstadoCuentaFinanciamientoService.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:filter\(\) expects \(callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: bool\)\|null, Closure\(App\\Models\\CuotaFinanciamiento\)\: bool given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/Financiamiento/EstadoCuentaFinanciamientoService.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:sum\(\) expects \(callable\(Illuminate\\Database\\Eloquent\\Model\)\: \(0\|float\)\)\|string\|null, Closure\(App\\Models\\CuotaFinanciamiento\)\: \(0\|float\) given\.$#'
+			identifier: argument.type
+			count: 3
+			path: app/Services/Financiamiento/EstadoCuentaFinanciamientoService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>dias_gracia" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/Financiamiento/EstadoCuentaFinanciamientoService.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Http\\Request\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Services/Financiamiento/LogFinancieroService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$cliente\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Financiamiento/RegistrarPagoFinanciamientoService.php
+
+		-
+			message: '#^Property App\\Models\\CuotaFinanciamiento\:\:\$fecha_pago \(Carbon\\Carbon\|null\) does not accept string\.$#'
+			identifier: assign.propertyType
+			count: 2
+			path: app/Services/Financiamiento/RegistrarPagoFinanciamientoService.php

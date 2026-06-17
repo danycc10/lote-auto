@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Autos;
 
+use App\Enums\AutoEstatus;
 use App\Models\Auto;
 use App\Models\MarcaAuto;
 use Livewire\Component;
@@ -142,7 +143,7 @@ class Index extends Component
 
     public function getTotalDisponiblesProperty(): int
     {
-        return Auto::where('estatus', 'disponible')->count();
+        return Auto::where('estatus', AutoEstatus::Disponible->value)->count();
     }
 
     public function getTotalDestacadosProperty(): int

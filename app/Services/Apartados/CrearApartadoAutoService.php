@@ -3,6 +3,7 @@
 namespace App\Services\Apartados;
 
 use App\Enums\ApartadoEstatus;
+use App\Enums\AutoEstatus;
 use App\Models\ApartadoAuto;
 use App\Models\Auto;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +18,7 @@ class CrearApartadoAutoService
             /** @var Auto $auto */
             $auto = Auto::lockForUpdate()->findOrFail($data['auto_id']);
 
-            if (!in_array($auto->estatus, ['disponible', 'recuperado'])) {
+            if (!in_array($auto->estatus, [AutoEstatus::Disponible->value, AutoEstatus::Recuperado->value])) {
                 throw ValidationException::withMessages([
                     'auto_id' => 'El auto seleccionado no está disponible para apartado.',
                 ]);
@@ -55,7 +56,7 @@ class CrearApartadoAutoService
             ]);
 
             $auto->update([
-                'estatus' => 'apartado',
+                'estatus' => AutoEstatus::Apartado->value,
             ]);
 
             return $apartado->fresh(['auto', 'cliente', 'usuario']);

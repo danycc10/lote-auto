@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Admin\Prospectos;
 
+use App\Enums\AutoEstatus;
+use App\Enums\ProspectoEstatus;
 use App\Models\Auto;
 use App\Models\Prospecto;
 use App\Models\User;
@@ -85,7 +87,7 @@ class Index extends Component
         return Auto::query()
             ->with(['marca', 'modelo'])
             ->where('activo', true)
-            ->whereIn('estatus', ['disponible', 'apartado'])
+            ->whereIn('estatus', [AutoEstatus::Disponible->value, AutoEstatus::Apartado->value])
             ->where(function ($q) use ($term) {
                 $q->whereHas('marca', fn ($m) => $m->where('nombre', 'like', $term))
                   ->orWhereHas('modelo', fn ($m) => $m->where('nombre', 'like', $term))
@@ -171,7 +173,7 @@ class Index extends Component
     {
         Prospecto::findOrFail($id)->update([
             'estatus'             => $estatus,
-            'ultimo_contacto_at'  => in_array($estatus, ['contactado', 'interesado', 'negociacion', 'ganado'], true)
+            'ultimo_contacto_at'  => in_array($estatus, [ProspectoEstatus::Contactado->value, ProspectoEstatus::Interesado->value, ProspectoEstatus::Negociacion->value, ProspectoEstatus::Ganado->value], true)
                 ? now()
                 : null,
         ]);
@@ -204,7 +206,7 @@ class Index extends Component
         $this->observaciones      = '';
         $this->autoId             = null;
         $this->usuarioAsignadoId  = null;
-        $this->estatusForm        = 'nuevo';
+        $this->estatusForm        = ProspectoEstatus::Nuevo->value;
         $this->busquedaAuto       = '';
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Public;
 
+use App\Enums\AutoEstatus;
 use App\Models\Auto;
 use Livewire\Component;
 
@@ -11,7 +12,7 @@ class AutoDetalle extends Component
 
     public function mount(Auto $auto): void
     {
-        abort_unless($auto->estatus === 'disponible' && $auto->activo, 404);
+        abort_unless($auto->estatus === AutoEstatus::Disponible->value && $auto->activo, 404);
 
         $this->auto = $auto->load([
             'marca',
@@ -26,7 +27,7 @@ class AutoDetalle extends Component
         // Autos de la misma marca primero, luego rellena con otros
         $relacionados = Auto::query()
             ->with(['marca', 'modelo', 'imagenPortada'])
-            ->where('estatus', 'disponible')
+            ->where('estatus', AutoEstatus::Disponible->value)
             ->where('activo', true)
             ->where('id', '!=', $this->auto->id)
             ->where('marca_auto_id', $this->auto->marca_auto_id)
@@ -38,7 +39,7 @@ class AutoDetalle extends Component
             $excluir = $relacionados->pluck('id')->push($this->auto->id);
             $relleno = Auto::query()
                 ->with(['marca', 'modelo', 'imagenPortada'])
-                ->where('estatus', 'disponible')
+                ->where('estatus', AutoEstatus::Disponible->value)
                 ->where('activo', true)
                 ->whereNotIn('id', $excluir)
                 ->inRandomOrder()

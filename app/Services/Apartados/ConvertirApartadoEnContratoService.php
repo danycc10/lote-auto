@@ -3,6 +3,7 @@
 namespace App\Services\Apartados;
 
 use App\Enums\ApartadoEstatus;
+use App\Enums\AutoEstatus;
 use App\Models\ApartadoAuto;
 use App\Models\Auto;
 use App\Models\ContratoFinanciamiento;
@@ -27,7 +28,7 @@ class ConvertirApartadoEnContratoService
             ]);
         }
 
-        if ($apartado->auto->estatus !== 'apartado') {
+        if ($apartado->auto->estatus !== AutoEstatus::Apartado->value) {
             throw ValidationException::withMessages([
                 'apartado' => 'El auto ya no se encuentra en estatus apartado.',
             ]);
@@ -73,7 +74,7 @@ class ConvertirApartadoEnContratoService
                     ->lockForUpdate()
                     ->firstOrFail();
 
-                if ($auto->estatus !== 'apartado') {
+                if ($auto->estatus !== AutoEstatus::Apartado->value) {
                     throw ValidationException::withMessages([
                         'apartado' => 'El auto ya no se encuentra en estatus apartado.',
                     ]);
@@ -91,7 +92,7 @@ class ConvertirApartadoEnContratoService
 
             if ($auto) {
                 $auto->update([
-                    'estatus' => 'financiado',
+                    'estatus' => AutoEstatus::Financiado->value,
                 ]);
             }
 

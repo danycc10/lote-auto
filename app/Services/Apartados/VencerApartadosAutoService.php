@@ -3,6 +3,7 @@
 namespace App\Services\Apartados;
 
 use App\Enums\ApartadoEstatus;
+use App\Enums\AutoEstatus;
 use App\Models\ApartadoAuto;
 use Illuminate\Support\Facades\DB;
 
@@ -29,9 +30,9 @@ class VencerApartadosAutoService
                             'estatus' => ApartadoEstatus::Vencido->value,
                         ]);
 
-                        if ($apartado->auto && $apartado->auto->estatus === 'apartado') {
+                        if ($apartado->auto && $apartado->auto->estatus === AutoEstatus::Apartado->value) {
                             $apartado->auto->update([
-                                'estatus' => 'disponible',
+                                'estatus' => AutoEstatus::Disponible->value,
                             ]);
                         }
 

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Public;
 
+use App\Enums\ProspectoEstatus;
 use App\Mail\NuevoProspectoMail;
 use App\Models\Configuracion;
 use App\Models\Prospecto;
@@ -44,7 +45,7 @@ class FormularioContacto extends Component
             'correo'       => $this->correo ?: null,
             'observaciones'=> $this->mensaje ?: null,
             'origen'       => 'web',
-            'estatus'      => 'nuevo',
+            'estatus'      => ProspectoEstatus::Nuevo->value,
         ]);
 
         $this->notificarAdmin($prospecto);

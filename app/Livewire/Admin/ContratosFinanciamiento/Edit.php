@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Admin\ContratosFinanciamiento;
 
+use App\Enums\AutoEstatus;
+use App\Enums\ContratoEstatus;
 use App\Models\Auto;
 use App\Models\Cliente;
 use App\Models\ContratoFinanciamiento;
@@ -271,7 +273,7 @@ class Edit extends Component
                 $autoAnterior = Auto::find($autoAnteriorId);
                 if ($autoAnterior) {
                     $autoAnterior->update([
-                        'estatus' => 'disponible',
+                        'estatus' => AutoEstatus::Disponible->value,
                     ]);
                 }
             }
@@ -279,7 +281,9 @@ class Edit extends Component
             $autoNuevo = Auto::find($data['auto_id']);
             if ($autoNuevo) {
                 $autoNuevo->update([
-                    'estatus' => in_array($data['estatus'], ['cancelado', 'recuperado'], true) ? 'recuperado' : 'financiado',
+                    'estatus' => in_array($data['estatus'], [ContratoEstatus::Cancelado->value, ContratoEstatus::Recuperado->value], true)
+                        ? AutoEstatus::Recuperado->value
+                        : AutoEstatus::Financiado->value,
                 ]);
             }
 

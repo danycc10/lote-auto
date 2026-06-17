@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\ContratosFinanciamiento;
 
+use App\Enums\AutoEstatus;
 use App\Models\Auto;
 use App\Models\Cliente;
 use App\Models\ContratoFinanciamiento;
@@ -155,7 +156,7 @@ class Create extends Component
             ->when($this->apartado_auto_id, function ($query) {
                 $query->where('id', $this->auto_id);
             }, function ($query) {
-                $query->whereIn('estatus', ['disponible', 'apartado', 'recuperado']);
+                $query->whereIn('estatus', [AutoEstatus::Disponible->value, AutoEstatus::Apartado->value, AutoEstatus::Recuperado->value]);
             })
             ->orderByDesc('id')
             ->get()
@@ -310,7 +311,7 @@ class Create extends Component
 
         $auto = Auto::findOrFail($data['auto_id']);
 
-        if (!in_array($auto->estatus, ['disponible', 'apartado', 'recuperado'], true)) {
+        if (!in_array($auto->estatus, [AutoEstatus::Disponible->value, AutoEstatus::Apartado->value, AutoEstatus::Recuperado->value], true)) {
             $this->addError('auto_id', 'Ese auto no está disponible para generar un contrato.');
             return;
         }
@@ -401,7 +402,7 @@ class Create extends Component
             );
 
             $auto->update([
-                'estatus' => 'financiado',
+                'estatus' => AutoEstatus::Financiado->value,
                 'activo' => true,
             ]);
 

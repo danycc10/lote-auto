@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\ApartadosAutos;
 
+use App\Enums\AutoEstatus;
 use App\Models\Auto;
 use App\Models\Cliente;
 use Livewire\Component;
@@ -83,7 +84,7 @@ class Create extends Component
     {
         return Auto::query()
             ->with(['marca', 'modelo'])
-            ->whereIn('estatus', ['disponible', 'recuperado'])
+            ->whereIn('estatus', [AutoEstatus::Disponible->value, AutoEstatus::Recuperado->value])
             ->when($this->buscarAuto !== '', function ($q) {
                 $search = trim($this->buscarAuto);
 

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Public;
 
+use App\Enums\AutoEstatus;
 use App\Models\Auto;
 use App\Models\MarcaAuto;
 use Livewire\Component;
@@ -53,7 +54,7 @@ class AutosDisponibles extends Component
     public function render()
     {
         $base = Auto::query()
-            ->where('estatus', 'disponible')
+            ->where('estatus', AutoEstatus::Disponible->value)
             ->where('activo', true);
 
         $autos = (clone $base)

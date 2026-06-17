@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Public;
 
+use App\Enums\AutoEstatus;
 use App\Models\Auto;
 use Livewire\Component;
 
@@ -11,7 +12,7 @@ class LandingAutos extends Component
     {
         $autosDestacados = Auto::query()
             ->with(['marca', 'modelo', 'imagenPortada'])
-            ->where('estatus', 'disponible')
+            ->where('estatus', AutoEstatus::Disponible->value)
             ->where('activo', true)
             ->latest()
             ->limit(6)
@@ -19,7 +20,7 @@ class LandingAutos extends Component
 
         $base = Auto::query()
             ->with(['marca', 'modelo', 'imagenPortada', 'imagenes'])
-            ->where('estatus', 'disponible')
+            ->where('estatus', AutoEstatus::Disponible->value)
             ->where('activo', true)
             ->whereHas('imagenes');
 

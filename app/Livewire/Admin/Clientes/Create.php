@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Clientes;
 
+use App\Livewire\Concerns\ClienteFormRules;
 use App\Models\Cliente;
 use Illuminate\Support\Str;
 use Livewire\Component;
@@ -9,6 +10,7 @@ use Livewire\WithFileUploads;
 
 class Create extends Component
 {
+    use ClienteFormRules;
     use WithFileUploads;
 
     public $nombre;
@@ -31,38 +33,13 @@ class Create extends Component
 
     protected function rules(): array
     {
-        return [
-            'nombre' => 'required|string|max:255',
-            'apellido_paterno' => 'nullable|string|max:255',
-            'apellido_materno' => 'nullable|string|max:255',
-            'telefono' => 'nullable|string|max:30',
-            'correo' => 'nullable|email|max:255|unique:clientes,correo',
-            'curp' => 'nullable|string|max:18|unique:clientes,curp',
-            'rfc' => 'nullable|string|max:20',
-            'direccion' => 'nullable|string',
-            'ciudad' => 'nullable|string|max:255',
-            'estado' => 'nullable|string|max:255',
-            'codigo_postal' => 'nullable|string|max:10',
-            'ocupacion' => 'nullable|string|max:255',
-            'ingreso_mensual' => 'nullable|numeric|min:0',
-            'activo' => 'boolean',
-
-            'ine' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
-            'comprobante_domicilio' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
-        ];
+        return $this->reglasCliente();
     }
 
-    protected $messages = [
-        'nombre.required' => 'El nombre es obligatorio.',
-        'correo.email' => 'Debes capturar un correo válido.',
-        'correo.unique' => 'Ese correo ya está registrado.',
-        'curp.unique' => 'Esa CURP ya está registrada.',
-        'ingreso_mensual.numeric' => 'El ingreso mensual debe ser numérico.',
-        'ine.mimes' => 'El INE debe ser JPG, JPEG, PNG, WEBP o PDF.',
-        'ine.max' => 'El archivo de INE no debe exceder 5 MB.',
-        'comprobante_domicilio.mimes' => 'El comprobante debe ser JPG, JPEG, PNG, WEBP o PDF.',
-        'comprobante_domicilio.max' => 'El comprobante no debe exceder 5 MB.',
-    ];
+    protected function messages(): array
+    {
+        return $this->mensajesCliente();
+    }
 
     public function guardar()
     {

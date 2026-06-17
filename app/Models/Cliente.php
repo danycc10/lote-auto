@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Cliente extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'clientes';
 
     protected $fillable = [
@@ -63,6 +67,20 @@ class Cliente extends Model
             $this->nombre . ' ' .
                 ($this->apellido_paterno ?? '') . ' ' .
                 ($this->apellido_materno ?? '')
+        );
+    }
+
+    protected function curp(): Attribute
+    {
+        return Attribute::make(
+            set: fn (?string $value) => filled($value) ? strtoupper(trim($value)) : null,
+        );
+    }
+
+    protected function rfc(): Attribute
+    {
+        return Attribute::make(
+            set: fn (?string $value) => filled($value) ? strtoupper(trim($value)) : null,
         );
     }
 }

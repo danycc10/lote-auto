@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Admin\ContratosFinanciamiento;
 
+use App\Enums\CuotaEstatus;
+use App\Enums\PagoEstatus;
 use App\Models\ContratoFinanciamiento;
 use App\Models\CuotaFinanciamiento;
 use App\Models\PagoFinanciamiento;
@@ -18,12 +20,12 @@ class CobranzaDashboard extends Component
         $contratosActivos = ContratoFinanciamiento::whereIn('estatus', ['activo', 'atrasado'])->count();
         $contratosAtrasados = ContratoFinanciamiento::where('estatus', 'atrasado')->count();
         $saldoPendiente = (float) ContratoFinanciamiento::whereIn('estatus', ['activo', 'atrasado'])->sum('saldo_actual');
-        $cobradoMes = (float) PagoFinanciamiento::where('estatus', 'aplicado')->whereBetween('fecha_pago', [$mesInicio, $mesFin])->sum('monto_aplicado');
-        $pagosHoy = (float) PagoFinanciamiento::where('estatus', 'aplicado')->whereDate('fecha_pago', $hoy)->sum('monto_aplicado');
+        $cobradoMes = (float) PagoFinanciamiento::where('estatus', PagoEstatus::Aplicado->value)->whereBetween('fecha_pago', [$mesInicio, $mesFin])->sum('monto_aplicado');
+        $pagosHoy = (float) PagoFinanciamiento::where('estatus', PagoEstatus::Aplicado->value)->whereDate('fecha_pago', $hoy)->sum('monto_aplicado');
 
         $cuotasVencidas = CuotaFinanciamiento::query()
             ->with('contrato.cliente', 'contrato.auto.marca', 'contrato.auto.modelo')
-            ->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+            ->whereIn('estatus', CuotaEstatus::conSaldo())
             ->whereDate('fecha_vencimiento', '<', $hoy)
             ->orderBy('fecha_vencimiento')
             ->limit(20)

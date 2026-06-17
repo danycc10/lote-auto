@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\CuotaEstatus;
 use App\Mail\NotificacionVencimientoCuotaMail;
 use App\Models\CuotaFinanciamiento;
 use Carbon\Carbon;
@@ -32,7 +33,7 @@ class NotificarVencimientosCuotasCommand extends Command
     {
         $cuotas = CuotaFinanciamiento::query()
             ->with(['contrato.cliente', 'contrato.auto.marca', 'contrato.auto.modelo'])
-            ->whereIn('estatus', ['pendiente', 'parcial'])
+            ->whereIn('estatus', CuotaEstatus::pendientesDePago())
             ->whereDate('fecha_vencimiento', $fecha)
             ->whereNull('notificado_correo_at')
             ->whereHas('contrato', fn ($q) =>
@@ -68,7 +69,7 @@ class NotificarVencimientosCuotasCommand extends Command
     {
         $cuotas = CuotaFinanciamiento::query()
             ->with(['contrato.cliente', 'contrato.auto.marca', 'contrato.auto.modelo'])
-            ->whereIn('estatus', ['pendiente', 'parcial'])
+            ->whereIn('estatus', CuotaEstatus::pendientesDePago())
             ->whereDate('fecha_vencimiento', $hoy)
             ->where(function ($q) use ($hoy) {
                 // No notificada hoy (null o notificada antes de hoy)

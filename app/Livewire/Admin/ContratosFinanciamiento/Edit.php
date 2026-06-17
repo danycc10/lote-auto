@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\ContratosFinanciamiento;
 
 use App\Enums\AutoEstatus;
 use App\Enums\ContratoEstatus;
+use App\Enums\PagoEstatus;
 use App\Models\Auto;
 use App\Models\Cliente;
 use App\Models\ContratoFinanciamiento;
@@ -213,7 +214,7 @@ class Edit extends Component
     {
         $data = $this->validate();
 
-        if ($this->contrato->pagos()->where('estatus', 'aplicado')->exists()) {
+        if ($this->contrato->pagos()->where('estatus', PagoEstatus::Aplicado->value)->exists()) {
             $this->addError('folio', 'Este contrato ya tiene pagos aplicados. Para no romper la trazabilidad financiera, ya no se puede regenerar desde edición.');
             return;
         }

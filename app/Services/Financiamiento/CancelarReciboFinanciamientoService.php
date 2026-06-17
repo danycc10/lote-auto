@@ -3,6 +3,8 @@
 namespace App\Services\Financiamiento;
 
 use App\Enums\CuotaEstatus;
+use App\Enums\PagoEstatus;
+use App\Enums\ReciboEstatus;
 use App\Models\CuotaFinanciamiento;
 use App\Models\HistorialFinanciamiento;
 use App\Models\ReciboFinanciamiento;
@@ -34,7 +36,7 @@ class CancelarReciboFinanciamientoService
                 'pago',
             ]);
 
-            if ($recibo->estatus === 'cancelado') {
+            if ($recibo->estatus === ReciboEstatus::Cancelado->value) {
                 throw new RuntimeException('El recibo ya está cancelado.');
             }
 
@@ -89,8 +91,8 @@ class CancelarReciboFinanciamientoService
 
             $montoRecibo = (float) $recibo->monto;
 
-            if ($pago && ($pago->estatus ?? null) !== 'cancelado') {
-                $pago->estatus = 'cancelado';
+            if ($pago && ($pago->estatus ?? null) !== PagoEstatus::Cancelado->value) {
+                $pago->estatus = PagoEstatus::Cancelado->value;
 
                 if (array_key_exists('cancelado_at', $pago->getAttributes())) {
                     $pago->cancelado_at = now();
@@ -136,7 +138,7 @@ class CancelarReciboFinanciamientoService
                 ->where('contrato_financiamiento_id', $contrato->id)
                 ->where(function ($q) {
                     $q->whereNull('estatus')
-                        ->orWhere('estatus', '!=', 'cancelado');
+                        ->orWhere('estatus', '!=', PagoEstatus::Cancelado->value);
                 })
                 ->sum('monto');
 
@@ -146,7 +148,7 @@ class CancelarReciboFinanciamientoService
             $contrato->recalcularEstatus();
             $contrato->save();
 
-            $recibo->estatus = 'cancelado';
+            $recibo->estatus = ReciboEstatus::Cancelado->value;
             $recibo->cancelado_at = now();
 
             $notaRecibo = trim(($recibo->observaciones ?? '') . "\n" . 'Cancelado manualmente.');

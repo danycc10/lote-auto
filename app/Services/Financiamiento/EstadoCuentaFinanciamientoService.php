@@ -3,6 +3,7 @@
 namespace App\Services\Financiamiento;
 
 use App\Enums\CuotaEstatus;
+use App\Enums\TipoRecargo;
 use App\Models\ContratoFinanciamiento;
 use App\Models\CuotaFinanciamiento;
 use Carbon\Carbon;
@@ -28,7 +29,7 @@ class EstadoCuentaFinanciamientoService
 
         $hoy = now()->startOfDay();
         $pagadas = $cuotas->where('estatus', CuotaEstatus::Pagada->value);
-        $pendientes = $cuotas->whereIn('estatus', [CuotaEstatus::Pendiente->value, CuotaEstatus::Parcial->value, CuotaEstatus::Vencida->value]);
+        $pendientes = $cuotas->whereIn('estatus', CuotaEstatus::conSaldo());
         $vencidas = $cuotas->filter(fn (CuotaFinanciamiento $cuota) => $this->isVencida($cuota, $hoy));
         $proximaCuota = $pendientes->sortBy('fecha_vencimiento')->first();
 
@@ -92,7 +93,7 @@ class EstadoCuentaFinanciamientoService
 
         $base = (float) $cuota->saldo;
 
-        if ($contrato->tipo_recargo === 'fijo') {
+        if ($contrato->tipo_recargo === TipoRecargo::Fijo->value) {
             return round((float) $contrato->valor_recargo, 2);
         }
 

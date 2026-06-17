@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\CobranzaAutos;
 
+use App\Enums\CuotaEstatus;
 use App\Mail\RecordatorioPagoMail;
 use App\Models\Configuracion;
 use App\Models\ContratoFinanciamiento;
@@ -105,7 +106,7 @@ class Dashboard extends Component
         $query->when($this->estatus === 'atrasados', function ($q) {
             $q->whereIn('estatus', ['activo', 'atrasado'])
                 ->whereHas('cuotas', function ($cuota) {
-                    $cuota->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+                    $cuota->whereIn('estatus', CuotaEstatus::conSaldo())
                         ->where('estatus', '!=', 'cancelada')
                         ->whereDate('fecha_vencimiento', '<', today());
                 });
@@ -139,12 +140,12 @@ protected function pagosBase()
         $endMonth = now()->endOfMonth()->toDateString();
 
         $totalVencido = (clone $this->cuotasBase())
-            ->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+            ->whereIn('estatus', CuotaEstatus::conSaldo())
             ->whereDate('fecha_vencimiento', '<', $today)
             ->sum(DB::raw('COALESCE(saldo, monto)'));
 
         $totalPorVencer = (clone $this->cuotasBase())
-            ->whereIn('estatus', ['pendiente', 'parcial'])
+            ->whereIn('estatus', CuotaEstatus::pendientesDePago())
             ->whereBetween('fecha_vencimiento', [$today, $today->copy()->addDays(7)])
             ->sum(DB::raw('COALESCE(saldo, monto)'));
 
@@ -159,14 +160,14 @@ protected function pagosBase()
         $contratosConAtraso = ContratoFinanciamiento::query()
             ->whereIn('estatus', ['activo', 'atrasado'])
             ->whereHas('cuotas', function ($q) use ($today) {
-                $q->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+                $q->whereIn('estatus', CuotaEstatus::conSaldo())
                     ->where('estatus', '!=', 'cancelada')
                     ->whereDate('fecha_vencimiento', '<', $today);
             })
             ->count();
 
         $cuotasVencidas = (clone $this->cuotasBase())
-            ->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+            ->whereIn('estatus', CuotaEstatus::conSaldo())
             ->whereDate('fecha_vencimiento', '<', $today)
             ->count();
 
@@ -176,18 +177,18 @@ protected function pagosBase()
 
         $diasPromedioAtraso = (int) round(
             (clone $this->cuotasBase())
-                ->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+                ->whereIn('estatus', CuotaEstatus::conSaldo())
                 ->whereDate('fecha_vencimiento', '<', $today)
                 ->avg(DB::raw('DATEDIFF(CURDATE(), fecha_vencimiento)')) ?? 0
         );
 
         $cuotasCriticasCount = (clone $this->cuotasBase())
-            ->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+            ->whereIn('estatus', CuotaEstatus::conSaldo())
             ->whereDate('fecha_vencimiento', '<', $today->copy()->subDays(30))
             ->count();
 
         $montoCritico = (clone $this->cuotasBase())
-            ->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+            ->whereIn('estatus', CuotaEstatus::conSaldo())
             ->whereDate('fecha_vencimiento', '<', $today->copy()->subDays(30))
             ->sum(DB::raw('COALESCE(saldo, monto)'));
 
@@ -209,7 +210,7 @@ protected function pagosBase()
     {
         return (clone $this->cuotasBase())
             ->with(['contrato.cliente', 'contrato.auto.marca', 'contrato.auto.modelo'])
-            ->whereIn('estatus', ['pendiente', 'parcial'])
+            ->whereIn('estatus', CuotaEstatus::pendientesDePago())
             ->whereBetween('fecha_vencimiento', [today(), today()->copy()->addDays(7)])
             ->orderBy('fecha_vencimiento')
             ->limit(8)
@@ -220,7 +221,7 @@ protected function pagosBase()
     {
         return (clone $this->cuotasBase())
             ->with(['contrato.cliente', 'contrato.auto.marca', 'contrato.auto.modelo'])
-            ->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+            ->whereIn('estatus', CuotaEstatus::conSaldo())
             ->whereDate('fecha_vencimiento', '<', today())
             ->orderBy('fecha_vencimiento')
             ->get();
@@ -232,20 +233,20 @@ protected function pagosBase()
             ->with(['cliente', 'auto.marca', 'auto.modelo'])
             ->whereIn('estatus', ['activo', 'atrasado'])
             ->whereHas('cuotas', function ($q) {
-                $q->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+                $q->whereIn('estatus', CuotaEstatus::conSaldo())
                     ->where('estatus', '!=', 'cancelada')
                     ->whereDate('fecha_vencimiento', '<', today()->subDays(30));
             })
             ->withSum([
                 'cuotas as monto_critico' => function ($q) {
-                    $q->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+                    $q->whereIn('estatus', CuotaEstatus::conSaldo())
                         ->where('estatus', '!=', 'cancelada')
                         ->whereDate('fecha_vencimiento', '<', today()->subDays(30));
                 }
             ], DB::raw('COALESCE(saldo, monto)'))
             ->withMin([
                 'cuotas as fecha_mas_antigua' => function ($q) {
-                    $q->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+                    $q->whereIn('estatus', CuotaEstatus::conSaldo())
                         ->where('estatus', '!=', 'cancelada')
                         ->whereDate('fecha_vencimiento', '<', today()->subDays(30));
                 }
@@ -261,20 +262,20 @@ protected function pagosBase()
             ->with(['cliente', 'auto.marca', 'auto.modelo'])
             ->whereIn('estatus', ['activo', 'atrasado'])
             ->whereHas('cuotas', function ($q) {
-                $q->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+                $q->whereIn('estatus', CuotaEstatus::conSaldo())
                     ->where('estatus', '!=', 'cancelada')
                     ->whereDate('fecha_vencimiento', '<', today());
             })
             ->withCount([
                 'cuotas as cuotas_atrasadas_count' => function ($q) {
-                    $q->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+                    $q->whereIn('estatus', CuotaEstatus::conSaldo())
                         ->where('estatus', '!=', 'cancelada')
                         ->whereDate('fecha_vencimiento', '<', today());
                 }
             ])
             ->withSum([
                 'cuotas as total_atrasado' => function ($q) {
-                    $q->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+                    $q->whereIn('estatus', CuotaEstatus::conSaldo())
                         ->where('estatus', '!=', 'cancelada')
                         ->whereDate('fecha_vencimiento', '<', today());
                 }
@@ -335,7 +336,7 @@ protected function pagosBase()
     public function seleccionarAtrasadas(): void
     {
         $this->seleccionados = (clone $this->cuotasBase())
-            ->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+            ->whereIn('estatus', CuotaEstatus::conSaldo())
             ->whereDate('fecha_vencimiento', '<', today())
             ->where(function ($q) {
                 $q->whereNull('notificado_correo_at')

@@ -4,6 +4,8 @@ namespace App\Services\Financiamiento;
 
 use App\Enums\ContratoEstatus;
 use App\Enums\CuotaEstatus;
+use App\Enums\PagoEstatus;
+use App\Enums\ReciboEstatus;
 use App\Mail\PagoConfirmadoMail;
 use App\Models\ContratoFinanciamiento;
 use App\Models\CuotaFinanciamiento;
@@ -138,7 +140,7 @@ class RegistrarPagoFinanciamientoService
                 'forma_pago' => $formaPago ?? 'efectivo',
                 'referencia' => $referencia,
                 'tarjeta_cobro_id' => $tarjetaCobroId,
-                'estatus' => 'aplicado',
+                'estatus' => PagoEstatus::Aplicado->value,
                 'observaciones' => $observaciones,
             ]);
 
@@ -187,7 +189,7 @@ class RegistrarPagoFinanciamientoService
                 'saldo_posterior' => $nuevoSaldoActual,
                 'concepto' => $concepto ?: 'Pago de financiamiento',
                 'observaciones' => $observaciones,
-                'estatus' => 'vigente',
+                'estatus' => ReciboEstatus::Vigente->value,
             ]);
 
             $this->auditoriaService->registrar(

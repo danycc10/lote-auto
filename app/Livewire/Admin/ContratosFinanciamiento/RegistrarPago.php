@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\ContratosFinanciamiento;
 
+use App\Enums\CuotaEstatus;
 use App\Models\ContratoFinanciamiento;
 use App\Models\CuotaFinanciamiento;
 use App\Models\TarjetaCobro;
@@ -83,7 +84,7 @@ class RegistrarPago extends Component
     {
         return CuotaFinanciamiento::query()
             ->where('contrato_financiamiento_id', $this->contrato->id)
-            ->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
+            ->whereIn('estatus', CuotaEstatus::conSaldo())
             ->orderBy('numero')
             ->get();
     }

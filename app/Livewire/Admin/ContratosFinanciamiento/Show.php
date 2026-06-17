@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Admin\ContratosFinanciamiento;
 
+use App\Enums\PagoEstatus;
+use App\Enums\ReciboEstatus;
 use App\Models\ContratoFinanciamiento;
 use Livewire\Component;
 
@@ -21,13 +23,13 @@ class Show extends Component
                 $q->orderBy('numero'),
 
             'pagos' => fn ($q) =>
-                $q->where('estatus', 'aplicado')
+                $q->where('estatus', PagoEstatus::Aplicado->value)
                   ->latest('fecha_pago'),
 
             'pagos.cuota',
 
             'recibos' => fn ($q) =>
-                $q->where('estatus', 'vigente')
+                $q->where('estatus', ReciboEstatus::Vigente->value)
                   ->latest('fecha_recibo'),
 
             'recibos.pago',

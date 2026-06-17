@@ -35,12 +35,13 @@ class Index extends Component
         $term = '%' . trim($this->busqueda) . '%';
 
         return Auto::query()
-            ->with(['marca', 'modelo'])
+            ->with(['marca', 'modelo', 'imagenPortada'])
             ->where('activo', true)
+            ->where('estatus', 'disponible')
             ->where(function ($q) use ($term) {
                 $q->whereHas('marca', fn ($m) => $m->where('nombre', 'like', $term))
                   ->orWhereHas('modelo', fn ($m) => $m->where('nombre', 'like', $term))
-                  ->orWhere('placas', 'like', $term)
+                  ->orWhere('placa', 'like', $term)
                   ->orWhere('vin', 'like', $term)
                   ->orWhere('anio', 'like', $term);
             })
@@ -50,8 +51,9 @@ class Index extends Component
                 'id'      => $a->id,
                 'label'   => trim(($a->marca?->nombre ?? '') . ' ' . ($a->modelo?->nombre ?? '') . ' ' . $a->anio),
                 'precio'  => (float) $a->precio_financiado,
-                'placas'  => $a->placas ?? $a->vin ?? '—',
+                'placas'  => $a->placa ?? $a->vin ?? '—',
                 'estatus' => $a->estatus,
+                'imagen'  => $a->imagenPortada?->url,
             ])
             ->toArray();
     }
@@ -154,7 +156,7 @@ class Index extends Component
         $this->autoId   = $id;
         $this->enganche = round((float) $auto->precio_financiado * 0.20, 2);
         $this->busqueda = '';
-        $this->unsetComputedProperties();
+        unset($this->resultadosBusqueda);
     }
 
     public function limpiar(): void

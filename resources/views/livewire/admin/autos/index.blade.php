@@ -105,7 +105,7 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-            <div class="w-48">
+            <div class="w-full sm:w-48">
                 <select wire:model.live="orden"
                     class="w-full rounded-lg border-slate-300 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                     <option value="recientes">Más recientes</option>

@@ -48,6 +48,7 @@ use App\Livewire\Admin\Sistema\Index as SistemaIndex;
 use App\Livewire\Admin\Sistema\AuditoriaIndex;
 use App\Livewire\Admin\Sistema\ConfiguracionIndex as SistemaConfiguracionIndex;
 use App\Livewire\Admin\Sistema\BrandingIndex as SistemaBrandingIndex;
+use App\Livewire\Admin\Sistema\LandingTemplateIndex;
 use App\Livewire\Public\AutosDisponibles;
 use App\Livewire\Public\LandingAutos;
 use App\Livewire\Public\AutoDetalle;
@@ -152,6 +153,10 @@ Route::middleware(['auth', 'verified'])
         Route::get('/sistema/apariencia', SistemaBrandingIndex::class)
             ->middleware('permission:dashboard.ver')
             ->name('sistema.apariencia');
+
+        Route::get('/sistema/landing', LandingTemplateIndex::class)
+            ->middleware('permission:dashboard.ver')
+            ->name('sistema.landing');
 
         Route::get('/sistema/auditoria', AuditoriaIndex::class)
             ->middleware('permission:auditoria.ver')

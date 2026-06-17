@@ -46,9 +46,22 @@
                         <button wire:click="seleccionarAuto({{ $resultado['id'] }})"
                                 @click="open = false"
                                 type="button"
-                                class="w-full flex items-start justify-between gap-3 px-4 py-3 hover:bg-indigo-50 transition text-left border-b border-slate-100 last:border-0">
-                            <div>
-                                <p class="text-sm font-semibold text-slate-900">{{ $resultado['label'] }}</p>
+                                class="w-full flex items-center gap-3 px-4 py-3 hover:bg-indigo-50 transition text-left border-b border-slate-100 last:border-0">
+                            {{-- Thumbnail --}}
+                            <div class="shrink-0 w-14 h-14 rounded-lg overflow-hidden bg-slate-100 border border-slate-200">
+                                @if($resultado['imagen'])
+                                <img src="{{ $resultado['imagen'] }}" alt="{{ $resultado['label'] }}"
+                                     class="w-full h-full object-cover">
+                                @else
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <svg class="h-6 w-6 text-slate-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                                    </svg>
+                                </div>
+                                @endif
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-semibold text-slate-900 truncate">{{ $resultado['label'] }}</p>
                                 <p class="text-xs text-slate-500">{{ $resultado['placas'] }}</p>
                             </div>
                             <div class="text-right shrink-0">
@@ -99,7 +112,7 @@
 
                 <div>
                     <label class="block text-xs font-medium text-slate-500 mb-1.5">Enganche ($)</label>
-                    <input type="number" wire:model.live="enganche" min="0" step="100"
+                    <input type="number" wire:model.lazy="enganche" min="0" step="100"
                            class="w-full rounded-lg border-slate-300 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
 
@@ -117,7 +130,7 @@
                     <label class="block text-xs font-medium text-slate-500 mb-1.5">
                         Tasa de interés anual (%) <span class="text-slate-400 font-normal">— 0 = sin interés</span>
                     </label>
-                    <input type="number" wire:model.live="tasaAnual" min="0" max="100" step="0.5"
+                    <input type="number" wire:model.lazy="tasaAnual" min="0" max="100" step="0.5"
                            class="w-full rounded-lg border-slate-300 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
             </div>

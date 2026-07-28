@@ -3,6 +3,7 @@
 namespace App\Services\Financiamiento;
 
 use App\Enums\CuotaEstatus;
+use App\Enums\PagoEstatus;
 use App\Enums\TipoRecargo;
 use App\Models\ContratoFinanciamiento;
 use App\Models\CuotaFinanciamiento;
@@ -34,11 +35,17 @@ class EstadoCuentaFinanciamientoService
         $proximaCuota = $pendientes->sortBy('fecha_vencimiento')->first();
 
         $capitalPendiente = $pendientes->sum(function (CuotaFinanciamiento $cuota) {
-            return max((float) $cuota->monto_capital - $this->estimadoPagadoAComponente($cuota, (float) $cuota->monto_capital), 0);
+            return max(
+                (float) $cuota->monto_capital - $this->pagadoAComponente($cuota, 'monto_capital'),
+                0,
+            );
         });
 
         $interesPendiente = $pendientes->sum(function (CuotaFinanciamiento $cuota) {
-            return max((float) $cuota->monto_interes - $this->estimadoPagadoAComponente($cuota, (float) $cuota->monto_interes), 0);
+            return max(
+                (float) $cuota->monto_interes - $this->pagadoAComponente($cuota, 'monto_interes'),
+                0,
+            );
         });
 
         return [
@@ -109,10 +116,25 @@ class EstadoCuentaFinanciamientoService
         return $this->diasAtraso($cuota, $hoy) > 0;
     }
 
-    protected function estimadoPagadoAComponente(CuotaFinanciamiento $cuota, float $montoComponente): float
+    protected function pagadoAComponente(CuotaFinanciamiento $cuota, string $campo): float
     {
+        $montoComponente = (float) $cuota->{$campo};
+        $aplicacionesVigentes = $cuota->aplicacionesPago
+            ->filter(
+                fn ($aplicacion) => $aplicacion->pago?->estatus === PagoEstatus::Aplicado->value,
+            );
+        $totalRastreado = (float) $aplicacionesVigentes->sum('monto');
+        $componenteRastreado = (float) $aplicacionesVigentes->sum($campo);
+        $pagoSinDesglose = max((float) $cuota->monto_pagado - $totalRastreado, 0);
+
+        if ($pagoSinDesglose <= 0) {
+            return min($componenteRastreado, $montoComponente);
+        }
+
         $base = max((float) $cuota->monto, 0.01);
         $proporcion = $montoComponente / $base;
-        return round((float) $cuota->monto_pagado * $proporcion, 2);
+        $estimadoHistorico = round($pagoSinDesglose * $proporcion, 2);
+
+        return min(round($componenteRastreado + $estimadoHistorico, 2), $montoComponente);
     }
 }

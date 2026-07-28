@@ -29,11 +29,13 @@ class AplicacionPagoFinanciamiento extends Model
         'recargo_generado' => 'decimal:2',
     ];
 
+    /** @return BelongsTo<PagoFinanciamiento, $this> */
     public function pago(): BelongsTo
     {
         return $this->belongsTo(PagoFinanciamiento::class, 'pago_financiamiento_id');
     }
 
+    /** @return BelongsTo<CuotaFinanciamiento, $this> */
     public function cuota(): BelongsTo
     {
         return $this->belongsTo(CuotaFinanciamiento::class, 'cuota_financiamiento_id');

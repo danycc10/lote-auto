@@ -46,6 +46,7 @@ class CuotaFinanciamiento extends Model
         return $this->belongsTo(ContratoFinanciamiento::class, 'contrato_financiamiento_id');
     }
 
+    /** @return HasMany<AplicacionPagoFinanciamiento, $this> */
     public function aplicacionesPago(): HasMany
     {
         return $this->hasMany(AplicacionPagoFinanciamiento::class, 'cuota_financiamiento_id');

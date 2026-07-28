@@ -22,19 +22,28 @@
         {{-- Brand --}}
         @php $adminLogoUrl = \App\Models\Configuracion::obtener('branding.logo_url', ''); @endphp
         <div class="flex items-center gap-3 h-14 px-4 border-b border-slate-800 shrink-0">
-            @if($adminLogoUrl)
-                <img src="{{ \Illuminate\Support\Facades\Storage::url($adminLogoUrl) }}"
-                     alt="{{ config('app.name') }}"
-                     class="h-8 w-auto max-w-[32px] object-contain shrink-0">
-            @else
-                <div class="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center shrink-0">
-                    <svg class="h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M3.375 4.5C2.339 4.5 1.5 5.34 1.5 6.375V13.5h12V6.375c0-1.036-.84-1.875-1.875-1.875h-8.25zM13.5 15h-12v2.625c0 1.035.84 1.875 1.875 1.875H3.75a3 3 0 106 0h2.25a.75.75 0 00.75-.75V15z"/>
-                        <path d="M8.25 19.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0zM15.75 6.75a.75.75 0 00-.75.75v11.25c0 .087.015.17.042.248a3 3 0 015.958.464c.853-.175 1.522-.935 1.464-1.883a18.659 18.659 0 00-3.732-10.104 1.837 1.837 0 00-1.47-.725H15.75z"/>
-                        <path d="M19.5 19.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z"/>
-                    </svg>
-                </div>
-            @endif
+            @persist('admin-sidebar-logo')
+                <span wire:ignore class="flex h-8 w-8 shrink-0 items-center justify-center">
+                    @if($adminLogoUrl)
+                        <img src="{{ \Illuminate\Support\Facades\Storage::url($adminLogoUrl) }}"
+                             alt=""
+                             aria-hidden="true"
+                             width="32"
+                             height="32"
+                             decoding="async"
+                             draggable="false"
+                             class="h-8 w-8 object-contain">
+                    @else
+                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600">
+                            <svg aria-hidden="true" class="h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M3.375 4.5C2.339 4.5 1.5 5.34 1.5 6.375V13.5h12V6.375c0-1.036-.84-1.875-1.875-1.875h-8.25zM13.5 15h-12v2.625c0 1.035.84 1.875 1.875 1.875H3.75a3 3 0 106 0h2.25a.75.75 0 00.75-.75V15z"/>
+                                <path d="M8.25 19.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0zM15.75 6.75a.75.75 0 00-.75.75v11.25c0 .087.015.17.042.248a3 3 0 015.958.464c.853-.175 1.522-.935 1.464-1.883a18.659 18.659 0 00-3.732-10.104 1.837 1.837 0 00-1.47-.725H15.75z"/>
+                                <path d="M19.5 19.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z"/>
+                            </svg>
+                        </span>
+                    @endif
+                </span>
+            @endpersist
             <span class="text-white font-semibold text-sm truncate">{{ config('app.name') }}</span>
 
             {{-- Mobile close --}}
@@ -54,7 +63,7 @@
 
             @if(\App\Models\Configuracion::esActivo('modulo.financiamiento'))
             @can('dashboard.ver')
-            <a href="{{ route('dashboard') }}" @click="$store.sidebar.open = false"
+            <a href="{{ route('dashboard') }}" wire:navigate @click="$store.sidebar.open = false"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                     {{ request()->routeIs('dashboard') ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
                 <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -71,7 +80,7 @@
             </div>
 
             @can('autos.ver')
-            <a href="{{ route('admin.autos.index') }}" @click="$store.sidebar.open = false"
+            <a href="{{ route('admin.autos.index') }}" wire:navigate @click="$store.sidebar.open = false"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                     {{ request()->routeIs('admin.autos.*') ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
                 <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -84,7 +93,7 @@
             @endcan
 
             @can('autos.ver')
-            <a href="{{ route('admin.catalogos.marcas-modelos') }}" @click="$store.sidebar.open = false"
+            <a href="{{ route('admin.catalogos.marcas-modelos') }}" wire:navigate @click="$store.sidebar.open = false"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                     {{ request()->routeIs('admin.catalogos.*') ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
                 <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -103,7 +112,7 @@
             </div>
 
             @can('clientes.ver')
-            <a href="{{ route('admin.clientes.index') }}" @click="$store.sidebar.open = false"
+            <a href="{{ route('admin.clientes.index') }}" wire:navigate @click="$store.sidebar.open = false"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                     {{ request()->routeIs('admin.clientes.*') ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
                 <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -115,7 +124,7 @@
             @endcan
 
             @can('clientes.ver')
-            <a href="{{ route('admin.prospectos.index') }}" @click="$store.sidebar.open = false"
+            <a href="{{ route('admin.prospectos.index') }}" wire:navigate @click="$store.sidebar.open = false"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                     {{ request()->routeIs('admin.prospectos.*') ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
                 <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -126,7 +135,7 @@
             @endcan
 
             @can('contratos.ver')
-            <a href="{{ route('admin.cotizador') }}" @click="$store.sidebar.open = false"
+            <a href="{{ route('admin.cotizador') }}" wire:navigate @click="$store.sidebar.open = false"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                     {{ request()->routeIs('admin.cotizador*') ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
                 <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -137,7 +146,7 @@
             @endcan
 
             @can('apartados.ver')
-            <a href="{{ route('admin.apartados-autos.index') }}" @click="$store.sidebar.open = false"
+            <a href="{{ route('admin.apartados-autos.index') }}" wire:navigate @click="$store.sidebar.open = false"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                     {{ request()->routeIs('admin.apartados-autos.*') ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
                 <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -149,7 +158,7 @@
             @endcan
 
             @can('contratos.ver')
-            <a href="{{ route('admin.contratos-financiamiento.index') }}" @click="$store.sidebar.open = false"
+            <a href="{{ route('admin.contratos-financiamiento.index') }}" wire:navigate @click="$store.sidebar.open = false"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                     {{ request()->routeIs('admin.contratos-financiamiento.*') ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
                 <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -161,7 +170,7 @@
             @endcan
 
             @can('recibos.ver')
-            <a href="{{ route('admin.recibos.index') }}" @click="$store.sidebar.open = false"
+            <a href="{{ route('admin.recibos.index') }}" wire:navigate @click="$store.sidebar.open = false"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                     {{ request()->routeIs('admin.recibos.*') ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
                 <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -174,7 +183,7 @@
             @endcan
 
             @can('logs_financieros.ver')
-            <a href="{{ route('admin.finanzas.logs-financieros') }}" @click="$store.sidebar.open = false"
+            <a href="{{ route('admin.finanzas.logs-financieros') }}" wire:navigate @click="$store.sidebar.open = false"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                     {{ request()->routeIs('admin.finanzas.*') ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
                 <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -185,7 +194,7 @@
             @endcan
 
             @can('dashboard.ver')
-            <a href="{{ route('admin.reportes.index') }}" @click="$store.sidebar.open = false"
+            <a href="{{ route('admin.reportes.index') }}" wire:navigate @click="$store.sidebar.open = false"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                     {{ request()->routeIs('admin.reportes.*') ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
                 <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -196,7 +205,7 @@
             @endcan
 
             @can('dashboard.ver')
-            <a href="{{ route('admin.administracion.tarjetas-cobro') }}" @click="$store.sidebar.open = false"
+            <a href="{{ route('admin.administracion.tarjetas-cobro') }}" wire:navigate @click="$store.sidebar.open = false"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                     {{ request()->routeIs('admin.administracion.tarjetas-cobro') ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
                 <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -216,7 +225,7 @@
 
 
             @if(auth()->user()->hasAnyRole(['administrador', 'gerente']))
-            <a href="{{ route('admin.sistema.apariencia') }}" @click="$store.sidebar.open = false"
+            <a href="{{ route('admin.sistema.apariencia') }}" wire:navigate @click="$store.sidebar.open = false"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                     {{ request()->routeIs('admin.sistema.apariencia') ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
                 <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -225,7 +234,7 @@
                 Apariencia
             </a>
 
-            <a href="{{ route('admin.sistema.landing') }}" @click="$store.sidebar.open = false"
+            <a href="{{ route('admin.sistema.landing') }}" wire:navigate @click="$store.sidebar.open = false"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                     {{ request()->routeIs('admin.sistema.landing') ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
                 <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -235,7 +244,7 @@
             </a>
             @endif
 
-            <a href="{{ route('admin.sistema.configuracion') }}" @click="$store.sidebar.open = false"
+            <a href="{{ route('admin.sistema.configuracion') }}" wire:navigate @click="$store.sidebar.open = false"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                     {{ request()->routeIs('admin.sistema.configuracion') ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
                 <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -245,7 +254,7 @@
             </a>
 
             @can('seguridad.roles')
-            <a href="{{ route('admin.seguridad.roles-permisos') }}" @click="$store.sidebar.open = false"
+            <a href="{{ route('admin.seguridad.roles-permisos') }}" wire:navigate @click="$store.sidebar.open = false"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                     {{ request()->routeIs('admin.seguridad.*') ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
                 <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -256,7 +265,7 @@
             @endcan
 
             @can('seguridad.roles')
-            <a href="{{ route('admin.seguridad.usuarios') }}" @click="$store.sidebar.open = false"
+            <a href="{{ route('admin.seguridad.usuarios') }}" wire:navigate @click="$store.sidebar.open = false"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                     {{ request()->routeIs('admin.seguridad.usuarios') ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
                 <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -267,7 +276,7 @@
             @endcan
 
             @can('auditoria.ver')
-            <a href="{{ route('admin.sistema.auditoria') }}" @click="$store.sidebar.open = false"
+            <a href="{{ route('admin.sistema.auditoria') }}" wire:navigate @click="$store.sidebar.open = false"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                     {{ request()->routeIs('admin.sistema.auditoria') ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
                 <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">

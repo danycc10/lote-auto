@@ -9,32 +9,41 @@ class ConfiguracionIndex extends Component
 {
     public bool $financiamientoActivo = true;
 
-    public string $whatsapp   = '';
-    public string $mapsEmbed  = '';
-    public string $instagram  = '';
-    public string $facebook   = '';
+    public string $whatsapp = '';
+
+    public string $mapsEmbed = '';
+
+    public string $instagram = '';
+
+    public string $facebook = '';
 
     public string $notifCorreoAsunto = '';
+
     public string $notifCorreoCuerpo = '';
-    public string $notifWaMensaje    = '';
+
+    public string $notifWaMensaje = '';
 
     public function mount(): void
     {
+        $this->authorizeConfiguration();
+
         abort_unless(auth()->user()?->can('seguridad.roles'), 403);
 
         $this->financiamientoActivo = Configuracion::esActivo('modulo.financiamiento');
-        $this->whatsapp             = Configuracion::obtener('contact.whatsapp', '');
-        $this->mapsEmbed            = Configuracion::obtener('contact.maps_embed', '');
-        $this->instagram            = Configuracion::obtener('contact.instagram', '');
-        $this->facebook             = Configuracion::obtener('contact.facebook', '');
+        $this->whatsapp = Configuracion::obtener('contact.whatsapp', '');
+        $this->mapsEmbed = Configuracion::obtener('contact.maps_embed', '');
+        $this->instagram = Configuracion::obtener('contact.instagram', '');
+        $this->facebook = Configuracion::obtener('contact.facebook', '');
 
         $this->notifCorreoAsunto = Configuracion::obtener('notif.correo_asunto', '');
         $this->notifCorreoCuerpo = Configuracion::obtener('notif.correo_cuerpo', '');
-        $this->notifWaMensaje    = Configuracion::obtener('notif.wa_mensaje', '');
+        $this->notifWaMensaje = Configuracion::obtener('notif.wa_mensaje', '');
     }
 
     public function toggleFinanciamiento(): void
     {
+        $this->authorizeConfiguration();
+
         $this->financiamientoActivo = ! $this->financiamientoActivo;
 
         Configuracion::establecer('modulo.financiamiento', $this->financiamientoActivo ? '1' : '0');
@@ -49,17 +58,19 @@ class ConfiguracionIndex extends Component
 
     public function guardarContacto(): void
     {
+        $this->authorizeConfiguration();
+
         $this->validate([
-            'whatsapp'  => ['required', 'string', 'max:20', 'regex:/^\d+$/'],
+            'whatsapp' => ['required', 'string', 'max:20', 'regex:/^\d+$/'],
             'mapsEmbed' => ['nullable', 'string', 'max:2000', 'url'],
             'instagram' => ['nullable', 'string', 'max:255', 'url'],
-            'facebook'  => ['nullable', 'string', 'max:255', 'url'],
+            'facebook' => ['nullable', 'string', 'max:255', 'url'],
         ], [
             'whatsapp.required' => 'El número de WhatsApp es obligatorio.',
-            'whatsapp.regex'    => 'Solo se permiten dígitos (sin +, espacios ni guiones).',
-            'mapsEmbed.url'     => 'Debe ser una URL válida.',
-            'instagram.url'     => 'Debe ser una URL válida (ej: https://instagram.com/...).',
-            'facebook.url'      => 'Debe ser una URL válida (ej: https://facebook.com/...).',
+            'whatsapp.regex' => 'Solo se permiten dígitos (sin +, espacios ni guiones).',
+            'mapsEmbed.url' => 'Debe ser una URL válida.',
+            'instagram.url' => 'Debe ser una URL válida (ej: https://instagram.com/...).',
+            'facebook.url' => 'Debe ser una URL válida (ej: https://facebook.com/...).',
         ]);
 
         Configuracion::establecer('contact.whatsapp', $this->whatsapp);
@@ -72,19 +83,21 @@ class ConfiguracionIndex extends Component
 
     public function guardarPlantillasNotif(): void
     {
+        $this->authorizeConfiguration();
+
         $this->validate([
             'notifCorreoAsunto' => ['required', 'string', 'max:200'],
             'notifCorreoCuerpo' => ['required', 'string', 'max:2000'],
-            'notifWaMensaje'    => ['required', 'string', 'max:500'],
+            'notifWaMensaje' => ['required', 'string', 'max:500'],
         ], [
             'notifCorreoAsunto.required' => 'El asunto es obligatorio.',
             'notifCorreoCuerpo.required' => 'El cuerpo del correo es obligatorio.',
-            'notifWaMensaje.required'    => 'El mensaje de WhatsApp es obligatorio.',
+            'notifWaMensaje.required' => 'El mensaje de WhatsApp es obligatorio.',
         ]);
 
         Configuracion::establecer('notif.correo_asunto', $this->notifCorreoAsunto);
         Configuracion::establecer('notif.correo_cuerpo', $this->notifCorreoCuerpo);
-        Configuracion::establecer('notif.wa_mensaje',    $this->notifWaMensaje);
+        Configuracion::establecer('notif.wa_mensaje', $this->notifWaMensaje);
 
         $this->dispatch('toast', type: 'success', message: 'Plantillas de notificación guardadas.');
     }
@@ -94,5 +107,10 @@ class ConfiguracionIndex extends Component
         return view('livewire.admin.sistema.configuracion-index')
             ->layout('layouts.app')
             ->title('Configuración del sistema');
+    }
+
+    private function authorizeConfiguration(): void
+    {
+        abort_unless(auth()->user()?->can('sistema.configurar'), 403);
     }
 }

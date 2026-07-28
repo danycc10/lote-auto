@@ -115,11 +115,13 @@
                                            class="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 transition-colors">
                                             Convertir
                                         </a>
+                                        @can('apartados.cancelar')
                                         <button type="button"
                                                 wire:click="confirmarCancelacion({{ $apartado->id }})"
                                                 class="inline-flex items-center px-2.5 py-1.5 rounded-lg border border-red-200 bg-red-50 text-xs font-medium text-red-700 hover:bg-red-100 transition-colors">
                                             Cancelar
                                         </button>
+                                        @endcan
                                     @else
                                         <span class="text-xs text-slate-400">—</span>
                                     @endif

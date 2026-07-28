@@ -15,33 +15,50 @@ class Index extends Component
 {
     use WithPagination;
 
-    public string  $q       = '';
-    public string  $estatus = '';
-    public int     $perPage = 15;
+    public string $q = '';
+
+    public string $estatus = '';
+
+    public int $perPage = 15;
 
     // Modal editar / crear
-    public bool    $mostrarModal  = false;
-    public ?int    $prospectoId   = null;
+    public bool $mostrarModal = false;
 
-    public string  $nombre           = '';
-    public string  $telefono         = '';
-    public string  $correo           = '';
-    public string  $origen           = '';
-    public string  $observaciones    = '';
-    public ?int    $autoId           = null;
-    public ?int    $usuarioAsignadoId = null;
-    public string  $estatusForm      = 'nuevo';
+    public ?int $prospectoId = null;
+
+    public string $nombre = '';
+
+    public string $telefono = '';
+
+    public string $correo = '';
+
+    public string $origen = '';
+
+    public string $observaciones = '';
+
+    public ?int $autoId = null;
+
+    public ?int $usuarioAsignadoId = null;
+
+    public string $estatusForm = 'nuevo';
 
     // Búsqueda de auto en el modal
-    public string  $busquedaAuto     = '';
+    public string $busquedaAuto = '';
 
     protected $queryString = [
-        'q'       => ['except' => ''],
+        'q' => ['except' => ''],
         'estatus' => ['except' => ''],
     ];
 
-    public function updatingQ(): void      { $this->resetPage(); }
-    public function updatingEstatus(): void { $this->resetPage(); }
+    public function updatingQ(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingEstatus(): void
+    {
+        $this->resetPage();
+    }
 
     #[Computed]
     public function prospectos()
@@ -49,10 +66,10 @@ class Index extends Component
         return Prospecto::query()
             ->with(['auto.marca', 'auto.modelo', 'usuarioAsignado'])
             ->when($this->q, function ($q) {
-                $term = '%' . trim($this->q) . '%';
+                $term = '%'.trim($this->q).'%';
                 $q->where('nombre', 'like', $term)
-                  ->orWhere('telefono', 'like', $term)
-                  ->orWhere('correo', 'like', $term);
+                    ->orWhere('telefono', 'like', $term)
+                    ->orWhere('correo', 'like', $term);
             })
             ->when($this->estatus, fn ($q) => $q->where('estatus', $this->estatus))
             ->latest()
@@ -82,7 +99,7 @@ class Index extends Component
             return [];
         }
 
-        $term = '%' . trim($this->busquedaAuto) . '%';
+        $term = '%'.trim($this->busquedaAuto).'%';
 
         return Auto::query()
             ->with(['marca', 'modelo'])
@@ -90,40 +107,44 @@ class Index extends Component
             ->whereIn('estatus', [AutoEstatus::Disponible->value, AutoEstatus::Apartado->value])
             ->where(function ($q) use ($term) {
                 $q->whereHas('marca', fn ($m) => $m->where('nombre', 'like', $term))
-                  ->orWhereHas('modelo', fn ($m) => $m->where('nombre', 'like', $term))
-                  ->orWhere('anio', 'like', $term)
-                  ->orWhere('placas', 'like', $term);
+                    ->orWhereHas('modelo', fn ($m) => $m->where('nombre', 'like', $term))
+                    ->orWhere('anio', 'like', $term)
+                    ->orWhere('placas', 'like', $term);
             })
             ->limit(6)
             ->get()
             ->map(fn ($a) => [
-                'id'    => $a->id,
-                'label' => trim(($a->marca?->nombre ?? '') . ' ' . ($a->modelo?->nombre ?? '') . ' ' . $a->anio),
+                'id' => $a->id,
+                'label' => trim(($a->marca?->nombre ?? '').' '.($a->modelo?->nombre ?? '').' '.$a->anio),
             ])
             ->toArray();
     }
 
     public function abrirModalNuevo(): void
     {
+        abort_unless(auth()->user()?->can('clientes.crear'), 403);
+
         $this->resetForm();
         $this->mostrarModal = true;
     }
 
     public function editar(int $id): void
     {
+        abort_unless(auth()->user()?->can('clientes.editar'), 403);
+
         $p = Prospecto::findOrFail($id);
 
-        $this->prospectoId       = $p->id;
-        $this->nombre            = $p->nombre;
-        $this->telefono          = $p->telefono ?? '';
-        $this->correo            = $p->correo ?? '';
-        $this->origen            = $p->origen ?? '';
-        $this->observaciones     = $p->observaciones ?? '';
-        $this->autoId            = $p->auto_id;
+        $this->prospectoId = $p->id;
+        $this->nombre = $p->nombre;
+        $this->telefono = $p->telefono ?? '';
+        $this->correo = $p->correo ?? '';
+        $this->origen = $p->origen ?? '';
+        $this->observaciones = $p->observaciones ?? '';
+        $this->autoId = $p->auto_id;
         $this->usuarioAsignadoId = $p->usuario_asignado_id;
-        $this->estatusForm       = $p->estatus;
-        $this->busquedaAuto      = $p->auto
-            ? trim(($p->auto->marca?->nombre ?? '') . ' ' . ($p->auto->modelo?->nombre ?? '') . ' ' . $p->auto->anio)
+        $this->estatusForm = $p->estatus;
+        $this->busquedaAuto = $p->auto
+            ? trim(($p->auto->marca?->nombre ?? '').' '.($p->auto->modelo?->nombre ?? '').' '.$p->auto->anio)
             : '';
 
         $this->mostrarModal = true;
@@ -131,29 +152,32 @@ class Index extends Component
 
     public function seleccionarAuto(int $id, string $label): void
     {
-        $this->autoId       = $id;
+        $this->autoId = $id;
         $this->busquedaAuto = $label;
         $this->unsetComputedProperties();
     }
 
     public function guardar(): void
     {
+        $permission = $this->prospectoId ? 'clientes.editar' : 'clientes.crear';
+        abort_unless(auth()->user()?->can($permission), 403);
+
         $this->validate([
-            'nombre'   => 'required|string|max:255',
+            'nombre' => 'required|string|max:255',
             'telefono' => 'nullable|string|max:30',
-            'correo'   => 'nullable|email|max:255',
+            'correo' => 'nullable|email|max:255',
             'estatusForm' => 'required|in:nuevo,contactado,interesado,negociacion,ganado,perdido',
         ]);
 
         $datos = [
-            'nombre'              => trim($this->nombre),
-            'telefono'            => $this->telefono ?: null,
-            'correo'              => $this->correo ?: null,
-            'origen'              => $this->origen ?: null,
-            'observaciones'       => $this->observaciones ?: null,
-            'auto_id'             => $this->autoId,
+            'nombre' => trim($this->nombre),
+            'telefono' => $this->telefono ?: null,
+            'correo' => $this->correo ?: null,
+            'origen' => $this->origen ?: null,
+            'observaciones' => $this->observaciones ?: null,
+            'auto_id' => $this->autoId,
             'usuario_asignado_id' => $this->usuarioAsignadoId,
-            'estatus'             => $this->estatusForm,
+            'estatus' => $this->estatusForm,
         ];
 
         if ($this->prospectoId) {
@@ -171,9 +195,11 @@ class Index extends Component
 
     public function cambiarEstatus(int $id, string $estatus): void
     {
+        abort_unless(auth()->user()?->can('clientes.editar'), 403);
+
         Prospecto::findOrFail($id)->update([
-            'estatus'             => $estatus,
-            'ultimo_contacto_at'  => in_array($estatus, [ProspectoEstatus::Contactado->value, ProspectoEstatus::Interesado->value, ProspectoEstatus::Negociacion->value, ProspectoEstatus::Ganado->value], true)
+            'estatus' => $estatus,
+            'ultimo_contacto_at' => in_array($estatus, [ProspectoEstatus::Contactado->value, ProspectoEstatus::Interesado->value, ProspectoEstatus::Negociacion->value, ProspectoEstatus::Ganado->value], true)
                 ? now()
                 : null,
         ]);
@@ -184,6 +210,8 @@ class Index extends Component
 
     public function marcarContactado(int $id): void
     {
+        abort_unless(auth()->user()?->can('clientes.editar'), 403);
+
         Prospecto::findOrFail($id)->update(['ultimo_contacto_at' => now()]);
         $this->unsetComputedProperties();
         $this->dispatch('toast', type: 'success', message: 'Último contacto registrado.');
@@ -191,6 +219,8 @@ class Index extends Component
 
     public function eliminar(int $id): void
     {
+        abort_unless(auth()->user()?->can('clientes.eliminar'), 403);
+
         Prospecto::findOrFail($id)->delete();
         $this->unsetComputedProperties();
         $this->dispatch('toast', type: 'success', message: 'Prospecto eliminado.');
@@ -198,16 +228,16 @@ class Index extends Component
 
     private function resetForm(): void
     {
-        $this->prospectoId        = null;
-        $this->nombre             = '';
-        $this->telefono           = '';
-        $this->correo             = '';
-        $this->origen             = '';
-        $this->observaciones      = '';
-        $this->autoId             = null;
-        $this->usuarioAsignadoId  = null;
-        $this->estatusForm        = ProspectoEstatus::Nuevo->value;
-        $this->busquedaAuto       = '';
+        $this->prospectoId = null;
+        $this->nombre = '';
+        $this->telefono = '';
+        $this->correo = '';
+        $this->origen = '';
+        $this->observaciones = '';
+        $this->autoId = null;
+        $this->usuarioAsignadoId = null;
+        $this->estatusForm = ProspectoEstatus::Nuevo->value;
+        $this->busquedaAuto = '';
     }
 
     public function render()

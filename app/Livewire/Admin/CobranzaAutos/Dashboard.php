@@ -19,15 +19,20 @@ class Dashboard extends Component
     use WithPagination;
 
     public string $q = '';
+
     public string $estatus = 'activos'; // activos | atrasados | liquidados | todos
+
     public ?string $fechaDesde = null;
+
     public ?string $fechaHasta = null;
 
     public int $perPage = 10;
 
-    public array $seleccionados     = [];
+    public array $seleccionados = [];
+
     public array $cuotasParaEnviar = [];
-    public bool  $mostrarModal     = false;
+
+    public bool $mostrarModal = false;
 
     protected $queryString = [
         'q' => ['except' => ''],
@@ -78,7 +83,7 @@ class Dashboard extends Component
         $query = $this->baseContratosQuery();
 
         $query->when($this->q, function ($q) {
-            $term = '%' . trim($this->q) . '%';
+            $term = '%'.trim($this->q).'%';
 
             $q->where(function ($sub) use ($term) {
                 $sub->where('folio', 'like', $term)
@@ -124,14 +129,14 @@ class Dashboard extends Component
             });
     }
 
-protected function pagosBase()
-{
-    return PagoFinanciamiento::query()
-        ->where('estatus', '!=', 'cancelado')
-        ->whereHas('contrato', function ($q) {
-            $q->where('estatus', '!=', 'cancelado');
-        });
-}
+    protected function pagosBase()
+    {
+        return PagoFinanciamiento::query()
+            ->where('estatus', '!=', 'cancelado')
+            ->whereHas('contrato', function ($q) {
+                $q->where('estatus', '!=', 'cancelado');
+            });
+    }
 
     public function getKpisProperty(): array
     {
@@ -193,16 +198,16 @@ protected function pagosBase()
             ->sum(DB::raw('COALESCE(saldo, monto)'));
 
         return [
-            'total_vencido'         => $totalVencido,
-            'total_por_vencer'      => $totalPorVencer,
-            'cobrado_mes'           => $cobradoMes,
-            'contratos_activos'     => $contratosActivos,
-            'contratos_con_atraso'  => $contratosConAtraso,
-            'cuotas_vencidas'       => $cuotasVencidas,
-            'pct_morosidad'         => $pctMorosidad,
-            'dias_promedio_atraso'  => $diasPromedioAtraso,
+            'total_vencido' => $totalVencido,
+            'total_por_vencer' => $totalPorVencer,
+            'cobrado_mes' => $cobradoMes,
+            'contratos_activos' => $contratosActivos,
+            'contratos_con_atraso' => $contratosConAtraso,
+            'cuotas_vencidas' => $cuotasVencidas,
+            'pct_morosidad' => $pctMorosidad,
+            'dias_promedio_atraso' => $diasPromedioAtraso,
             'cuotas_criticas_count' => $cuotasCriticasCount,
-            'monto_critico'         => $montoCritico,
+            'monto_critico' => $montoCritico,
         ];
     }
 
@@ -242,14 +247,14 @@ protected function pagosBase()
                     $q->whereIn('estatus', CuotaEstatus::conSaldo())
                         ->where('estatus', '!=', 'cancelada')
                         ->whereDate('fecha_vencimiento', '<', today()->subDays(30));
-                }
+                },
             ], DB::raw('COALESCE(saldo, monto)'))
             ->withMin([
                 'cuotas as fecha_mas_antigua' => function ($q) {
                     $q->whereIn('estatus', CuotaEstatus::conSaldo())
                         ->where('estatus', '!=', 'cancelada')
                         ->whereDate('fecha_vencimiento', '<', today()->subDays(30));
-                }
+                },
             ], 'fecha_vencimiento')
             ->orderByDesc('monto_critico')
             ->limit(5)
@@ -271,14 +276,14 @@ protected function pagosBase()
                     $q->whereIn('estatus', CuotaEstatus::conSaldo())
                         ->where('estatus', '!=', 'cancelada')
                         ->whereDate('fecha_vencimiento', '<', today());
-                }
+                },
             ])
             ->withSum([
                 'cuotas as total_atrasado' => function ($q) {
                     $q->whereIn('estatus', CuotaEstatus::conSaldo())
                         ->where('estatus', '!=', 'cancelada')
                         ->whereDate('fecha_vencimiento', '<', today());
-                }
+                },
             ], DB::raw('COALESCE(saldo, monto)'))
             ->orderByDesc('total_atrasado')
             ->limit(8)
@@ -312,35 +317,42 @@ protected function pagosBase()
 
     public function abrirModalIndividual(int $cuotaId): void
     {
+        abort_unless(auth()->user()?->can('notificaciones.enviar'), 403);
+
         $this->cuotasParaEnviar = [(string) $cuotaId];
-        $this->mostrarModal     = true;
+        $this->mostrarModal = true;
     }
 
     public function abrirModalLote(): void
     {
+        abort_unless(auth()->user()?->can('notificaciones.enviar'), 403);
+
         if (empty($this->seleccionados)) {
             $this->dispatch('toast', type: 'error', message: 'Selecciona al menos una cuota.');
+
             return;
         }
 
         $this->cuotasParaEnviar = $this->seleccionados;
-        $this->mostrarModal     = true;
+        $this->mostrarModal = true;
     }
 
     public function cerrarModal(): void
     {
-        $this->mostrarModal     = false;
+        $this->mostrarModal = false;
         $this->cuotasParaEnviar = [];
     }
 
     public function seleccionarAtrasadas(): void
     {
+        abort_unless(auth()->user()?->can('notificaciones.enviar'), 403);
+
         $this->seleccionados = (clone $this->cuotasBase())
             ->whereIn('estatus', CuotaEstatus::conSaldo())
             ->whereDate('fecha_vencimiento', '<', today())
             ->where(function ($q) {
                 $q->whereNull('notificado_correo_at')
-                  ->orWhereDate('notificado_correo_at', '<', today());
+                    ->orWhereDate('notificado_correo_at', '<', today());
             })
             ->pluck('id')
             ->map(fn ($id) => (string) $id)
@@ -354,8 +366,11 @@ protected function pagosBase()
 
     public function confirmarEnvio(): void
     {
+        abort_unless(auth()->user()?->can('notificaciones.enviar'), 403);
+
         if (empty($this->cuotasParaEnviar)) {
             $this->cerrarModal();
+
             return;
         }
 
@@ -366,8 +381,8 @@ protected function pagosBase()
             ->whereIn('id', $this->cuotasParaEnviar)
             ->get();
 
-        $enviados         = 0;
-        $sinCorreo        = 0;
+        $enviados = 0;
+        $sinCorreo = 0;
         $yaNotificadosHoy = 0;
 
         foreach ($cuotas as $cuota) {
@@ -375,25 +390,27 @@ protected function pagosBase()
 
             if (! $cliente?->correo) {
                 $sinCorreo++;
+
                 continue;
             }
 
             if ($cuota->notificado_correo_at?->isToday()) {
                 $yaNotificadosHoy++;
+
                 continue;
             }
 
-            $diasAtraso     = (int) now()->diffInDays(Carbon::parse($cuota->fecha_vencimiento));
+            $diasAtraso = (int) now()->diffInDays(Carbon::parse($cuota->fecha_vencimiento));
             $montoPendiente = (float) ($cuota->saldo ?: $cuota->monto);
 
             $vars = [
-                '{nombre}'            => $cliente->nombre_completo,
-                '{folio}'             => $cuota->contrato->folio,
-                '{numero_cuota}'      => $cuota->numero,
+                '{nombre}' => $cliente->nombre_completo,
+                '{folio}' => $cuota->contrato->folio,
+                '{numero_cuota}' => $cuota->numero,
                 '{fecha_vencimiento}' => Carbon::parse($cuota->fecha_vencimiento)->format('d/m/Y'),
-                '{dias_atraso}'       => $diasAtraso,
-                '{monto_pendiente}'   => number_format($montoPendiente, 2),
-                '{monto_cuota}'       => number_format((float) $cuota->monto, 2),
+                '{dias_atraso}' => $diasAtraso,
+                '{monto_pendiente}' => number_format($montoPendiente, 2),
+                '{monto_cuota}' => number_format((float) $cuota->monto, 2),
             ];
 
             Mail::to($cliente->correo)->send(
@@ -416,9 +433,15 @@ protected function pagosBase()
         $this->cerrarModal();
 
         $parts = [];
-        if ($enviados > 0)         { $parts[] = "Enviados: {$enviados}"; }
-        if ($yaNotificadosHoy > 0) { $parts[] = "Ya notificados hoy: {$yaNotificadosHoy}"; }
-        if ($sinCorreo > 0)        { $parts[] = "Sin correo: {$sinCorreo}"; }
+        if ($enviados > 0) {
+            $parts[] = "Enviados: {$enviados}";
+        }
+        if ($yaNotificadosHoy > 0) {
+            $parts[] = "Ya notificados hoy: {$yaNotificadosHoy}";
+        }
+        if ($sinCorreo > 0) {
+            $parts[] = "Sin correo: {$sinCorreo}";
+        }
 
         $type = $enviados > 0 ? 'success' : ($yaNotificadosHoy > 0 ? 'warning' : 'error');
         $this->dispatch('toast', type: $type, message: implode(' · ', $parts));
@@ -435,13 +458,13 @@ protected function pagosBase()
             ->orderBy('fecha_vencimiento')
             ->get()
             ->map(fn ($c) => [
-                'nombre'          => $c->contrato?->cliente?->nombre_completo ?? '—',
-                'correo'          => $c->contrato?->cliente?->correo ?: null,
-                'cuota'           => $c->numero,
-                'folio'           => $c->contrato?->folio ?? '—',
-                'monto'           => number_format((float) ($c->saldo ?: $c->monto), 2),
-                'dias'            => (int) now()->diffInDays(Carbon::parse($c->fecha_vencimiento)),
-                'notificado_hoy'  => $c->notificado_correo_at?->isToday() ?? false,
+                'nombre' => $c->contrato?->cliente?->nombre_completo ?? '—',
+                'correo' => $c->contrato?->cliente?->correo ?: null,
+                'cuota' => $c->numero,
+                'folio' => $c->contrato?->folio ?? '—',
+                'monto' => number_format((float) ($c->saldo ?: $c->monto), 2),
+                'dias' => (int) now()->diffInDays(Carbon::parse($c->fecha_vencimiento)),
+                'notificado_hoy' => $c->notificado_correo_at?->isToday() ?? false,
             ])
             ->toArray();
     }
@@ -451,15 +474,15 @@ protected function pagosBase()
         $contratos = $this->contratosQuery()->paginate($this->perPage);
 
         return view('livewire.admin.cobranza-autos.dashboard', [
-            'contratos'            => $contratos,
-            'kpis'                 => $this->kpis,
+            'contratos' => $contratos,
+            'kpis' => $this->kpis,
             'proximosVencimientos' => $this->proximosVencimientos,
-            'cuotasVencidas'       => $this->cuotasVencidas,
-            'contratosTopAtraso'   => $this->contratosTopAtraso,
-            'alertasCriticas'      => $this->alertasCriticas,
-            'cobranzaPorDia'       => $this->cobranzaPorDia,
-            'waMensajePlantilla'   => Configuracion::obtener('notif.wa_mensaje', 'Hola {nombre}, tiene pagos vencidos por ${monto_atrasado} en su contrato {folio}. Por favor comuníquese con nosotros.'),
-            'modalDestinatarios'   => $this->mostrarModal ? $this->modalDestinatarios() : [],
+            'cuotasVencidas' => $this->cuotasVencidas,
+            'contratosTopAtraso' => $this->contratosTopAtraso,
+            'alertasCriticas' => $this->alertasCriticas,
+            'cobranzaPorDia' => $this->cobranzaPorDia,
+            'waMensajePlantilla' => Configuracion::obtener('notif.wa_mensaje', 'Hola {nombre}, tiene pagos vencidos por ${monto_atrasado} en su contrato {folio}. Por favor comuníquese con nosotros.'),
+            'modalDestinatarios' => $this->mostrarModal ? $this->modalDestinatarios() : [],
         ])->layout('layouts.app');
     }
 }

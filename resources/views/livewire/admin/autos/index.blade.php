@@ -234,6 +234,7 @@
                                 </td>
                                 <td class="px-5 py-4 text-right min-w-[200px]">
                                     <div class="flex flex-col gap-1.5 items-end">
+                                        @can('autos.editar')
                                         <a href="{{ route('admin.autos.edit', $auto) }}"
                                             class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600 text-xs font-medium text-white hover:bg-indigo-700 transition">
                                             Editar
@@ -248,6 +249,7 @@
                                             class="inline-flex items-center px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 transition">
                                             {{ $auto->destacado ? 'Quitar destacado' : 'Destacar' }}
                                         </button>
+                                        @endcan
                                     </div>
                                 </td>
                             </tr>

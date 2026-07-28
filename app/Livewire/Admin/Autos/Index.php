@@ -13,10 +13,15 @@ class Index extends Component
     use WithPagination;
 
     public string $busqueda = '';
+
     public ?int $marcaId = null;
+
     public ?string $estatus = null;
+
     public ?string $destacado = null;
+
     public ?string $activo = null;
+
     public string $orden = 'recientes';
 
     protected $queryString = [
@@ -88,7 +93,7 @@ class Index extends Component
             ->with([
                 'marca',
                 'modelo',
-                'imagenes' => fn($q) => $q->orderByDesc('es_portada')->orderBy('orden'),
+                'imagenes' => fn ($q) => $q->orderByDesc('es_portada')->orderBy('orden'),
             ])
             ->when($this->busqueda !== '', function ($query) {
                 $texto = trim($this->busqueda);
@@ -110,20 +115,20 @@ class Index extends Component
                         });
                 });
             })
-            ->when($this->marcaId, fn($query) => $query->where('marca_auto_id', $this->marcaId))
-            ->when($this->estatus, fn($query) => $query->where('estatus', $this->estatus))
+            ->when($this->marcaId, fn ($query) => $query->where('marca_auto_id', $this->marcaId))
+            ->when($this->estatus, fn ($query) => $query->where('estatus', $this->estatus))
             ->when($this->destacado !== null && $this->destacado !== '', function ($query) {
                 $query->where('destacado', $this->destacado === '1');
             })
             ->when($this->activo !== null && $this->activo !== '', function ($query) {
                 $query->where('activo', $this->activo === '1');
             })
-            ->when($this->orden === 'recientes', fn($q) => $q->orderByDesc('id'))
-            ->when($this->orden === 'antiguos', fn($q) => $q->orderBy('id'))
-            ->when($this->orden === 'precio_menor', fn($q) => $q->orderBy('precio_contado'))
-            ->when($this->orden === 'precio_mayor', fn($q) => $q->orderByDesc('precio_contado'))
-            ->when($this->orden === 'anio_nuevo', fn($q) => $q->orderByDesc('anio'))
-            ->when($this->orden === 'anio_viejo', fn($q) => $q->orderBy('anio'));
+            ->when($this->orden === 'recientes', fn ($q) => $q->orderByDesc('id'))
+            ->when($this->orden === 'antiguos', fn ($q) => $q->orderBy('id'))
+            ->when($this->orden === 'precio_menor', fn ($q) => $q->orderBy('precio_contado'))
+            ->when($this->orden === 'precio_mayor', fn ($q) => $q->orderByDesc('precio_contado'))
+            ->when($this->orden === 'anio_nuevo', fn ($q) => $q->orderByDesc('anio'))
+            ->when($this->orden === 'anio_viejo', fn ($q) => $q->orderBy('anio'));
     }
 
     public function getAutosProperty()
@@ -153,10 +158,12 @@ class Index extends Component
 
     public function toggleActivo(int $autoId): void
     {
+        abort_unless(auth()->user()?->can('autos.editar'), 403);
+
         $auto = Auto::findOrFail($autoId);
 
         $auto->update([
-            'activo' => !$auto->activo,
+            'activo' => ! $auto->activo,
         ]);
 
         session()->flash('success', 'Estatus de activo actualizado correctamente.');
@@ -164,10 +171,12 @@ class Index extends Component
 
     public function toggleDestacado(int $autoId): void
     {
+        abort_unless(auth()->user()?->can('autos.editar'), 403);
+
         $auto = Auto::findOrFail($autoId);
 
         $auto->update([
-            'destacado' => !$auto->destacado,
+            'destacado' => ! $auto->destacado,
         ]);
 
         session()->flash('success', 'Estado de destacado actualizado correctamente.');

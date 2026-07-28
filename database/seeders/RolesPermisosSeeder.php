@@ -46,6 +46,8 @@ class RolesPermisosSeeder extends Seeder
             'seguridad.roles',
             'seguridad.usuarios',
             'seguridad.roles.asignar_administrador',
+            'sistema.configurar',
+            'notificaciones.enviar',
 
             'recibos.ver',
             'recibos.imprimir',
@@ -90,6 +92,7 @@ class RolesPermisosSeeder extends Seeder
             'pagos.ver',
             'pagos.registrar',
             'pagos.cancelar',
+            'notificaciones.enviar',
             'recibos.ver',
             'recibos.imprimir',
             'recibos.cancelar',
@@ -102,6 +105,7 @@ class RolesPermisosSeeder extends Seeder
             'contratos.ver',
             'pagos.ver',
             'pagos.registrar',
+            'notificaciones.enviar',
             'recibos.ver',
             'recibos.imprimir',
         ]);

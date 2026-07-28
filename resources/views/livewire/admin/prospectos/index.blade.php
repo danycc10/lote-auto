@@ -25,6 +25,7 @@
             <h1 class="text-xl font-semibold text-slate-900">Prospectos</h1>
             <p class="text-sm text-slate-500 mt-0.5">Seguimiento de leads y clientes potenciales.</p>
         </div>
+        @can('clientes.crear')
         <button wire:click="abrirModalNuevo" type="button"
                 class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-sm font-semibold text-white hover:bg-indigo-700 transition shadow-sm">
             <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -32,6 +33,7 @@
             </svg>
             Nuevo prospecto
         </button>
+        @endcan
     </div>
 
     {{-- Pipeline de estatus --}}
@@ -121,6 +123,7 @@
                             @endif
                         </td>
                         <td class="px-5 py-3.5">
+                            @can('clientes.editar')
                             <div x-data="{ open: false }" class="relative">
                                 <button @click="open = !open" type="button"
                                         class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition {{ $colores[$p->estatus] ?? 'bg-slate-100 text-slate-600' }}">
@@ -143,6 +146,11 @@
                                     @endforeach
                                 </div>
                             </div>
+                            @else
+                            <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium border {{ $colores[$p->estatus] ?? 'bg-slate-100 text-slate-600' }}">
+                                {{ $etiquetas[$p->estatus] ?? ucfirst($p->estatus) }}
+                            </span>
+                            @endcan
                         </td>
                         <td class="px-5 py-3.5">
                             <span class="text-sm text-slate-600">{{ $p->usuarioAsignado?->name ?? '—' }}</span>
@@ -158,7 +166,7 @@
                         <td class="px-5 py-3.5">
                             <div class="flex items-center justify-end gap-1.5">
                                 {{-- WA --}}
-                                @if($waUrl)
+                                @if($waUrl && auth()->user()?->can('clientes.editar'))
                                 <a href="{{ $waUrl }}" target="_blank" rel="noopener"
                                    wire:click="marcarContactado({{ $p->id }})"
                                    title="Contactar por WhatsApp"
@@ -169,6 +177,7 @@
                                 </a>
                                 @endif
                                 {{-- Editar --}}
+                                @can('clientes.editar')
                                 <button wire:click="editar({{ $p->id }})" type="button"
                                         title="Editar"
                                         class="inline-flex items-center justify-center h-7 w-7 rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition">
@@ -176,7 +185,9 @@
                                         <path d="M2.695 14.763l-1.262 3.154a.5.5 0 0 0 .65.65l3.155-1.262a4 4 0 0 0 1.343-.885L17.5 5.5a2.121 2.121 0 0 0-3-3L3.58 13.42a4 4 0 0 0-.885 1.343Z"/>
                                     </svg>
                                 </button>
+                                @endcan
                                 {{-- Eliminar --}}
+                                @can('clientes.eliminar')
                                 <button wire:click="eliminar({{ $p->id }})"
                                         wire:confirm="¿Eliminar este prospecto?"
                                         type="button"
@@ -186,6 +197,7 @@
                                         <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clip-rule="evenodd"/>
                                     </svg>
                                 </button>
+                                @endcan
                             </div>
                         </td>
                     </tr>

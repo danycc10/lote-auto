@@ -147,15 +147,15 @@ Route::middleware(['auth', 'verified'])
             ->name('sistema.index');
 
         Route::get('/sistema/configuracion', SistemaConfiguracionIndex::class)
-            ->middleware('permission:seguridad.roles')
+            ->middleware('permission:sistema.configurar')
             ->name('sistema.configuracion');
 
         Route::get('/sistema/apariencia', SistemaBrandingIndex::class)
-            ->middleware('permission:dashboard.ver')
+            ->middleware('permission:sistema.configurar')
             ->name('sistema.apariencia');
 
         Route::get('/sistema/landing', LandingTemplateIndex::class)
-            ->middleware('permission:dashboard.ver')
+            ->middleware('permission:sistema.configurar')
             ->name('sistema.landing');
 
         Route::get('/sistema/auditoria', AuditoriaIndex::class)
@@ -267,11 +267,11 @@ Route::middleware(['auth', 'verified'])
                 ->name('finanzas.logs-financieros');
 
             Route::get('/reportes', ReportesIndex::class)
-                ->middleware('permission:dashboard.ver')
+                ->middleware('permission:reportes.ver')
                 ->name('reportes.index');
 
             Route::get('/reportes/export', [ReportesExportController::class, 'export'])
-                ->middleware('permission:dashboard.ver')
+                ->middleware('permission:reportes.ver')
                 ->name('reportes.export');
 
             Route::get('/administracion/tarjetas-cobro', TarjetasCobroIndex::class)

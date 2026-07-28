@@ -395,10 +395,12 @@
                     <h2 class="text-sm font-semibold text-slate-900">Cuotas vencidas</h2>
                     <p class="text-xs text-slate-500 mt-0.5">Selecciona para enviar recordatorio.</p>
                 </div>
+                @can('notificaciones.enviar')
                 <button wire:click="seleccionarAtrasadas" type="button"
                         class="shrink-0 text-xs font-medium text-indigo-600 hover:text-indigo-800 transition">
                     Seleccionar todas
                 </button>
+                @endcan
             </div>
 
             {{-- Barra de acción en lote --}}
@@ -408,6 +410,7 @@
                 <div class="flex items-center gap-2">
                     <button wire:click="limpiarSeleccion" type="button"
                             class="text-xs text-indigo-500 hover:text-indigo-700 transition">Limpiar</button>
+                    @can('notificaciones.enviar')
                     <button wire:click="abrirModalLote" type="button"
                             class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-indigo-600 text-xs font-semibold text-white hover:bg-indigo-700 disabled:opacity-60 transition">
                         <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -415,6 +418,7 @@
                         </svg>
                         Enviar correo
                     </button>
+                    @endcan
                 </div>
             </div>
             @endif
@@ -483,7 +487,7 @@
                                 </p>
                             </div>
                             {{-- Botón correo individual --}}
-                            @if($cuota->contrato?->cliente?->correo)
+                            @if($cuota->contrato?->cliente?->correo && auth()->user()?->can('notificaciones.enviar'))
                             @if($notificadoHoy)
                             <button wire:click="abrirModalIndividual({{ $cuota->id }})" type="button"
                                     title="Notificado hoy — click para reenviar"

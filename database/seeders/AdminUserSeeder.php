@@ -30,13 +30,22 @@ class AdminUserSeeder extends Seeder
             );
         }
 
-        $credentials = Validator::validate(
+        $validator = Validator::make(
             ['email' => $email, 'password' => $password],
             [
                 'email' => ['required', 'email:rfc', 'max:255'],
                 'password' => ['required', 'string', Password::min(12)->letters()->mixedCase()->numbers()->symbols()],
             ],
         );
+
+        if ($validator->fails()) {
+            throw new RuntimeException(
+                'Configuración de administrador inválida: INITIAL_ADMIN_EMAIL debe ser un correo válido y '
+                .'INITIAL_ADMIN_PASSWORD debe tener al menos 12 caracteres, mayúscula, minúscula, número y símbolo.'
+            );
+        }
+
+        $credentials = $validator->validated();
 
         $user = User::firstOrCreate(
             ['email' => $credentials['email']],

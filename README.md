@@ -26,6 +26,8 @@ Configura `INITIAL_ADMIN_EMAIL` e `INITIAL_ADMIN_PASSWORD` únicamente para el p
 php artisan db:seed
 ```
 
+La contraseña inicial debe tener al menos 12 caracteres e incluir mayúscula, minúscula, número y símbolo. Si la configuración ya estaba almacenada en caché, ejecuta `php artisan config:clear` antes del seeder.
+
 El seeder no crea ni promueve usuarios si esas variables no están configuradas.
 
 Para desarrollo:
@@ -77,4 +79,3 @@ Consulta [docs/OPERATIONS.md](docs/OPERATIONS.md) antes de desplegar. Incluye:
 - health checks y observabilidad.
 
 El endpoint `/up` comprueba arranque, base de datos y cache.
-

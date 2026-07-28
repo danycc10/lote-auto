@@ -2,16 +2,16 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolesPermisosSeeder extends Seeder
 {
     public function run(): void
     {
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         $permisos = [
             'dashboard.ver',
@@ -130,12 +130,6 @@ class RolesPermisosSeeder extends Seeder
             'recibos.ver',
         ]);
 
-        $primerUsuario = User::query()->orderBy('id')->first();
-
-        if ($primerUsuario && ! $primerUsuario->hasRole('administrador')) {
-            $primerUsuario->assignRole('administrador');
-        }
-
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }
 }

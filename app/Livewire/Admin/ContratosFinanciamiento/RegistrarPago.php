@@ -15,13 +15,21 @@ class RegistrarPago extends Component
     public ContratoFinanciamiento $contrato;
 
     public $cuota_id = null;
+
     public $fecha_pago;
+
     public $monto;
+
     public bool $incluirRecargo = false;
+
     public $forma_pago = 'efectivo';
+
     public $tarjeta_cobro_id = null;
+
     public $referencia = null;
+
     public $concepto = null;
+
     public $observaciones = null;
 
     public function mount(ContratoFinanciamiento $contrato): void
@@ -50,7 +58,7 @@ class RegistrarPago extends Component
 
     public function getRecargoSugeridoProperty(): float
     {
-        if (!$this->cuota_id) {
+        if (! $this->cuota_id) {
             return 0.0;
         }
 
@@ -58,7 +66,7 @@ class RegistrarPago extends Component
             ->where('contrato_financiamiento_id', $this->contrato->id)
             ->find($this->cuota_id);
 
-        if (!$cuota) {
+        if (! $cuota) {
             return 0.0;
         }
 
@@ -91,29 +99,30 @@ class RegistrarPago extends Component
 
     public function getCuotaSeleccionadaProperty(): ?CuotaFinanciamiento
     {
-        if (!$this->cuota_id) {
+        if (! $this->cuota_id) {
             return null;
         }
+
         return $this->cuotasDisponibles->firstWhere('id', $this->cuota_id);
     }
 
     public function seleccionarCuota(int $id): void
     {
         $cuota = $this->cuotasDisponibles->firstWhere('id', $id);
-        if (!$cuota) {
+        if (! $cuota) {
             return;
         }
 
         $this->cuota_id = $id;
         $this->incluirRecargo = false;
         $this->monto = number_format((float) $cuota->saldo, 2, '.', '');
-        $this->concepto = 'Pago de cuota #' . $cuota->numero;
+        $this->concepto = 'Pago de cuota #'.$cuota->numero;
     }
 
     public function updatedIncluirRecargo($value): void
     {
         $cuota = $this->cuotaSeleccionada;
-        if (!$cuota) {
+        if (! $cuota) {
             return;
         }
 
@@ -135,8 +144,9 @@ class RegistrarPago extends Component
     {
         $this->incluirRecargo = false;
 
-        if (!$value) {
+        if (! $value) {
             $this->monto = null;
+
             return;
         }
 
@@ -146,7 +156,7 @@ class RegistrarPago extends Component
 
         if ($cuota) {
             $this->monto = number_format((float) $cuota->saldo, 2, '.', '');
-            $this->concepto = 'Pago de cuota #' . $cuota->numero;
+            $this->concepto = 'Pago de cuota #'.$cuota->numero;
         }
     }
 
@@ -163,7 +173,7 @@ class RegistrarPago extends Component
 
             $resultado = $service->ejecutar(
                 contrato: $this->contrato,
-                monto: (float) str_replace(',', '', (string) $this->monto) - $recargo,
+                monto: (float) str_replace(',', '', (string) $this->monto),
                 cuota: $cuota,
                 fechaPago: $this->fecha_pago,
                 concepto: $this->concepto,
@@ -175,6 +185,7 @@ class RegistrarPago extends Component
             );
         } catch (\RuntimeException $e) {
             $this->addError('monto', $e->getMessage());
+
             return;
         }
 
@@ -186,9 +197,9 @@ class RegistrarPago extends Component
     public function render()
     {
         return view('livewire.admin.contratos-financiamiento.registrar-pago', [
-            'cuotasDisponibles'   => $this->cuotasDisponibles,
-            'recargoSugerido'     => $this->recargoSugerido,
-            'cuotaSeleccionada'   => $this->cuotaSeleccionada,
+            'cuotasDisponibles' => $this->cuotasDisponibles,
+            'recargoSugerido' => $this->recargoSugerido,
+            'cuotaSeleccionada' => $this->cuotaSeleccionada,
             'tarjetasDisponibles' => $this->tarjetasDisponibles,
         ])
             ->layout('layouts.app')

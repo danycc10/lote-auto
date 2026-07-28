@@ -2,9 +2,11 @@
 
 namespace Tests\Feature\Financiamiento;
 
+use App\Livewire\Admin\ContratosFinanciamiento\RegistrarPago;
 use App\Models\PagoFinanciamiento;
 use App\Models\ReciboFinanciamiento;
 use App\Services\Financiamiento\RegistrarPagoFinanciamientoService;
+use Livewire\Livewire;
 use RuntimeException;
 
 class RegistrarPagoTest extends FinanciamientoTestCase
@@ -74,6 +76,51 @@ class RegistrarPagoTest extends FinanciamientoTestCase
             'contrato_financiamiento_id' => $contrato->id,
             'forma_pago' => 'transferencia',
             'referencia' => 'REF-TEST-001',
+        ]);
+    }
+
+    public function test_pago_desde_livewire_aplica_y_registra_el_recargo_cobrado(): void
+    {
+        $user = $this->usuarioConPermiso('pagos.registrar');
+        $this->actingAs($user);
+
+        $contrato = $this->crearContrato([
+            'tipo_recargo' => 'fijo',
+            'valor_recargo' => 10,
+        ]);
+        $cuota = $this->crearCuota($contrato, 1, [
+            'fecha_vencimiento' => now()->subDay()->toDateString(),
+            'estatus' => 'vencida',
+        ]);
+
+        Livewire::test(RegistrarPago::class, ['contrato' => $contrato])
+            ->call('seleccionarCuota', $cuota->id)
+            ->set('incluirRecargo', true)
+            ->assertSet('monto', '25010.00')
+            ->call('guardar')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('pagos_financiamiento', [
+            'cuota_id' => $cuota->id,
+            'monto' => 25010,
+            'monto_aplicado' => 25010,
+        ]);
+        $this->assertDatabaseHas('recibos_financiamiento', [
+            'cuota_id' => $cuota->id,
+            'monto' => 25010,
+        ]);
+        $this->assertDatabaseHas('cuotas_financiamiento', [
+            'id' => $cuota->id,
+            'recargo_aplicado' => 10,
+            'monto_pagado' => 25010,
+            'saldo' => 0,
+            'estatus' => 'pagada',
+        ]);
+        $this->assertDatabaseHas('contratos_financiamiento', [
+            'id' => $contrato->id,
+            'total_pagar' => 100010,
+            'total_pagado' => 25010,
+            'saldo_actual' => 75000,
         ]);
     }
 

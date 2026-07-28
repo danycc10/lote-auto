@@ -14,21 +14,35 @@ class Create extends Component
     use WithFileUploads;
 
     public $nombre;
+
     public $apellido_paterno;
+
     public $apellido_materno;
+
     public $telefono;
+
     public $correo;
+
     public $curp;
+
     public $rfc;
+
     public $direccion;
+
     public $ciudad;
+
     public $estado;
+
     public $codigo_postal;
+
     public $ocupacion;
+
     public $ingreso_mensual;
+
     public $activo = true;
 
     public $ine;
+
     public $comprobante_domicilio;
 
     protected function rules(): array
@@ -62,14 +76,14 @@ class Create extends Component
             'activo' => (bool) ($data['activo'] ?? true),
         ]);
 
-        $basePath = 'clientes/' . $cliente->id . '-' . Str::slug($cliente->nombre_completo ?: $cliente->nombre);
+        $basePath = 'clientes/'.$cliente->id.'-'.Str::slug($cliente->nombre_completo ?: $cliente->nombre);
 
         if ($this->ine) {
-            $cliente->ruta_ine = $this->ine->store($basePath . '/documentos', 'private');
+            $cliente->ruta_ine = $this->ine->store($basePath.'/documentos', 'private');
         }
 
         if ($this->comprobante_domicilio) {
-            $cliente->ruta_comprobante_domicilio = $this->comprobante_domicilio->store($basePath . '/documentos', 'private');
+            $cliente->ruta_comprobante_domicilio = $this->comprobante_domicilio->store($basePath.'/documentos', 'private');
         }
 
         $cliente->save();

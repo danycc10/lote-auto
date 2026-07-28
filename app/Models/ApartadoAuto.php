@@ -58,7 +58,7 @@ class ApartadoAuto extends Model
         return $this->belongsTo(User::class, 'usuario_id');
     }
 
-      public function contratoFinanciamiento(): HasOne
+    public function contratoFinanciamiento(): HasOne
     {
         return $this->hasOne(ContratoFinanciamiento::class, 'apartado_auto_id');
     }

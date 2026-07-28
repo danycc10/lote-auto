@@ -43,7 +43,7 @@ class LandingAutos extends Component
 
         return view('livewire.public.landing-autos', [
             'autosDestacados' => $autosDestacados,
-            'heroAutos'       => $heroAutos,
+            'heroAutos' => $heroAutos,
         ])->layout('layouts.guest');
     }
 }

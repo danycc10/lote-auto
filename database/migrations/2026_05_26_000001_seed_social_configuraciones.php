@@ -9,13 +9,13 @@ return new class extends Migration
     {
         $defaults = [
             [
-                'clave'       => 'contact.instagram',
-                'valor'       => '',
+                'clave' => 'contact.instagram',
+                'valor' => '',
                 'descripcion' => 'URL del perfil de Instagram (ej: https://instagram.com/tunegocio)',
             ],
             [
-                'clave'       => 'contact.facebook',
-                'valor'       => '',
+                'clave' => 'contact.facebook',
+                'valor' => '',
                 'descripcion' => 'URL de la página de Facebook (ej: https://facebook.com/tunegocio)',
             ],
         ];

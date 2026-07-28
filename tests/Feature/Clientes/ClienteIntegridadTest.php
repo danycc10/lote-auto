@@ -27,8 +27,8 @@ class ClienteIntegridadTest extends TestCase
     {
         $cliente = Cliente::create([
             'nombre' => 'Ana López',
-            'curp'   => 'abcd010101hdfxyz09',
-            'rfc'    => 'xaxx010101000',
+            'curp' => 'abcd010101hdfxyz09',
+            'rfc' => 'xaxx010101000',
         ]);
 
         $this->assertSame('ABCD010101HDFXYZ09', $cliente->curp);

@@ -26,7 +26,7 @@ class ModeloAutoSeeder extends Seeder
         foreach ($data as $nombreMarca => $modelos) {
             $marca = MarcaAuto::where('nombre', $nombreMarca)->first();
 
-            if (!$marca) {
+            if (! $marca) {
                 continue;
             }
 

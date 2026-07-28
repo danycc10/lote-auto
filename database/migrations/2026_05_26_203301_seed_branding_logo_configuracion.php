@@ -8,19 +8,19 @@ return new class extends Migration
     public function up(): void
     {
         DB::table('configuraciones')->insertOrIgnore([
-            'clave'       => 'branding.logo_url',
-            'valor'       => '',
+            'clave' => 'branding.logo_url',
+            'valor' => '',
             'descripcion' => 'Ruta de la imagen del logo (storage). Vacío = usa el ícono SVG por defecto.',
-            'created_at'  => now(),
-            'updated_at'  => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         DB::table('configuraciones')->insertOrIgnore([
-            'clave'       => 'branding.logo_ticket_url',
-            'valor'       => '',
+            'clave' => 'branding.logo_ticket_url',
+            'valor' => '',
             'descripcion' => 'Ruta del logo para tickets/PDF térmico (versión negra/oscura). Vacío = solo texto.',
-            'created_at'  => now(),
-            'updated_at'  => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 

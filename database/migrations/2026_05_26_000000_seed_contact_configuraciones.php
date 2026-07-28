@@ -9,13 +9,13 @@ return new class extends Migration
     {
         $defaults = [
             [
-                'clave'       => 'contact.whatsapp',
-                'valor'       => '',
+                'clave' => 'contact.whatsapp',
+                'valor' => '',
                 'descripcion' => 'Número de WhatsApp del negocio (solo dígitos, con código de país, ej: 5218001234567)',
             ],
             [
-                'clave'       => 'contact.maps_embed',
-                'valor'       => '',
+                'clave' => 'contact.maps_embed',
+                'valor' => '',
                 'descripcion' => 'URL del iframe de Google Maps (Compartir → Insertar mapa → copiar solo el src)',
             ],
         ];

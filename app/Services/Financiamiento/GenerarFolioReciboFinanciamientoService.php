@@ -17,7 +17,7 @@ class GenerarFolioReciboFinanciamientoService
 
         $ultimoFolio = ReciboFinanciamiento::query()
             ->whereDate('fecha_recibo', $fecha->toDateString())
-            ->where('folio', 'like', 'RF-' . $fechaTexto . '-%')
+            ->where('folio', 'like', 'RF-'.$fechaTexto.'-%')
             ->lockForUpdate()
             ->orderByDesc('id')
             ->value('folio');
@@ -26,7 +26,7 @@ class GenerarFolioReciboFinanciamientoService
 
         if (
             $ultimoFolio &&
-            preg_match('/^RF-' . $fechaTexto . '-(\d+)$/', $ultimoFolio, $match)
+            preg_match('/^RF-'.$fechaTexto.'-(\d+)$/', $ultimoFolio, $match)
         ) {
             $consecutivo = ((int) $match[1]) + 1;
         }

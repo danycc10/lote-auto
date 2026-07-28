@@ -11,9 +11,13 @@ class LogsFinancierosIndex extends Component
     use WithPagination;
 
     public string $buscar = '';
+
     public string $tipo = '';
+
     public string $nivel = '';
+
     public ?string $fechaInicio = null;
+
     public ?string $fechaFin = null;
 
     public ?int $logSeleccionadoId = null;
@@ -79,10 +83,10 @@ class LogsFinancierosIndex extends Component
             ->with('usuario')
             ->when($this->buscar !== '', function ($query) {
                 $query->where(function ($q) {
-                    $q->where('titulo', 'like', '%' . $this->buscar . '%')
-                        ->orWhere('descripcion', 'like', '%' . $this->buscar . '%')
-                        ->orWhere('referencia', 'like', '%' . $this->buscar . '%')
-                        ->orWhere('tipo', 'like', '%' . $this->buscar . '%');
+                    $q->where('titulo', 'like', '%'.$this->buscar.'%')
+                        ->orWhere('descripcion', 'like', '%'.$this->buscar.'%')
+                        ->orWhere('referencia', 'like', '%'.$this->buscar.'%')
+                        ->orWhere('tipo', 'like', '%'.$this->buscar.'%');
                 });
             })
             ->when($this->tipo !== '', fn ($q) => $q->where('tipo', $this->tipo))

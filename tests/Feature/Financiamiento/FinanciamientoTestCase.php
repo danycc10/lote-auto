@@ -10,6 +10,7 @@ use App\Models\ReciboFinanciamiento;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
@@ -31,6 +32,7 @@ abstract class FinanciamientoTestCase extends TestCase
             $perm = Permission::firstOrCreate(['name' => $permiso, 'guard_name' => 'web']);
             $user->givePermissionTo($perm);
         }
+
         return $user;
     }
 
@@ -38,10 +40,10 @@ abstract class FinanciamientoTestCase extends TestCase
     {
         $uid = uniqid('', true);
 
-        $cliente = Cliente::create(['nombre' => 'Cliente ' . $uid]);
+        $cliente = Cliente::create(['nombre' => 'Cliente '.$uid]);
 
         $marcaId = DB::table('marcas_autos')->insertGetId([
-            'nombre' => 'Marca ' . $uid,
+            'nombre' => 'Marca '.$uid,
             'activo' => 1,
             'created_at' => now(),
             'updated_at' => now(),
@@ -49,14 +51,14 @@ abstract class FinanciamientoTestCase extends TestCase
 
         $modeloId = DB::table('modelos_autos')->insertGetId([
             'marca_auto_id' => $marcaId,
-            'nombre' => 'Modelo ' . $uid,
+            'nombre' => 'Modelo '.$uid,
             'activo' => 1,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
         $autoId = DB::table('autos')->insertGetId([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'uuid' => (string) Str::uuid(),
             'marca_auto_id' => $marcaId,
             'modelo_auto_id' => $modeloId,
             'anio' => 2020,
@@ -71,7 +73,7 @@ abstract class FinanciamientoTestCase extends TestCase
         ]);
 
         return ContratoFinanciamiento::create(array_merge([
-            'folio' => 'CF-TEST-' . substr($uid, -8),
+            'folio' => 'CF-TEST-'.substr($uid, -8),
             'auto_id' => $autoId,
             'cliente_id' => $cliente->id,
             'fecha_contrato' => now()->toDateString(),
@@ -130,7 +132,7 @@ abstract class FinanciamientoTestCase extends TestCase
 
         $uid = uniqid('', true);
         $recibo = ReciboFinanciamiento::create([
-            'folio' => 'RF-' . substr($uid, -10),
+            'folio' => 'RF-'.substr($uid, -10),
             'contrato_financiamiento_id' => $contrato->id,
             'cuota_id' => $cuota->id,
             'pago_financiamiento_id' => $pago->id,
@@ -139,7 +141,7 @@ abstract class FinanciamientoTestCase extends TestCase
             'monto' => $cuota->monto,
             'saldo_anterior' => $saldoAnterior,
             'saldo_posterior' => $saldoPosterior,
-            'concepto' => 'Pago de cuota #' . $cuota->numero,
+            'concepto' => 'Pago de cuota #'.$cuota->numero,
             'estatus' => 'vigente',
         ]);
 

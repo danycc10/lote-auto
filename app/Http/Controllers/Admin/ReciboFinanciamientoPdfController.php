@@ -18,6 +18,6 @@ class ReciboFinanciamientoPdfController extends Controller
             'recibo' => $recibo,
         ])->setPaper([0, 0, 226.77, 600]);
 
-        return $pdf->stream('recibo-' . $recibo->folio . '.pdf');
+        return $pdf->stream('recibo-'.$recibo->folio.'.pdf');
     }
 }

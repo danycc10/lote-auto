@@ -10,7 +10,7 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class ReporteInventarioExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize, WithStyles
+class ReporteInventarioExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMapping, WithStyles
 {
     public function __construct(
         private readonly ?string $desde,

@@ -19,20 +19,20 @@ class PublicFlowTest extends TestCase
         $uid = uniqid('', true);
 
         $marcaId = DB::table('marcas_autos')->insertGetId([
-            'nombre' => 'Marca ' . $uid, 'activo' => 1, 'created_at' => now(), 'updated_at' => now(),
+            'nombre' => 'Marca '.$uid, 'activo' => 1, 'created_at' => now(), 'updated_at' => now(),
         ]);
 
         $modeloId = DB::table('modelos_autos')->insertGetId([
-            'marca_auto_id' => $marcaId, 'nombre' => 'Modelo ' . $uid, 'activo' => 1, 'created_at' => now(), 'updated_at' => now(),
+            'marca_auto_id' => $marcaId, 'nombre' => 'Modelo '.$uid, 'activo' => 1, 'created_at' => now(), 'updated_at' => now(),
         ]);
 
         return Auto::create([
-            'marca_auto_id'     => $marcaId,
-            'modelo_auto_id'    => $modeloId,
-            'anio'              => 2022,
-            'estatus'           => $estatus,
-            'activo'            => $activo,
-            'precio_contado'    => 200000,
+            'marca_auto_id' => $marcaId,
+            'modelo_auto_id' => $modeloId,
+            'anio' => 2022,
+            'estatus' => $estatus,
+            'activo' => $activo,
+            'precio_contado' => 200000,
             'precio_financiado' => 240000,
         ]);
     }
@@ -80,8 +80,8 @@ class PublicFlowTest extends TestCase
             ->assertHasNoErrors();
 
         $this->assertDatabaseHas('prospectos', [
-            'nombre'  => 'Prospecto Web',
-            'origen'  => 'web',
+            'nombre' => 'Prospecto Web',
+            'origen' => 'web',
             'estatus' => 'nuevo',
         ]);
     }

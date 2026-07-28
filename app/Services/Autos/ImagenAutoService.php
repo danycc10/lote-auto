@@ -13,7 +13,7 @@ class ImagenAutoService
         $img = Image::read($archivo->getRealPath())
             ->scaleDown(1600, 1600);
 
-        $nombre = uniqid() . '.webp';
+        $nombre = uniqid().'.webp';
         $ruta = "autos/{$autoId}/{$nombre}";
 
         Storage::disk('public')->put($ruta, (string) $img->toWebp(75));

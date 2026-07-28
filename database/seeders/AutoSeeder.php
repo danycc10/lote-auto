@@ -171,34 +171,34 @@ class AutoSeeder extends Seeder
                 ->where('marca_auto_id', $marca?->id)
                 ->first();
 
-            if (!$marca || !$modelo) {
+            if (! $marca || ! $modelo) {
                 continue;
             }
 
             $codigo = $this->generarCodigo($marca->nombre, $modelo->nombre, $item['anio']);
-            $auto   = Auto::firstOrNew(['codigo_inventario' => $codigo]);
+            $auto = Auto::firstOrNew(['codigo_inventario' => $codigo]);
 
             if (! $auto->exists) {
                 $auto->uuid = (string) Str::uuid();
-                $auto->vin  = $this->generarVin();
+                $auto->vin = $this->generarVin();
             }
 
             $auto->fill([
-                'marca_auto_id'    => $marca->id,
-                'modelo_auto_id'   => $modelo->id,
-                'placa'            => null,
-                'anio'             => $item['anio'],
-                'version'          => $item['version'],
-                'color'            => $item['color'],
-                'kilometraje'      => $item['kilometraje'],
-                'transmision'      => $item['transmision'],
+                'marca_auto_id' => $marca->id,
+                'modelo_auto_id' => $modelo->id,
+                'placa' => null,
+                'anio' => $item['anio'],
+                'version' => $item['version'],
+                'color' => $item['color'],
+                'kilometraje' => $item['kilometraje'],
+                'transmision' => $item['transmision'],
                 'tipo_combustible' => $item['tipo_combustible'],
-                'precio_contado'   => $item['precio_contado'],
-                'precio_financiado'=> $item['precio_financiado'],
-                'estatus'          => $item['estatus'],
-                'descripcion'      => $item['descripcion'],
-                'destacado'        => $item['destacado'],
-                'activo'           => true,
+                'precio_contado' => $item['precio_contado'],
+                'precio_financiado' => $item['precio_financiado'],
+                'estatus' => $item['estatus'],
+                'descripcion' => $item['descripcion'],
+                'destacado' => $item['destacado'],
+                'activo' => true,
             ])->save();
         }
     }

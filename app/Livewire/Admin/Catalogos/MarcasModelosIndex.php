@@ -9,16 +9,22 @@ use Livewire\Component;
 class MarcasModelosIndex extends Component
 {
     // ── Marca ──────────────────────────────────────────────
-    public string $marcaNombre    = '';
-    public ?int   $marcaEditandoId = null;
-    public ?int   $marcaSeleccionada = null;
-    public bool   $mostrarFormMarca = false;
+    public string $marcaNombre = '';
+
+    public ?int $marcaEditandoId = null;
+
+    public ?int $marcaSeleccionada = null;
+
+    public bool $mostrarFormMarca = false;
 
     // ── Modelo ─────────────────────────────────────────────
-    public string $modeloNombre    = '';
-    public ?int   $modeloEditandoId = null;
+    public string $modeloNombre = '';
+
+    public ?int $modeloEditandoId = null;
+
     public int|string $modeloMarcaId = '';
-    public bool   $mostrarFormModelo = false;
+
+    public bool $mostrarFormModelo = false;
 
     protected function rulesMarca(): array
     {
@@ -30,8 +36,8 @@ class MarcasModelosIndex extends Component
     protected function rulesModelo(): array
     {
         return [
-            'modeloNombre'   => ['required', 'string', 'max:100'],
-            'modeloMarcaId'  => ['required', 'exists:marcas_autos,id'],
+            'modeloNombre' => ['required', 'string', 'max:100'],
+            'modeloMarcaId' => ['required', 'exists:marcas_autos,id'],
         ];
     }
 
@@ -48,8 +54,8 @@ class MarcasModelosIndex extends Component
     {
         abort_unless(auth()->user()?->can('autos.editar'), 403);
         $marca = MarcaAuto::findOrFail($id);
-        $this->marcaEditandoId  = $id;
-        $this->marcaNombre      = $marca->nombre;
+        $this->marcaEditandoId = $id;
+        $this->marcaNombre = $marca->nombre;
         $this->mostrarFormMarca = true;
     }
 
@@ -76,7 +82,7 @@ class MarcasModelosIndex extends Component
     {
         abort_unless(auth()->user()?->can('autos.editar'), 403);
         $marca = MarcaAuto::findOrFail($id);
-        $marca->update(['activo' => !$marca->activo]);
+        $marca->update(['activo' => ! $marca->activo]);
     }
 
     public function eliminarMarca(int $id): void
@@ -86,6 +92,7 @@ class MarcasModelosIndex extends Component
 
         if ($marca->autos()->exists()) {
             $this->dispatch('toast', type: 'error', message: 'No se puede eliminar: tiene autos asociados.');
+
             return;
         }
 
@@ -108,8 +115,8 @@ class MarcasModelosIndex extends Component
 
     protected function resetMarcaForm(): void
     {
-        $this->marcaNombre      = '';
-        $this->marcaEditandoId  = null;
+        $this->marcaNombre = '';
+        $this->marcaEditandoId = null;
         $this->mostrarFormMarca = false;
     }
 
@@ -126,9 +133,9 @@ class MarcasModelosIndex extends Component
     {
         abort_unless(auth()->user()?->can('autos.editar'), 403);
         $modelo = ModeloAuto::findOrFail($id);
-        $this->modeloEditandoId  = $id;
-        $this->modeloNombre      = $modelo->nombre;
-        $this->modeloMarcaId     = $modelo->marca_auto_id;
+        $this->modeloEditandoId = $id;
+        $this->modeloNombre = $modelo->nombre;
+        $this->modeloMarcaId = $modelo->marca_auto_id;
         $this->mostrarFormModelo = true;
     }
 
@@ -140,9 +147,9 @@ class MarcasModelosIndex extends Component
         ModeloAuto::updateOrCreate(
             ['id' => $this->modeloEditandoId],
             [
-                'nombre'       => trim($this->modeloNombre),
-                'marca_auto_id'=> $this->modeloMarcaId,
-                'activo'       => true,
+                'nombre' => trim($this->modeloNombre),
+                'marca_auto_id' => $this->modeloMarcaId,
+                'activo' => true,
             ]
         );
 
@@ -159,7 +166,7 @@ class MarcasModelosIndex extends Component
     {
         abort_unless(auth()->user()?->can('autos.editar'), 403);
         $modelo = ModeloAuto::findOrFail($id);
-        $modelo->update(['activo' => !$modelo->activo]);
+        $modelo->update(['activo' => ! $modelo->activo]);
     }
 
     public function eliminarModelo(int $id): void
@@ -169,6 +176,7 @@ class MarcasModelosIndex extends Component
 
         if ($modelo->autos()->exists()) {
             $this->dispatch('toast', type: 'error', message: 'No se puede eliminar: tiene autos asociados.');
+
             return;
         }
 
@@ -178,9 +186,9 @@ class MarcasModelosIndex extends Component
 
     protected function resetModeloForm(): void
     {
-        $this->modeloNombre      = '';
-        $this->modeloEditandoId  = null;
-        $this->modeloMarcaId     = $this->marcaSeleccionada ?? '';
+        $this->modeloNombre = '';
+        $this->modeloEditandoId = null;
+        $this->modeloMarcaId = $this->marcaSeleccionada ?? '';
         $this->mostrarFormModelo = false;
     }
 
@@ -202,8 +210,8 @@ class MarcasModelosIndex extends Component
             : null;
 
         return view('livewire.admin.catalogos.marcas-modelos-index', [
-            'marcas'      => $marcas,
-            'modelos'     => $modelos,
+            'marcas' => $marcas,
+            'modelos' => $modelos,
             'marcaActual' => $marcaActual,
         ])->layout('layouts.app');
     }

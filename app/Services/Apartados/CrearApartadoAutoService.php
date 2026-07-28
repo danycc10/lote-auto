@@ -18,7 +18,7 @@ class CrearApartadoAutoService
             /** @var Auto $auto */
             $auto = Auto::lockForUpdate()->findOrFail($data['auto_id']);
 
-            if (!in_array($auto->estatus, [AutoEstatus::Disponible->value, AutoEstatus::Recuperado->value])) {
+            if (! in_array($auto->estatus, [AutoEstatus::Disponible->value, AutoEstatus::Recuperado->value])) {
                 throw ValidationException::withMessages([
                     'auto_id' => 'El auto seleccionado no está disponible para apartado.',
                 ]);
@@ -65,10 +65,10 @@ class CrearApartadoAutoService
 
     protected function generarFolio(): string
     {
-        $prefix = 'APA-' . now()->format('Ymd') . '-';
+        $prefix = 'APA-'.now()->format('Ymd').'-';
 
         $ultimo = ApartadoAuto::query()
-            ->where('folio', 'like', $prefix . '%')
+            ->where('folio', 'like', $prefix.'%')
             ->lockForUpdate()
             ->latest('id')
             ->value('folio');
@@ -79,6 +79,6 @@ class CrearApartadoAutoService
             $consecutivo = ((int) $m[1]) + 1;
         }
 
-        return $prefix . str_pad((string) $consecutivo, 4, '0', STR_PAD_LEFT);
+        return $prefix.str_pad((string) $consecutivo, 4, '0', STR_PAD_LEFT);
     }
 }

@@ -11,7 +11,9 @@ class Index extends Component
     use WithPagination;
 
     public string $busqueda = '';
+
     public ?string $activo = null;
+
     public string $orden = 'recientes';
 
     protected $queryString = [

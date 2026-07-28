@@ -39,7 +39,7 @@ return new class extends Migration
             // ── Sección Catálogo / Autos (id="autos") ──────────────────────────────
             ['clave' => 'branding.autos_eyebrow',    'valor' => 'Inventario',                                                            'descripcion' => 'Eyebrow de la sección de catálogo'],
             ['clave' => 'branding.autos_titulo',     'valor' => 'Autos disponibles',                                                     'descripcion' => 'Título de la sección de catálogo'],
-            ['clave' => 'branding.autos_descripcion','valor' => 'Unidades listas para cotizar. Escríbenos para conocer el plan que más te conviene.', 'descripcion' => 'Descripción de la sección de catálogo'],
+            ['clave' => 'branding.autos_descripcion', 'valor' => 'Unidades listas para cotizar. Escríbenos para conocer el plan que más te conviene.', 'descripcion' => 'Descripción de la sección de catálogo'],
 
             // ── Sección Contacto (id="contacto") ───────────────────────────────────
             ['clave' => 'branding.contacto_titulo',      'valor' => '¿Tienes dudas?',                                                    'descripcion' => 'Título de la sección de contacto'],

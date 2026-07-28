@@ -19,18 +19,15 @@ class Show extends Component
             'auto.marca',
             'auto.modelo',
 
-            'cuotas' => fn ($q) =>
-                $q->orderBy('numero'),
+            'cuotas' => fn ($q) => $q->orderBy('numero'),
 
-            'pagos' => fn ($q) =>
-                $q->where('estatus', PagoEstatus::Aplicado->value)
-                  ->latest('fecha_pago'),
+            'pagos' => fn ($q) => $q->where('estatus', PagoEstatus::Aplicado->value)
+                ->latest('fecha_pago'),
 
             'pagos.cuota',
 
-            'recibos' => fn ($q) =>
-                $q->where('estatus', ReciboEstatus::Vigente->value)
-                  ->latest('fecha_recibo'),
+            'recibos' => fn ($q) => $q->where('estatus', ReciboEstatus::Vigente->value)
+                ->latest('fecha_recibo'),
 
             'recibos.pago',
         ]);

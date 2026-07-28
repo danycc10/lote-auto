@@ -33,7 +33,7 @@ class PagoConfirmadoMail extends Mailable
         return new Content(
             view: 'emails.pago-confirmado',
             with: [
-                'pago'   => $this->pago->load(['contrato.auto.marca', 'contrato.auto.modelo', 'cuota']),
+                'pago' => $this->pago->load(['contrato.auto.marca', 'contrato.auto.modelo', 'cuota']),
                 'recibo' => $this->recibo,
             ],
         );

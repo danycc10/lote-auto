@@ -5,28 +5,35 @@ namespace App\Livewire\Admin\ApartadosAutos;
 use App\Enums\AutoEstatus;
 use App\Models\Auto;
 use App\Models\Cliente;
-use Livewire\Component;
 use App\Services\Apartados\CrearApartadoAutoService;
+use Livewire\Component;
 
 class Create extends Component
 {
     public ?int $auto_id = null;
+
     public ?int $cliente_id = null;
 
     public string $fecha_apartado = '';
+
     public string $fecha_vencimiento = '';
+
     public string $monto_anticipo = '0';
 
     public ?string $forma_pago = null;
+
     public ?string $referencia = null;
 
     public ?string $nombre_cliente_temporal = null;
+
     public ?string $telefono_cliente_temporal = null;
+
     public ?string $correo_cliente_temporal = null;
 
     public ?string $observaciones = null;
 
     public string $buscarAuto = '';
+
     public string $buscarCliente = '';
 
     public function mount(): void
@@ -56,8 +63,9 @@ class Create extends Component
     {
         $this->validate();
 
-        if (!$this->cliente_id && blank($this->nombre_cliente_temporal)) {
+        if (! $this->cliente_id && blank($this->nombre_cliente_temporal)) {
             $this->addError('nombre_cliente_temporal', 'Debes seleccionar un cliente o capturar el nombre temporal.');
+
             return null;
         }
 
@@ -75,7 +83,7 @@ class Create extends Component
             'observaciones' => $this->observaciones,
         ]);
 
-        session()->flash('ok', 'Apartado creado correctamente con folio ' . $apartado->folio . '.');
+        session()->flash('ok', 'Apartado creado correctamente con folio '.$apartado->folio.'.');
 
         return redirect()->route('admin.apartados-autos.index');
     }
@@ -92,8 +100,8 @@ class Create extends Component
                     $sub->where('vin', 'like', "%{$search}%")
                         ->orWhere('placa', 'like', "%{$search}%")
                         ->orWhere('anio', 'like', "%{$search}%")
-                        ->orWhereHas('marca', fn($m) => $m->where('nombre', 'like', "%{$search}%"))
-                        ->orWhereHas('modelo', fn($m) => $m->where('nombre', 'like', "%{$search}%"));
+                        ->orWhereHas('marca', fn ($m) => $m->where('nombre', 'like', "%{$search}%"))
+                        ->orWhereHas('modelo', fn ($m) => $m->where('nombre', 'like', "%{$search}%"));
                 });
             })
             ->orderByDesc('id')

@@ -11,8 +11,11 @@ class Index extends Component
     use WithPagination;
 
     public string $busqueda = '';
+
     public ?string $estatus = null;
+
     public ?string $frecuencia = null;
+
     public string $orden = 'recientes';
 
     protected $queryString = [
@@ -77,18 +80,18 @@ class Index extends Component
                                 ->orWhere('vin', 'like', "%{$texto}%")
                                 ->orWhere('placa', 'like', "%{$texto}%")
                                 ->orWhere('anio', 'like', "%{$texto}%")
-                                ->orWhereHas('marca', fn($marca) => $marca->where('nombre', 'like', "%{$texto}%"))
-                                ->orWhereHas('modelo', fn($modelo) => $modelo->where('nombre', 'like', "%{$texto}%"));
+                                ->orWhereHas('marca', fn ($marca) => $marca->where('nombre', 'like', "%{$texto}%"))
+                                ->orWhereHas('modelo', fn ($modelo) => $modelo->where('nombre', 'like', "%{$texto}%"));
                         });
                 });
             })
-            ->when($this->estatus, fn($q) => $q->where('estatus', $this->estatus))
-            ->when($this->frecuencia, fn($q) => $q->where('frecuencia', $this->frecuencia))
-            ->when($this->orden === 'recientes', fn($q) => $q->orderByDesc('id'))
-            ->when($this->orden === 'antiguos', fn($q) => $q->orderBy('id'))
-            ->when($this->orden === 'saldo_mayor', fn($q) => $q->orderByDesc('saldo_actual'))
-            ->when($this->orden === 'saldo_menor', fn($q) => $q->orderBy('saldo_actual'))
-            ->when($this->orden === 'fecha_contrato', fn($q) => $q->orderByDesc('fecha_contrato'));
+            ->when($this->estatus, fn ($q) => $q->where('estatus', $this->estatus))
+            ->when($this->frecuencia, fn ($q) => $q->where('frecuencia', $this->frecuencia))
+            ->when($this->orden === 'recientes', fn ($q) => $q->orderByDesc('id'))
+            ->when($this->orden === 'antiguos', fn ($q) => $q->orderBy('id'))
+            ->when($this->orden === 'saldo_mayor', fn ($q) => $q->orderByDesc('saldo_actual'))
+            ->when($this->orden === 'saldo_menor', fn ($q) => $q->orderBy('saldo_actual'))
+            ->when($this->orden === 'fecha_contrato', fn ($q) => $q->orderByDesc('fecha_contrato'));
     }
 
     public function getContratosProperty()

@@ -11,7 +11,7 @@ return new class extends Migration
             // Hero
             ['clave' => 'branding.badge_hero',        'valor' => 'Autos disponibles hoy',          'descripcion' => 'Texto del badge/eyebrow animado en el hero'],
             ['clave' => 'branding.cta_hero_primario',  'valor' => 'Ver autos disponibles',          'descripcion' => 'Texto del botón CTA principal del hero'],
-            ['clave' => 'branding.cta_hero_secundario','valor' => 'Cotizar por WhatsApp',           'descripcion' => 'Texto del botón CTA secundario del hero'],
+            ['clave' => 'branding.cta_hero_secundario', 'valor' => 'Cotizar por WhatsApp',           'descripcion' => 'Texto del botón CTA secundario del hero'],
             // Estadísticas — labels
             ['clave' => 'branding.stat_1_label', 'valor' => 'Clientes atendidos',    'descripcion' => 'Etiqueta de la primera estadística'],
             ['clave' => 'branding.stat_2_label', 'valor' => 'Respuesta garantizada', 'descripcion' => 'Etiqueta de la segunda estadística'],

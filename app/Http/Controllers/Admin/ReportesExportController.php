@@ -17,16 +17,16 @@ class ReportesExportController extends Controller
     {
         abort_unless(auth()->user()?->can('dashboard.ver'), 403);
 
-        $tipo  = $request->input('tipo', 'pagos');
+        $tipo = $request->input('tipo', 'pagos');
         $desde = $request->input('desde');
         $hasta = $request->input('hasta');
 
         $exports = [
-            'pagos'      => [ReportePagosExport::class,          'reporte-pagos'],
-            'contratos'  => [ReporteContratosExport::class,      'reporte-contratos'],
-            'cuotas'     => [ReporteCuotasVencidasExport::class, 'reporte-cuotas-vencidas'],
+            'pagos' => [ReportePagosExport::class,          'reporte-pagos'],
+            'contratos' => [ReporteContratosExport::class,      'reporte-contratos'],
+            'cuotas' => [ReporteCuotasVencidasExport::class, 'reporte-cuotas-vencidas'],
             'inventario' => [ReporteInventarioExport::class,     'reporte-inventario'],
-            'apartados'  => [ReporteApartadosExport::class,      'reporte-apartados'],
+            'apartados' => [ReporteApartadosExport::class,      'reporte-apartados'],
         ];
 
         abort_unless(array_key_exists($tipo, $exports), 404);

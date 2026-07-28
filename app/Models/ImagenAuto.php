@@ -37,7 +37,7 @@ class ImagenAuto extends Model
 
     public function getUrlAttribute(): ?string
     {
-        if (!$this->ruta) {
+        if (! $this->ruta) {
             return null;
         }
 

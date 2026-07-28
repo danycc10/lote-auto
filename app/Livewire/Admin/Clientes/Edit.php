@@ -17,21 +17,35 @@ class Edit extends Component
     public Cliente $cliente;
 
     public $nombre;
+
     public $apellido_paterno;
+
     public $apellido_materno;
+
     public $telefono;
+
     public $correo;
+
     public $curp;
+
     public $rfc;
+
     public $direccion;
+
     public $ciudad;
+
     public $estado;
+
     public $codigo_postal;
+
     public $ocupacion;
+
     public $ingreso_mensual;
+
     public $activo = true;
 
     public $ine;
+
     public $comprobante_domicilio;
 
     public function mount(Cliente $cliente): void
@@ -85,14 +99,14 @@ class Edit extends Component
             'activo' => (bool) ($data['activo'] ?? true),
         ]);
 
-        $basePath = 'clientes/' . $this->cliente->id . '-' . Str::slug($this->cliente->nombre_completo ?: $this->cliente->nombre);
+        $basePath = 'clientes/'.$this->cliente->id.'-'.Str::slug($this->cliente->nombre_completo ?: $this->cliente->nombre);
 
         if ($this->ine) {
             if ($this->cliente->ruta_ine && Storage::disk('private')->exists($this->cliente->ruta_ine)) {
                 Storage::disk('private')->delete($this->cliente->ruta_ine);
             }
 
-            $this->cliente->ruta_ine = $this->ine->store($basePath . '/documentos', 'private');
+            $this->cliente->ruta_ine = $this->ine->store($basePath.'/documentos', 'private');
         }
 
         if ($this->comprobante_domicilio) {
@@ -100,7 +114,7 @@ class Edit extends Component
                 Storage::disk('private')->delete($this->cliente->ruta_comprobante_domicilio);
             }
 
-            $this->cliente->ruta_comprobante_domicilio = $this->comprobante_domicilio->store($basePath . '/documentos', 'private');
+            $this->cliente->ruta_comprobante_domicilio = $this->comprobante_domicilio->store($basePath.'/documentos', 'private');
         }
 
         $this->cliente->save();

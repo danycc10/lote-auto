@@ -20,7 +20,7 @@ class NuevoProspectoMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Nuevo prospecto web — ' . $this->prospecto->nombre,
+            subject: 'Nuevo prospecto web — '.$this->prospecto->nombre,
         );
     }
 

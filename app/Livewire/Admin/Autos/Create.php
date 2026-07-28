@@ -8,6 +8,7 @@ use App\Models\MarcaAuto;
 use App\Models\ModeloAuto;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
 class Create extends Component
@@ -15,29 +16,40 @@ class Create extends Component
     use WithFileUploads;
 
     public $marca_auto_id;
+
     public $modelo_auto_id;
 
     public $codigo_inventario;
+
     public $vin;
+
     public $placa;
 
     public $anio;
+
     public $version;
+
     public $color;
+
     public $kilometraje = 0;
 
     public $transmision;
+
     public $tipo_combustible;
 
     public $precio_contado = 0;
+
     public $precio_financiado = 0;
 
     public $estatus = 'disponible';
+
     public $descripcion;
+
     public $destacado = false;
+
     public $activo = true;
 
-    /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile> */
+    /** @var array<int, TemporaryUploadedFile> */
     public $imagenes = [];
 
     public ?int $portadaIndex = 0;
@@ -52,7 +64,7 @@ class Create extends Component
             'vin' => 'nullable|string|max:255|unique:autos,vin',
             'placa' => 'nullable|string|max:255|unique:autos,placa',
 
-            'anio' => 'required|integer|min:1900|max:' . date('Y'),
+            'anio' => 'required|integer|min:1900|max:'.date('Y'),
             'version' => 'nullable|string|max:255',
             'color' => 'nullable|string|max:255',
             'kilometraje' => 'nullable|integer|min:0',
@@ -93,7 +105,7 @@ class Create extends Component
     public function getModelosProperty()
     {
         return ModeloAuto::query()
-            ->when($this->marca_auto_id, fn($q) => $q->where('marca_auto_id', $this->marca_auto_id))
+            ->when($this->marca_auto_id, fn ($q) => $q->where('marca_auto_id', $this->marca_auto_id))
             ->where('activo', true)
             ->orderBy('nombre')
             ->get();
@@ -109,14 +121,14 @@ class Create extends Component
         $this->validateOnly('imagenes');
         $this->validateOnly('imagenes.*');
 
-        if (!empty($this->imagenes) && ($this->portadaIndex === null || !isset($this->imagenes[$this->portadaIndex]))) {
+        if (! empty($this->imagenes) && ($this->portadaIndex === null || ! isset($this->imagenes[$this->portadaIndex]))) {
             $this->portadaIndex = 0;
         }
     }
 
     public function quitarImagen(int $index): void
     {
-        if (!isset($this->imagenes[$index])) {
+        if (! isset($this->imagenes[$index])) {
             return;
         }
 
@@ -125,11 +137,13 @@ class Create extends Component
 
         if (empty($this->imagenes)) {
             $this->portadaIndex = null;
+
             return;
         }
 
         if ($this->portadaIndex === $index) {
             $this->portadaIndex = 0;
+
             return;
         }
 
@@ -140,7 +154,7 @@ class Create extends Component
 
     public function seleccionarPortada(int $index): void
     {
-        if (!isset($this->imagenes[$index])) {
+        if (! isset($this->imagenes[$index])) {
             return;
         }
 
@@ -172,7 +186,7 @@ class Create extends Component
                 'activo' => (bool) ($data['activo'] ?? true),
             ]);
 
-            if (!empty($this->imagenes)) {
+            if (! empty($this->imagenes)) {
                 foreach ($this->imagenes as $index => $imagen) {
                     $ruta = $imagen->store("autos/{$auto->id}", 'public');
 

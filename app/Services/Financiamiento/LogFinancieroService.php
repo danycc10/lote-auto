@@ -52,7 +52,7 @@ class LogFinancieroService
         return $this->registrar(
             tipo: 'pago_registrado',
             titulo: 'Pago registrado',
-            descripcion: 'Se registró un pago por $' . number_format($monto, 2) . ' con recibo ' . $folioRecibo . '.',
+            descripcion: 'Se registró un pago por $'.number_format($monto, 2).' con recibo '.$folioRecibo.'.',
             modulo: 'financiamiento',
             referencia: $folioRecibo,
             modelo: $pago,
@@ -76,7 +76,7 @@ class LogFinancieroService
         return $this->registrar(
             tipo: 'recibo_cancelado',
             titulo: 'Recibo cancelado',
-            descripcion: 'Se canceló el recibo ' . $folioRecibo . ' por $' . number_format($monto, 2) . ($motivo ? '. Motivo: ' . $motivo : '.'),
+            descripcion: 'Se canceló el recibo '.$folioRecibo.' por $'.number_format($monto, 2).($motivo ? '. Motivo: '.$motivo : '.'),
             modulo: 'financiamiento',
             referencia: $folioRecibo,
             modelo: $recibo,

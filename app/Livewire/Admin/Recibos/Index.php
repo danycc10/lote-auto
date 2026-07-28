@@ -14,19 +14,29 @@ class Index extends Component
     use WithPagination;
 
     public string $q = '';
+
     public string $sortBy = 'fecha_recibo';
+
     public string $sortDir = 'desc';
+
     public string $estatus = 'vigente';
 
     public ?string $fechaDesde = null;
+
     public ?string $fechaHasta = null;
+
     public ?string $montoMin = null;
+
     public ?string $montoMax = null;
+
     public string $tipoRelacion = 'todos';
 
     public bool $modalCancelar = false;
+
     public ?int $reciboCancelarId = null;
+
     public ?string $reciboCancelarFolio = null;
+
     public string $motivoCancelacion = '';
 
     protected $queryString = [
@@ -45,34 +55,42 @@ class Index extends Component
     {
         $this->resetPage();
     }
+
     public function updatingEstatus(): void
     {
         $this->resetPage();
     }
+
     public function updatingFechaDesde(): void
     {
         $this->resetPage();
     }
+
     public function updatingFechaHasta(): void
     {
         $this->resetPage();
     }
+
     public function updatingMontoMin(): void
     {
         $this->resetPage();
     }
+
     public function updatingMontoMax(): void
     {
         $this->resetPage();
     }
+
     public function updatingTipoRelacion(): void
     {
         $this->resetPage();
     }
+
     public function updatingSortBy(): void
     {
         $this->resetPage();
     }
+
     public function updatingSortDir(): void
     {
         $this->resetPage();
@@ -82,12 +100,13 @@ class Index extends Component
     {
         $allowed = ['folio', 'fecha_recibo', 'monto', 'estatus', 'created_at'];
 
-        if (!in_array($field, $allowed, true)) {
+        if (! in_array($field, $allowed, true)) {
             return;
         }
 
         if ($this->sortBy === $field) {
             $this->sortDir = $this->sortDir === 'asc' ? 'desc' : 'asc';
+
             return;
         }
 
@@ -138,7 +157,7 @@ class Index extends Component
     }
 
     public function confirmarCancelacion(
-        \App\Services\Financiamiento\CancelarReciboFinanciamientoService $service
+        CancelarReciboFinanciamientoService $service
     ): void {
         $this->validate([
             'motivoCancelacion' => ['required', 'string', 'min:5', 'max:1000'],
@@ -147,12 +166,12 @@ class Index extends Component
             'motivoCancelacion.min' => 'El motivo debe tener al menos 5 caracteres.',
         ]);
 
-        if (!$this->reciboCancelarId) {
+        if (! $this->reciboCancelarId) {
             return;
         }
 
         try {
-            $recibo = \App\Models\ReciboFinanciamiento::findOrFail($this->reciboCancelarId);
+            $recibo = ReciboFinanciamiento::findOrFail($this->reciboCancelarId);
 
             $service->execute(
                 $recibo,
@@ -177,7 +196,7 @@ class Index extends Component
                 type: 'warning',
                 message: $e->getMessage()
             );
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->cerrarModalCancelar();
 
             $this->dispatch(
@@ -214,13 +233,13 @@ class Index extends Component
                         });
                 });
             })
-            ->when($this->estatus !== 'todos', fn(Builder $q) => $q->where('estatus', $this->estatus))
-            ->when($this->fechaDesde, fn(Builder $q) => $q->whereDate('fecha_recibo', '>=', $this->fechaDesde))
-            ->when($this->fechaHasta, fn(Builder $q) => $q->whereDate('fecha_recibo', '<=', $this->fechaHasta))
-            ->when($this->montoMin !== null && $this->montoMin !== '', fn(Builder $q) => $q->where('monto', '>=', (float) $this->montoMin))
-            ->when($this->montoMax !== null && $this->montoMax !== '', fn(Builder $q) => $q->where('monto', '<=', (float) $this->montoMax))
-            ->when($this->tipoRelacion === 'con_cuota', fn(Builder $q) => $q->whereNotNull('cuota_id'))
-            ->when($this->tipoRelacion === 'pago_general', fn(Builder $q) => $q->whereNull('cuota_id'))
+            ->when($this->estatus !== 'todos', fn (Builder $q) => $q->where('estatus', $this->estatus))
+            ->when($this->fechaDesde, fn (Builder $q) => $q->whereDate('fecha_recibo', '>=', $this->fechaDesde))
+            ->when($this->fechaHasta, fn (Builder $q) => $q->whereDate('fecha_recibo', '<=', $this->fechaHasta))
+            ->when($this->montoMin !== null && $this->montoMin !== '', fn (Builder $q) => $q->where('monto', '>=', (float) $this->montoMin))
+            ->when($this->montoMax !== null && $this->montoMax !== '', fn (Builder $q) => $q->where('monto', '<=', (float) $this->montoMax))
+            ->when($this->tipoRelacion === 'con_cuota', fn (Builder $q) => $q->whereNotNull('cuota_id'))
+            ->when($this->tipoRelacion === 'pago_general', fn (Builder $q) => $q->whereNull('cuota_id'))
             ->orderBy($this->sortBy, $this->sortDir)
             ->paginate(12);
     }

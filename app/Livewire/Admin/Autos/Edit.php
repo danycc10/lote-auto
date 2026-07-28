@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
 class Edit extends Component
@@ -19,29 +20,40 @@ class Edit extends Component
     public Auto $auto;
 
     public $marca_auto_id;
+
     public $modelo_auto_id;
 
     public $codigo_inventario;
+
     public $vin;
+
     public $placa;
 
     public $anio;
+
     public $version;
+
     public $color;
+
     public $kilometraje = 0;
 
     public $transmision;
+
     public $tipo_combustible;
 
     public $precio_contado = 0;
+
     public $precio_financiado = 0;
 
     public $estatus = 'disponible';
+
     public $descripcion;
+
     public $destacado = false;
+
     public $activo = true;
 
-    /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile> */
+    /** @var array<int, TemporaryUploadedFile> */
     public $imagenesNuevas = [];
 
     public ?int $portadaNuevaIndex = 0;
@@ -74,10 +86,10 @@ class Edit extends Component
         return [
             'marca_auto_id' => 'required|exists:marcas_autos,id',
             'modelo_auto_id' => 'required|exists:modelos_autos,id',
-            'codigo_inventario' => 'nullable|string|max:255|unique:autos,codigo_inventario,' . $this->auto->id,
-            'vin' => 'nullable|string|max:255|unique:autos,vin,' . $this->auto->id,
-            'placa' => 'nullable|string|max:255|unique:autos,placa,' . $this->auto->id,
-            'anio' => 'required|integer|min:1900|max:' . date('Y'),
+            'codigo_inventario' => 'nullable|string|max:255|unique:autos,codigo_inventario,'.$this->auto->id,
+            'vin' => 'nullable|string|max:255|unique:autos,vin,'.$this->auto->id,
+            'placa' => 'nullable|string|max:255|unique:autos,placa,'.$this->auto->id,
+            'anio' => 'required|integer|min:1900|max:'.date('Y'),
             'version' => 'nullable|string|max:255',
             'color' => 'nullable|string|max:255',
             'kilometraje' => 'nullable|integer|min:0',
@@ -121,7 +133,7 @@ class Edit extends Component
     public function getModelosProperty()
     {
         return ModeloAuto::query()
-            ->when($this->marca_auto_id, fn($q) => $q->where('marca_auto_id', $this->marca_auto_id))
+            ->when($this->marca_auto_id, fn ($q) => $q->where('marca_auto_id', $this->marca_auto_id))
             ->where('activo', true)
             ->orderBy('nombre')
             ->get();
@@ -153,14 +165,14 @@ class Edit extends Component
         $this->validateOnly('imagenesNuevas');
         $this->validateOnly('imagenesNuevas.*');
 
-        if (!empty($this->imagenesNuevas) && ($this->portadaNuevaIndex === null || !isset($this->imagenesNuevas[$this->portadaNuevaIndex]))) {
+        if (! empty($this->imagenesNuevas) && ($this->portadaNuevaIndex === null || ! isset($this->imagenesNuevas[$this->portadaNuevaIndex]))) {
             $this->portadaNuevaIndex = 0;
         }
     }
 
     public function quitarImagenNueva(int $index): void
     {
-        if (!isset($this->imagenesNuevas[$index])) {
+        if (! isset($this->imagenesNuevas[$index])) {
             return;
         }
 
@@ -169,11 +181,13 @@ class Edit extends Component
 
         if (empty($this->imagenesNuevas)) {
             $this->portadaNuevaIndex = null;
+
             return;
         }
 
         if ($this->portadaNuevaIndex === $index) {
             $this->portadaNuevaIndex = 0;
+
             return;
         }
 
@@ -184,7 +198,7 @@ class Edit extends Component
 
     public function seleccionarPortadaNueva(int $index): void
     {
-        if (!isset($this->imagenesNuevas[$index])) {
+        if (! isset($this->imagenesNuevas[$index])) {
             return;
         }
 
@@ -216,7 +230,7 @@ class Edit extends Component
                 'activo' => (bool) ($data['activo'] ?? true),
             ]);
 
-            if (!empty($this->imagenesNuevas)) {
+            if (! empty($this->imagenesNuevas)) {
                 $siguienteOrden = ((int) $this->auto->imagenes()->max('orden')) + 1;
 
                 foreach ($this->imagenesNuevas as $index => $imagen) {
@@ -244,14 +258,14 @@ class Edit extends Component
                     if ($ultimaInsertadaComoPortada) {
                         $ultimaInsertadaComoPortada->update(['es_portada' => true]);
                     }
-                } elseif (!$this->auto->imagenes()->where('es_portada', true)->exists()) {
+                } elseif (! $this->auto->imagenes()->where('es_portada', true)->exists()) {
                     $primera = $this->auto->imagenes()->orderBy('orden')->first();
                     if ($primera) {
                         $primera->update(['es_portada' => true]);
                     }
                 }
             } else {
-                if (!$this->auto->imagenes()->where('es_portada', true)->exists()) {
+                if (! $this->auto->imagenes()->where('es_portada', true)->exists()) {
                     $primera = $this->auto->imagenes()->orderBy('orden')->first();
                     if ($primera) {
                         $primera->update(['es_portada' => true]);

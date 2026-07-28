@@ -20,10 +20,10 @@ return new class extends Migration
         $driver = Schema::getConnection()->getDriverName();
 
         if ($driver !== 'sqlite') {
-            DB::statement("UPDATE pagos_financiamiento p
+            DB::statement('UPDATE pagos_financiamiento p
                 LEFT JOIN aplicaciones_pagos_financiamiento ap ON ap.pago_financiamiento_id = p.id
                 SET p.cuota_id = ap.cuota_financiamiento_id
-                WHERE p.cuota_id IS NULL");
+                WHERE p.cuota_id IS NULL');
         }
     }
 

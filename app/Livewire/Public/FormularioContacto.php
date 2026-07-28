@@ -6,24 +6,28 @@ use App\Enums\ProspectoEstatus;
 use App\Mail\NuevoProspectoMail;
 use App\Models\Configuracion;
 use App\Models\Prospecto;
-use Livewire\Component;
 use Illuminate\Support\Facades\Mail;
+use Livewire\Component;
 
 class FormularioContacto extends Component
 {
-    public string $nombre    = '';
-    public string $telefono  = '';
-    public string $correo    = '';
-    public string $mensaje   = '';
-    public bool   $enviado   = false;
+    public string $nombre = '';
+
+    public string $telefono = '';
+
+    public string $correo = '';
+
+    public string $mensaje = '';
+
+    public bool $enviado = false;
 
     protected function rules(): array
     {
         return [
-            'nombre'   => 'required|string|max:255',
+            'nombre' => 'required|string|max:255',
             'telefono' => 'nullable|string|max:30',
-            'correo'   => 'nullable|email|max:255',
-            'mensaje'  => 'nullable|string|max:1000',
+            'correo' => 'nullable|email|max:255',
+            'mensaje' => 'nullable|string|max:1000',
         ];
     }
 
@@ -31,7 +35,7 @@ class FormularioContacto extends Component
     {
         return [
             'nombre.required' => 'Por favor escribe tu nombre.',
-            'correo.email'    => 'El correo no parece válido.',
+            'correo.email' => 'El correo no parece válido.',
         ];
     }
 
@@ -40,12 +44,12 @@ class FormularioContacto extends Component
         $this->validate();
 
         $prospecto = Prospecto::create([
-            'nombre'       => trim($this->nombre),
-            'telefono'     => $this->telefono ?: null,
-            'correo'       => $this->correo ?: null,
-            'observaciones'=> $this->mensaje ?: null,
-            'origen'       => 'web',
-            'estatus'      => ProspectoEstatus::Nuevo->value,
+            'nombre' => trim($this->nombre),
+            'telefono' => $this->telefono ?: null,
+            'correo' => $this->correo ?: null,
+            'observaciones' => $this->mensaje ?: null,
+            'origen' => 'web',
+            'estatus' => ProspectoEstatus::Nuevo->value,
         ]);
 
         $this->notificarAdmin($prospecto);

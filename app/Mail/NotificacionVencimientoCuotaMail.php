@@ -20,12 +20,12 @@ class NotificacionVencimientoCuotaMail extends Mailable
 
     public function envelope(): Envelope
     {
-        $folio  = $this->cuota->contrato?->folio ?? '';
+        $folio = $this->cuota->contrato?->folio ?? '';
         $numero = $this->cuota->numero;
 
         $subject = match ($this->tipo) {
             'vencimiento_hoy' => "Pago de hoy — Cuota #{$numero} contrato {$folio}",
-            default           => "Recordatorio de pago — Cuota #{$numero} vence en 3 días",
+            default => "Recordatorio de pago — Cuota #{$numero} vence en 3 días",
         };
 
         return new Envelope(subject: $subject);
@@ -36,12 +36,12 @@ class NotificacionVencimientoCuotaMail extends Mailable
         return new Content(
             view: 'emails.notificacion-vencimiento-cuota',
             with: [
-                'cuota'  => $this->cuota->load([
+                'cuota' => $this->cuota->load([
                     'contrato.auto.marca',
                     'contrato.auto.modelo',
                     'contrato.cliente',
                 ]),
-                'tipo'   => $this->tipo,
+                'tipo' => $this->tipo,
             ],
         );
     }

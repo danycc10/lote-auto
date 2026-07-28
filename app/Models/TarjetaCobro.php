@@ -45,8 +45,9 @@ class TarjetaCobro extends Model
             $partes[] = $this->banco;
         }
         if ($this->numero) {
-            $partes[] = '****' . ltrim($this->numero, '*');
+            $partes[] = '****'.ltrim($this->numero, '*');
         }
+
         return implode(' · ', $partes);
     }
 }

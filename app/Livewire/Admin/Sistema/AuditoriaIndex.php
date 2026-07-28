@@ -11,9 +11,13 @@ class AuditoriaIndex extends Component
     use WithPagination;
 
     public string $buscar = '';
+
     public string $accion = '';
+
     public string $modelo = '';
+
     public ?string $fechaInicio = null;
+
     public ?string $fechaFin = null;
 
     public ?int $auditoriaSeleccionadaId = null;
@@ -69,10 +73,10 @@ class AuditoriaIndex extends Component
             ->with('usuario')
             ->when($this->buscar, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('accion', 'like', '%' . $this->buscar . '%')
-                        ->orWhere('modelo', 'like', '%' . $this->buscar . '%')
-                        ->orWhere('observaciones', 'like', '%' . $this->buscar . '%')
-                        ->orWhere('ip', 'like', '%' . $this->buscar . '%');
+                    $q->where('accion', 'like', '%'.$this->buscar.'%')
+                        ->orWhere('modelo', 'like', '%'.$this->buscar.'%')
+                        ->orWhere('observaciones', 'like', '%'.$this->buscar.'%')
+                        ->orWhere('ip', 'like', '%'.$this->buscar.'%');
                 });
             })
             ->when($this->accion, fn ($q) => $q->where('accion', $this->accion))

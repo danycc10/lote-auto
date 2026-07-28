@@ -10,6 +10,7 @@ class Edit extends Component
     public ReciboFinanciamiento $recibo;
 
     public string $concepto = '';
+
     public string $observaciones = '';
 
     public function mount(ReciboFinanciamiento $recibo): void

@@ -8,30 +8,36 @@ use Livewire\Component;
 class TarjetasCobroIndex extends Component
 {
     public string $modo = '';
+
     public ?int $tarjetaId = null;
 
     public string $nombre = '';
+
     public string $banco = '';
+
     public string $tipo = 'transferencia';
+
     public string $numero = '';
+
     public string $titular = '';
+
     public bool $activa = true;
 
     protected function rules(): array
     {
         return [
-            'nombre'   => ['required', 'string', 'max:150'],
-            'banco'    => ['nullable', 'string', 'max:100'],
-            'tipo'     => ['required', 'in:tarjeta,transferencia,deposito'],
-            'numero'   => ['nullable', 'string', 'max:100'],
-            'titular'  => ['nullable', 'string', 'max:150'],
-            'activa'   => ['boolean'],
+            'nombre' => ['required', 'string', 'max:150'],
+            'banco' => ['nullable', 'string', 'max:100'],
+            'tipo' => ['required', 'in:tarjeta,transferencia,deposito'],
+            'numero' => ['nullable', 'string', 'max:100'],
+            'titular' => ['nullable', 'string', 'max:150'],
+            'activa' => ['boolean'],
         ];
     }
 
     protected array $messages = [
         'nombre.required' => 'El nombre es obligatorio.',
-        'tipo.required'   => 'El tipo es obligatorio.',
+        'tipo.required' => 'El tipo es obligatorio.',
     ];
 
     public function getTarjetasProperty()
@@ -54,13 +60,13 @@ class TarjetasCobroIndex extends Component
         $tarjeta = TarjetaCobro::findOrFail($id);
 
         $this->tarjetaId = $id;
-        $this->nombre   = $tarjeta->nombre;
-        $this->banco    = $tarjeta->banco ?? '';
-        $this->tipo     = $tarjeta->tipo;
-        $this->numero   = $tarjeta->numero ?? '';
-        $this->titular  = $tarjeta->titular ?? '';
-        $this->activa   = $tarjeta->activa;
-        $this->modo     = 'editar';
+        $this->nombre = $tarjeta->nombre;
+        $this->banco = $tarjeta->banco ?? '';
+        $this->tipo = $tarjeta->tipo;
+        $this->numero = $tarjeta->numero ?? '';
+        $this->titular = $tarjeta->titular ?? '';
+        $this->activa = $tarjeta->activa;
+        $this->modo = 'editar';
     }
 
     public function guardar(): void
@@ -70,12 +76,12 @@ class TarjetasCobroIndex extends Component
         $this->validate();
 
         $datos = [
-            'nombre'  => $this->nombre,
-            'banco'   => $this->banco ?: null,
-            'tipo'    => $this->tipo,
-            'numero'  => $this->numero ?: null,
+            'nombre' => $this->nombre,
+            'banco' => $this->banco ?: null,
+            'tipo' => $this->tipo,
+            'numero' => $this->numero ?: null,
             'titular' => $this->titular ?: null,
-            'activa'  => $this->activa,
+            'activa' => $this->activa,
         ];
 
         if ($this->modo === 'crear') {
@@ -111,19 +117,19 @@ class TarjetasCobroIndex extends Component
 
     public function cancelar(): void
     {
-        $this->modo      = '';
+        $this->modo = '';
         $this->tarjetaId = null;
         $this->resetCampos();
     }
 
     private function resetCampos(): void
     {
-        $this->nombre  = '';
-        $this->banco   = '';
-        $this->tipo    = 'transferencia';
-        $this->numero  = '';
+        $this->nombre = '';
+        $this->banco = '';
+        $this->tipo = 'transferencia';
+        $this->numero = '';
         $this->titular = '';
-        $this->activa  = true;
+        $this->activa = true;
         $this->resetValidation();
     }
 

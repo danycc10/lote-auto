@@ -22,7 +22,7 @@ class ConvertirApartadoEnContratoService
             ]);
         }
 
-        if (!$apartado->auto) {
+        if (! $apartado->auto) {
             throw ValidationException::withMessages([
                 'apartado' => 'El apartado no tiene auto relacionado.',
             ]);

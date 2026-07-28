@@ -13,8 +13,7 @@ class Configuracion extends Model
 
     public static function obtener(string $clave, mixed $default = null): mixed
     {
-        return Cache::remember("sys_cfg_{$clave}", 300, fn () =>
-            static::where('clave', $clave)->value('valor') ?? $default
+        return Cache::remember("sys_cfg_{$clave}", 300, fn () => static::where('clave', $clave)->value('valor') ?? $default
         );
     }
 

@@ -92,8 +92,8 @@ class Auto extends Model
     public function getNombreCompletoAttribute(): string
     {
         return trim(
-            ($this->marca?->nombre ?? '') . ' ' .
-                ($this->modelo?->nombre ?? '') . ' ' .
+            ($this->marca?->nombre ?? '').' '.
+                ($this->modelo?->nombre ?? '').' '.
                 $this->anio
         );
     }

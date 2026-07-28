@@ -6,6 +6,7 @@ use App\Livewire\Admin\ContratosFinanciamiento\RegistrarPago;
 use App\Models\PagoFinanciamiento;
 use App\Models\ReciboFinanciamiento;
 use App\Services\Financiamiento\RegistrarPagoFinanciamientoService;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 use RuntimeException;
 
@@ -190,5 +191,35 @@ class RegistrarPagoTest extends FinanciamientoTestCase
             monto: 25000,
             cuota: $cuota,
         );
+    }
+
+    public function test_reintentar_la_misma_clave_no_duplica_el_pago(): void
+    {
+        $user = $this->usuarioConPermiso('pagos.registrar');
+        $this->actingAs($user);
+        $contrato = $this->crearContrato();
+        $cuota = $this->crearCuota($contrato);
+        $clave = (string) Str::uuid();
+
+        $primero = $this->service()->ejecutar(
+            contrato: $contrato,
+            monto: 10000,
+            cuota: $cuota,
+            idempotencyKey: $clave,
+        );
+        $segundo = $this->service()->ejecutar(
+            contrato: $contrato->fresh(),
+            monto: 10000,
+            cuota: $cuota->fresh(),
+            idempotencyKey: $clave,
+        );
+
+        $this->assertSame($primero['pago']->id, $segundo['pago']->id);
+        $this->assertSame($primero['recibo']->id, $segundo['recibo']->id);
+        $this->assertTrue($segundo['reutilizado']);
+        $this->assertDatabaseCount('pagos_financiamiento', 1);
+        $this->assertDatabaseCount('recibos_financiamiento', 1);
+        $this->assertSame('10000.00', $contrato->fresh()->total_pagado);
+        $this->assertSame('10000.00', $cuota->fresh()->monto_pagado);
     }
 }

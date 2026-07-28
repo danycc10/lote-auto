@@ -11,6 +11,7 @@ class PagoFinanciamiento extends Model
     protected $table = 'pagos_financiamiento';
 
     protected $fillable = [
+        'idempotency_key',
         'contrato_financiamiento_id',
         'cuota_id',
         'cliente_id',

@@ -8,6 +8,7 @@ use App\Models\CuotaFinanciamiento;
 use App\Models\TarjetaCobro;
 use App\Services\Financiamiento\EstadoCuentaFinanciamientoService;
 use App\Services\Financiamiento\RegistrarPagoFinanciamientoService;
+use Illuminate\Support\Str;
 use Livewire\Component;
 
 class RegistrarPago extends Component
@@ -32,6 +33,8 @@ class RegistrarPago extends Component
 
     public $observaciones = null;
 
+    public string $idempotency_key;
+
     public function mount(ContratoFinanciamiento $contrato): void
     {
         $this->contrato = $contrato->load([
@@ -41,6 +44,7 @@ class RegistrarPago extends Component
         ]);
 
         $this->fecha_pago = now()->toDateString();
+        $this->idempotency_key = (string) Str::uuid();
     }
 
     protected function rules(): array
@@ -53,6 +57,7 @@ class RegistrarPago extends Component
             'referencia' => ['nullable', 'string', 'max:255'],
             'concepto' => ['nullable', 'string', 'max:255'],
             'observaciones' => ['nullable', 'string'],
+            'idempotency_key' => ['required', 'uuid'],
         ];
     }
 
@@ -182,6 +187,7 @@ class RegistrarPago extends Component
                 referencia: $this->referencia,
                 tarjetaCobroId: $this->tarjeta_cobro_id ? (int) $this->tarjeta_cobro_id : null,
                 recargo: $recargo,
+                idempotencyKey: $this->idempotency_key,
             );
         } catch (\RuntimeException $e) {
             $this->addError('monto', $e->getMessage());

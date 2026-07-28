@@ -15,6 +15,7 @@ use App\Models\ReciboFinanciamiento;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use RuntimeException;
 
 class RegistrarPagoFinanciamientoService
@@ -36,6 +37,7 @@ class RegistrarPagoFinanciamientoService
         ?string $referencia = null,
         ?int $tarjetaCobroId = null,
         float $recargo = 0,
+        ?string $idempotencyKey = null,
     ): array {
         $resultado = DB::transaction(function () use (
             $contrato,
@@ -48,6 +50,7 @@ class RegistrarPagoFinanciamientoService
             $referencia,
             $tarjetaCobroId,
             $recargo,
+            $idempotencyKey,
         ) {
             $fechaPago = $fechaPago ?: now()->toDateString();
 
@@ -59,10 +62,33 @@ class RegistrarPagoFinanciamientoService
                 throw new RuntimeException('El monto del pago debe ser mayor a 0.');
             }
 
+            if ($idempotencyKey !== null && ! Str::isUuid($idempotencyKey)) {
+                throw new RuntimeException('La clave de idempotencia del pago no es válida.');
+            }
+
             $contratoBloqueado = ContratoFinanciamiento::query()
                 ->whereKey($contrato->id)
                 ->lockForUpdate()
                 ->firstOrFail();
+
+            if ($idempotencyKey !== null) {
+                $pagoExistente = PagoFinanciamiento::query()
+                    ->where('contrato_financiamiento_id', $contratoBloqueado->id)
+                    ->where('idempotency_key', $idempotencyKey)
+                    ->first();
+
+                if ($pagoExistente) {
+                    return [
+                        'pago' => $pagoExistente,
+                        'recibo' => ReciboFinanciamiento::query()
+                            ->where('pago_financiamiento_id', $pagoExistente->id)
+                            ->firstOrFail(),
+                        'contrato' => $contratoBloqueado,
+                        'cuota' => $pagoExistente->cuota,
+                        'reutilizado' => true,
+                    ];
+                }
+            }
 
             $estatusBloqueantes = [
                 ContratoEstatus::Cancelado->value,
@@ -130,6 +156,7 @@ class RegistrarPagoFinanciamientoService
             }
 
             $pago = PagoFinanciamiento::create([
+                'idempotency_key' => $idempotencyKey,
                 'contrato_financiamiento_id' => $contratoBloqueado->id,
                 'cliente_id' => $contratoBloqueado->cliente_id,
                 'cuota_id' => $cuotaBloqueada?->id,
@@ -257,13 +284,16 @@ class RegistrarPagoFinanciamientoService
                 'recibo' => $recibo->fresh(),
                 'contrato' => $contratoBloqueado->fresh(),
                 'cuota' => $cuotaBloqueada?->fresh(),
+                'reutilizado' => false,
             ];
 
             return $resultado;
         }, 3);
 
         // Enviar confirmación al cliente fuera de la transacción (no bloquea el commit)
-        $this->enviarConfirmacionCliente($resultado['pago'], $resultado['recibo']);
+        if (! $resultado['reutilizado']) {
+            $this->enviarConfirmacionCliente($resultado['pago'], $resultado['recibo']);
+        }
 
         return $resultado;
     }

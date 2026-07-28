@@ -1,69 +1,60 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-
-use App\Livewire\Admin\Autos\Index as AutosIndex;
-use App\Livewire\Admin\Autos\Create as AutosCreate;
-use App\Livewire\Admin\Autos\Edit as AutosEdit;
-
-use App\Livewire\Admin\Clientes\Index as ClientesIndex;
-use App\Livewire\Admin\Clientes\Create as ClientesCreate;
-use App\Livewire\Admin\Clientes\Edit as ClientesEdit;
-
-use App\Livewire\Admin\ApartadosAutos\Index as ApartadosAutosIndex;
-use App\Livewire\Admin\ApartadosAutos\Create as ApartadosAutosCreate;
-
-use App\Livewire\Admin\Recibos\Index as RecibosIndex;
-use App\Livewire\Admin\Recibos\Create as RecibosCreate;
-use App\Livewire\Admin\Recibos\Show as RecibosShow;
-use App\Livewire\Admin\Recibos\Edit as RecibosEdit;
-
-use App\Livewire\Admin\ContratosFinanciamiento\Index as ContratosFinanciamientoIndex;
-use App\Livewire\Admin\ContratosFinanciamiento\Create as ContratosFinanciamientoCreate;
-use App\Livewire\Admin\ContratosFinanciamiento\Edit as ContratosFinanciamientoEdit;
-use App\Livewire\Admin\ContratosFinanciamiento\Show as ContratosFinanciamientoShow;
-use App\Livewire\Admin\ContratosFinanciamiento\RegistrarPago as ContratosFinanciamientoRegistrarPago;
-
-use App\Livewire\Admin\CobranzaAutos\Dashboard;
-
 use App\Http\Controllers\Admin\ClienteArchivoController;
 use App\Http\Controllers\Admin\ContratoFinanciamientoArchivoController;
-use App\Http\Controllers\Admin\ReciboFinanciamientoPdfController;
-
-use App\Livewire\Admin\Seguridad\RolesPermisosManager;
-use App\Livewire\Admin\Usuarios\Index as UsuariosIndex;
-
-use App\Livewire\Admin\Finanzas\LogsFinancierosIndex;
-
-use App\Livewire\Admin\Reportes\Index as ReportesIndex;
-use App\Http\Controllers\Admin\ReportesExportController;
-
 use App\Http\Controllers\Admin\CotizadorPdfController;
-use App\Livewire\Admin\Cotizador\Index as CotizadorIndex;
-use App\Livewire\Admin\Prospectos\Index as ProspectosIndex;
+use App\Http\Controllers\Admin\ReciboFinanciamientoPdfController;
+use App\Http\Controllers\Admin\ReportesExportController;
 use App\Livewire\Admin\Administracion\Index as AdministracionIndex;
 use App\Livewire\Admin\Administracion\TarjetasCobroIndex;
+use App\Livewire\Admin\ApartadosAutos\Create as ApartadosAutosCreate;
+use App\Livewire\Admin\ApartadosAutos\Index as ApartadosAutosIndex;
+use App\Livewire\Admin\Autos\Create as AutosCreate;
+use App\Livewire\Admin\Autos\Edit as AutosEdit;
+use App\Livewire\Admin\Autos\Index as AutosIndex;
 use App\Livewire\Admin\Catalogos\MarcasModelosIndex;
-use App\Livewire\Admin\Sistema\Index as SistemaIndex;
+use App\Livewire\Admin\Clientes\Create as ClientesCreate;
+use App\Livewire\Admin\Clientes\Edit as ClientesEdit;
+use App\Livewire\Admin\Clientes\Index as ClientesIndex;
+use App\Livewire\Admin\CobranzaAutos\Dashboard;
+use App\Livewire\Admin\ContratosFinanciamiento\Create as ContratosFinanciamientoCreate;
+use App\Livewire\Admin\ContratosFinanciamiento\Edit as ContratosFinanciamientoEdit;
+use App\Livewire\Admin\ContratosFinanciamiento\Index as ContratosFinanciamientoIndex;
+use App\Livewire\Admin\ContratosFinanciamiento\RegistrarPago as ContratosFinanciamientoRegistrarPago;
+use App\Livewire\Admin\ContratosFinanciamiento\Show as ContratosFinanciamientoShow;
+use App\Livewire\Admin\Cotizador\Index as CotizadorIndex;
+use App\Livewire\Admin\Finanzas\LogsFinancierosIndex;
+use App\Livewire\Admin\Prospectos\Index as ProspectosIndex;
+use App\Livewire\Admin\Recibos\Create as RecibosCreate;
+use App\Livewire\Admin\Recibos\Edit as RecibosEdit;
+use App\Livewire\Admin\Recibos\Index as RecibosIndex;
+use App\Livewire\Admin\Recibos\Show as RecibosShow;
+use App\Livewire\Admin\Reportes\Index as ReportesIndex;
+use App\Livewire\Admin\Seguridad\RolesPermisosManager;
 use App\Livewire\Admin\Sistema\AuditoriaIndex;
-use App\Livewire\Admin\Sistema\ConfiguracionIndex as SistemaConfiguracionIndex;
 use App\Livewire\Admin\Sistema\BrandingIndex as SistemaBrandingIndex;
+use App\Livewire\Admin\Sistema\ConfiguracionIndex as SistemaConfiguracionIndex;
+use App\Livewire\Admin\Sistema\Index as SistemaIndex;
 use App\Livewire\Admin\Sistema\LandingTemplateIndex;
+use App\Livewire\Admin\Usuarios\Index as UsuariosIndex;
+use App\Livewire\Public\AutoDetalle;
 use App\Livewire\Public\AutosDisponibles;
 use App\Livewire\Public\LandingAutos;
-use App\Livewire\Public\AutoDetalle;
+use App\Models\Auto;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/robots.txt', function () {
-    $content  = "User-agent: *\n";
+    $content = "User-agent: *\n";
     $content .= "Disallow: /admin/\n";
     $content .= "Disallow: /dashboard\n";
     $content .= "Allow: /\n\n";
-    $content .= "Sitemap: " . url('/sitemap.xml') . "\n";
+    $content .= 'Sitemap: '.url('/sitemap.xml')."\n";
+
     return response($content, 200, ['Content-Type' => 'text/plain; charset=utf-8']);
 });
 
 Route::get('/sitemap.xml', function () {
-    $autos = \App\Models\Auto::query()
+    $autos = Auto::query()
         ->select(['uuid', 'updated_at'])
         ->where('estatus', 'disponible')
         ->where('activo', true)
@@ -77,24 +68,24 @@ Route::get('/sitemap.xml', function () {
 
     foreach ($autos as $auto) {
         $urls->push([
-            'loc'        => route('public.autos.show', $auto->uuid),
-            'lastmod'    => $auto->updated_at->format('Y-m-d'),
+            'loc' => route('public.autos.show', $auto->uuid),
+            'lastmod' => $auto->updated_at->format('Y-m-d'),
             'changefreq' => 'weekly',
-            'priority'   => '0.8',
+            'priority' => '0.8',
         ]);
     }
 
-    $xml  = '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL;
-    $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . PHP_EOL;
+    $xml = '<?xml version="1.0" encoding="UTF-8"?>'.PHP_EOL;
+    $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'.PHP_EOL;
     foreach ($urls as $url) {
-        $xml .= '  <url>' . PHP_EOL;
-        $xml .= '    <loc>' . e($url['loc']) . '</loc>' . PHP_EOL;
+        $xml .= '  <url>'.PHP_EOL;
+        $xml .= '    <loc>'.e($url['loc']).'</loc>'.PHP_EOL;
         if (isset($url['lastmod'])) {
-            $xml .= '    <lastmod>' . $url['lastmod'] . '</lastmod>' . PHP_EOL;
+            $xml .= '    <lastmod>'.$url['lastmod'].'</lastmod>'.PHP_EOL;
         }
-        $xml .= '    <changefreq>' . $url['changefreq'] . '</changefreq>' . PHP_EOL;
-        $xml .= '    <priority>' . $url['priority'] . '</priority>' . PHP_EOL;
-        $xml .= '  </url>' . PHP_EOL;
+        $xml .= '    <changefreq>'.$url['changefreq'].'</changefreq>'.PHP_EOL;
+        $xml .= '    <priority>'.$url['priority'].'</priority>'.PHP_EOL;
+        $xml .= '  </url>'.PHP_EOL;
     }
     $xml .= '</urlset>';
 

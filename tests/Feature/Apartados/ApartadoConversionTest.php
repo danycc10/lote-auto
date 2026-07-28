@@ -9,6 +9,7 @@ use App\Models\ContratoFinanciamiento;
 use App\Models\User;
 use App\Services\Apartados\ConvertirApartadoEnContratoService;
 use App\Services\Apartados\CrearApartadoAutoService;
+use App\Services\Apartados\VencerApartadosAutoService;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -139,5 +140,24 @@ class ApartadoConversionTest extends TestCase
         $segundoContrato->update([
             'apartado_auto_id' => $apartado->id,
         ]);
+    }
+
+    public function test_vencimiento_no_libera_un_apartado_ya_convertido(): void
+    {
+        $user = User::factory()->create();
+        $cliente = Cliente::create(['nombre' => 'Cliente convertido']);
+        $auto = $this->crearAutoDisponible();
+        $apartado = $this->crearApartado($auto, $cliente, $user);
+        $apartado->update([
+            'fecha_vencimiento' => today()->subDay()->toDateString(),
+        ]);
+        $contrato = $this->crearContrato($auto, $cliente);
+        app(ConvertirApartadoEnContratoService::class)->finalizarConversion($apartado, $contrato);
+
+        $vencidos = app(VencerApartadosAutoService::class)->ejecutar();
+
+        $this->assertSame(0, $vencidos);
+        $this->assertSame('convertido', $apartado->fresh()->estatus);
+        $this->assertSame('financiado', $auto->fresh()->estatus);
     }
 }

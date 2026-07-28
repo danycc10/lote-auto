@@ -547,12 +547,6 @@ parameters:
 			path: app/Services/Apartados/ConvertirApartadoEnContratoService.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$estatus\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Services/Apartados/VencerApartadosAutoService.php
-
-		-
 			message: '#^Call to static method read\(\) on an unknown class Intervention\\Image\\Laravel\\Facades\\Image\.$#'
 			identifier: class.notFound
 			count: 1

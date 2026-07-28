@@ -46,13 +46,9 @@
                             <label class="block text-xs font-medium text-slate-700 mb-1.5">Estatus <span class="text-red-500">*</span></label>
                             <select wire:model="estatus"
                                     class="block w-full rounded-lg border-slate-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                <option value="borrador">Borrador</option>
-                                <option value="activo">Activo</option>
-                                <option value="atrasado">Atrasado</option>
-                                <option value="liquidado">Liquidado</option>
-                                <option value="cancelado">Cancelado</option>
-                                <option value="reestructurado">Reestructurado</option>
-                                <option value="recuperado">Recuperado</option>
+                                @foreach($estatusDisponibles as $estatusDisponible)
+                                    <option value="{{ $estatusDisponible->value }}">{{ $estatusDisponible->etiqueta() }}</option>
+                                @endforeach
                             </select>
                             @error('estatus') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                         </div>

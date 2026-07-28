@@ -145,4 +145,73 @@ class ActualizarContratoFinanciamientoTest extends FinanciamientoTestCase
             $actor->id,
         );
     }
+
+    public function test_no_permite_marcar_como_liquidado_un_contrato_con_saldo(): void
+    {
+        $actor = $this->usuarioConPermiso('contratos.editar');
+        $contrato = $this->crearContrato(['estatus' => 'activo']);
+        $datos = $this->datos([
+            'auto_id' => $contrato->auto_id,
+            'cliente_id' => $contrato->cliente_id,
+            'estatus' => 'liquidado',
+        ]);
+
+        try {
+            app(ActualizarContratoFinanciamientoService::class)->actualizar(
+                $contrato,
+                $datos,
+                $actor->id,
+            );
+            $this->fail('La transición inválida debió ser rechazada.');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey('estatus', $exception->errors());
+        }
+
+        $this->assertSame('activo', $contrato->fresh()->estatus);
+    }
+
+    public function test_no_permite_reactivar_un_contrato_cancelado(): void
+    {
+        $actor = $this->usuarioConPermiso('contratos.editar');
+        $contrato = $this->crearContrato(['estatus' => 'cancelado']);
+        $datos = $this->datos([
+            'auto_id' => $contrato->auto_id,
+            'cliente_id' => $contrato->cliente_id,
+            'estatus' => 'activo',
+        ]);
+
+        $this->expectException(ValidationException::class);
+
+        app(ActualizarContratoFinanciamientoService::class)->actualizar(
+            $contrato,
+            $datos,
+            $actor->id,
+        );
+    }
+
+    public function test_cancelar_contrato_cancela_sus_cuotas_y_recupera_el_auto(): void
+    {
+        $actor = $this->usuarioConPermiso('contratos.editar');
+        $contrato = $this->crearContrato(['estatus' => 'activo']);
+        $datos = $this->datos([
+            'auto_id' => $contrato->auto_id,
+            'cliente_id' => $contrato->cliente_id,
+            'estatus' => 'cancelado',
+        ]);
+
+        $actualizado = app(ActualizarContratoFinanciamientoService::class)->actualizar(
+            $contrato,
+            $datos,
+            $actor->id,
+        );
+
+        $this->assertSame('cancelado', $actualizado->estatus);
+        $this->assertSame('recuperado', $actualizado->auto->estatus);
+        $this->assertNotEmpty($actualizado->cuotas);
+        $this->assertTrue(
+            $actualizado->cuotas->every(
+                fn ($cuota) => $cuota->estatus === 'cancelada',
+            ),
+        );
+    }
 }

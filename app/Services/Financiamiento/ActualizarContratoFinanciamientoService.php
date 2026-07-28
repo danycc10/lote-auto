@@ -4,6 +4,7 @@ namespace App\Services\Financiamiento;
 
 use App\Enums\AutoEstatus;
 use App\Enums\ContratoEstatus;
+use App\Enums\CuotaEstatus;
 use App\Enums\FormulaFinanciamiento;
 use App\Enums\PagoEstatus;
 use App\Models\Auto;
@@ -118,6 +119,14 @@ class ActualizarContratoFinanciamientoService
 
             $this->generador->regenerar($contrato);
 
+            $nuevoEstatus = ContratoEstatus::from((string) $data['estatus']);
+
+            if ($nuevoEstatus->cancelaPlanDePagos()) {
+                $contrato->cuotas()->update([
+                    'estatus' => CuotaEstatus::Cancelada->value,
+                ]);
+            }
+
             if ($autoAnterior->id !== $autoNuevo->id) {
                 $autoAnterior->update([
                     'estatus' => AutoEstatus::Disponible->value,
@@ -181,9 +190,18 @@ class ActualizarContratoFinanciamientoService
             }
         }
 
-        if (! in_array($data['estatus'], ContratoEstatus::values(), true)) {
+        $estatusActual = ContratoEstatus::from((string) $contrato->estatus);
+        $nuevoEstatus = ContratoEstatus::tryFrom((string) $data['estatus']);
+
+        if (! $nuevoEstatus) {
             throw ValidationException::withMessages([
                 'estatus' => 'El estatus del contrato no es válido.',
+            ]);
+        }
+
+        if (! $estatusActual->puedeTransicionarA($nuevoEstatus)) {
+            throw ValidationException::withMessages([
+                'estatus' => "No se puede cambiar un contrato {$estatusActual->etiqueta()} a {$nuevoEstatus->etiqueta()}.",
             ]);
         }
 

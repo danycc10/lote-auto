@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\ContratosFinanciamiento;
 
 use App\Enums\AutoEstatus;
+use App\Enums\ContratoEstatus;
 use App\Enums\FormulaFinanciamiento;
 use App\Models\Auto;
 use App\Models\Cliente;
@@ -143,7 +144,7 @@ class Edit extends Component
             'tipo_recargo' => 'nullable|in:fijo,porcentaje',
             'valor_recargo' => 'nullable|numeric|min:0',
 
-            'estatus' => 'required|in:borrador,activo,atrasado,liquidado,cancelado,reestructurado,recuperado',
+            'estatus' => 'required|in:'.implode(',', ContratoEstatus::values()),
             'observaciones' => 'nullable|string',
 
             'contrato_firmado' => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:10240',
@@ -174,6 +175,14 @@ class Edit extends Component
             ->orderBy('nombre')
             ->orderBy('apellido_paterno')
             ->get();
+    }
+
+    /**
+     * @return list<ContratoEstatus>
+     */
+    public function getEstatusDisponiblesProperty(): array
+    {
+        return ContratoEstatus::from($this->contrato->estatus)->transicionesPermitidas();
     }
 
     public function updatedPrecioVenta(): void
@@ -309,6 +318,7 @@ class Edit extends Component
         return view('livewire.admin.contratos-financiamiento.edit', [
             'autos' => $this->autos,
             'clientes' => $this->clientes,
+            'estatusDisponibles' => $this->getEstatusDisponiblesProperty(),
             'contratoActual' => $contrato,
         ])->layout('layouts.app');
     }

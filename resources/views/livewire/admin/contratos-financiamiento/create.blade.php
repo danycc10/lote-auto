@@ -55,11 +55,6 @@
                                     class="block w-full rounded-lg border-slate-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 <option value="borrador">Borrador</option>
                                 <option value="activo">Activo</option>
-                                <option value="atrasado">Atrasado</option>
-                                <option value="liquidado">Liquidado</option>
-                                <option value="cancelado">Cancelado</option>
-                                <option value="reestructurado">Reestructurado</option>
-                                <option value="recuperado">Recuperado</option>
                             </select>
                             @error('estatus') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                         </div>

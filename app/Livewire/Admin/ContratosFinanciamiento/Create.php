@@ -3,17 +3,14 @@
 namespace App\Livewire\Admin\ContratosFinanciamiento;
 
 use App\Enums\AutoEstatus;
-use App\Enums\FormulaFinanciamiento;
 use App\Models\ApartadoAuto;
 use App\Models\Auto;
 use App\Models\Cliente;
-use App\Models\ContratoFinanciamiento;
 use App\Services\Apartados\ConvertirApartadoEnContratoService;
 use App\Services\Financiamiento\CalculadoraFinanciamientoService;
-use App\Services\Financiamiento\GeneradorCuotasFinanciamientoService;
-use App\Services\Financiamiento\HistorialFinanciamientoService;
+use App\Services\Financiamiento\CrearContratoFinanciamientoService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -29,8 +26,6 @@ class Create extends Component
     public $auto_id;
 
     public $cliente_id;
-
-    public $vendedor_id;
 
     public $fecha_contrato;
 
@@ -93,8 +88,7 @@ class Create extends Component
     {
         $this->fecha_contrato = now()->toDateString();
         $this->fecha_primer_pago = now()->addWeek()->toDateString();
-        $this->vendedor_id = auth()->id();
-        $this->folio = $this->generarFolio();
+        $this->folio = 'Automático al guardar';
 
         $this->apartado_auto_id = request()->integer('apartado_auto_id') ?: null;
 
@@ -134,14 +128,12 @@ class Create extends Component
         return [
             'auto_id' => 'required|exists:autos,id',
             'cliente_id' => 'required|exists:clientes,id',
-            'vendedor_id' => 'nullable|exists:users,id',
-
             'fecha_contrato' => 'required|date',
             'fecha_primer_pago' => 'nullable|date|after_or_equal:fecha_contrato',
 
             'precio_contado' => 'required|numeric|min:0',
             'precio_venta' => 'required|numeric|min:0',
-            'enganche' => 'nullable|numeric|min:0',
+            'enganche' => 'nullable|numeric|min:0|lte:precio_venta',
             'comision_apertura' => 'nullable|numeric|min:0',
             'monto_seguro' => 'nullable|numeric|min:0',
             'monto_gps' => 'nullable|numeric|min:0',
@@ -160,7 +152,7 @@ class Create extends Component
             'tipo_recargo' => 'nullable|in:fijo,porcentaje',
             'valor_recargo' => 'nullable|numeric|min:0',
 
-            'estatus' => 'required|in:borrador,activo,atrasado,liquidado,cancelado,reestructurado,recuperado',
+            'estatus' => 'required|in:borrador,activo',
             'observaciones' => 'nullable|string',
 
             'contrato_firmado' => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:10240',
@@ -186,7 +178,7 @@ class Create extends Component
             ->when($this->apartado_auto_id, function ($query) {
                 $query->where('id', $this->auto_id);
             }, function ($query) {
-                $query->whereIn('estatus', [AutoEstatus::Disponible->value, AutoEstatus::Apartado->value, AutoEstatus::Recuperado->value]);
+                $query->whereIn('estatus', [AutoEstatus::Disponible->value, AutoEstatus::Recuperado->value]);
             })
             ->orderByDesc('id')
             ->get()
@@ -318,142 +310,34 @@ class Create extends Component
         $this->total_pagado = 0;
     }
 
-    protected function generarFolio(): string
+    public function guardar(CrearContratoFinanciamientoService $creador)
     {
-        $prefijo = 'CF-'.now()->format('Ymd');
-
-        $ultimo = ContratoFinanciamiento::query()
-            ->where('folio', 'like', $prefijo.'-%')
-            ->latest('id')
-            ->value('folio');
-
-        if (! $ultimo) {
-            return $prefijo.'-001';
-        }
-
-        $partes = explode('-', $ultimo);
-        $numero = (int) end($partes);
-        $siguiente = str_pad((string) ($numero + 1), 3, '0', STR_PAD_LEFT);
-
-        return $prefijo.'-'.$siguiente;
-    }
-
-    public function guardar(
-        GeneradorCuotasFinanciamientoService $generador,
-        HistorialFinanciamientoService $historial,
-        ConvertirApartadoEnContratoService $convertirService
-    ) {
         // Los importes derivados nunca se confían al estado enviado por el navegador.
         $this->recalcularTotales();
         $data = $this->validate();
+        $rutaContrato = $this->contrato_firmado
+            ? $this->contrato_firmado->store(
+                'contratos-financiamiento/pendientes/'.Str::uuid(),
+                'private',
+            )
+            : null;
 
-        $data['folio'] = $this->generarFolio();
-        $this->folio = $data['folio'];
-
-        $auto = Auto::findOrFail($data['auto_id']);
-
-        if (! in_array($auto->estatus, [AutoEstatus::Disponible->value, AutoEstatus::Apartado->value, AutoEstatus::Recuperado->value], true)) {
-            $this->addError('auto_id', 'Ese auto no está disponible para generar un contrato.');
-
-            return;
-        }
-
-        if ($this->apartado_auto_id) {
-            $apartado = ApartadoAuto::with(['auto', 'cliente'])->findOrFail($this->apartado_auto_id);
-
-            $convertirService->validarParaConvertir($apartado);
-
-            if ((int) $apartado->auto_id !== (int) $data['auto_id']) {
-                $this->addError('auto_id', 'El auto no coincide con el apartado seleccionado.');
-
-                return;
-            }
-
-            if ((int) $apartado->cliente_id !== (int) $data['cliente_id']) {
-                $this->addError('cliente_id', 'El cliente no coincide con el apartado seleccionado.');
-
-                return;
-            }
-
-            if ((float) $data['enganche'] < (float) $apartado->monto_anticipo) {
-                $this->addError('enganche', 'El enganche no puede ser menor al anticipo del apartado.');
-
-                return;
-            }
-        }
-
-        $contratoCreado = DB::transaction(function () use ($data, $auto, $generador, $historial, $convertirService) {
-            $contrato = ContratoFinanciamiento::create([
-                'folio' => $data['folio'],
-                'auto_id' => $data['auto_id'],
-                'cliente_id' => $data['cliente_id'],
-                'apartado_auto_id' => $this->apartado_auto_id,
-                'vendedor_id' => $data['vendedor_id'] ?? Auth::id(),
-                'fecha_contrato' => $data['fecha_contrato'],
-                'fecha_primer_pago' => $data['fecha_primer_pago'] ?? null,
-                'precio_contado' => $data['precio_contado'],
-                'precio_venta' => $data['precio_venta'],
-                'enganche' => $data['enganche'] ?? 0,
-                'comision_apertura' => $data['comision_apertura'] ?? 0,
-                'monto_seguro' => $data['monto_seguro'] ?? 0,
-                'monto_gps' => $data['monto_gps'] ?? 0,
-                'monto_financiado' => $data['monto_financiado'],
-                'tasa_interes' => $data['tasa_interes'] ?? 0,
-                'formula_calculo' => FormulaFinanciamiento::AnualidadV1->value,
-                'plazo' => $data['plazo'],
-                'frecuencia' => $data['frecuencia'],
-                'monto_cuota' => $data['monto_cuota'],
-                'total_pagar' => $data['total_pagar'],
-                'total_pagado' => $data['total_pagado'] ?? 0,
-                'saldo_actual' => $data['saldo_actual'],
-                'dias_gracia' => $data['dias_gracia'] ?? 0,
-                'tipo_recargo' => $data['tipo_recargo'] ?? null,
-                'valor_recargo' => $data['valor_recargo'] ?? 0,
-                'estatus' => $data['estatus'],
-                'observaciones' => $data['observaciones'] ?? null,
-                'ruta_contrato_firmado' => null,
-            ]);
-
-            if ($this->contrato_firmado) {
-                $slug = Str::slug($contrato->folio);
-                $ruta = $this->contrato_firmado->store("contratos-financiamiento/{$contrato->id}-{$slug}", 'private');
-
-                $contrato->update([
-                    'ruta_contrato_firmado' => $ruta,
-                ]);
-            }
-
-            $generador->regenerar($contrato);
-
-            if ($this->apartado_auto_id) {
-                $apartado = ApartadoAuto::findOrFail($this->apartado_auto_id);
-                $convertirService->finalizarConversion($apartado, $contrato);
-            }
-
-            $historial->registrar(
-                $contrato,
-                'contrato_creado',
-                null,
-                $contrato->fresh()->only([
-                    'folio',
-                    'cliente_id',
-                    'auto_id',
-                    'fecha_contrato',
-                    'monto_financiado',
-                    'total_pagar',
-                    'saldo_actual',
-                    'estatus',
-                ]),
-                'Contrato creado y plan de financiamiento generado.'
+        try {
+            $contratoCreado = $creador->crear(
+                $data,
+                $this->apartado_auto_id,
+                (int) Auth::id(),
+                $rutaContrato,
             );
+        } catch (\Throwable $exception) {
+            if ($rutaContrato) {
+                Storage::disk('private')->delete($rutaContrato);
+            }
 
-            $auto->update([
-                'estatus' => AutoEstatus::Financiado->value,
-                'activo' => true,
-            ]);
+            throw $exception;
+        }
 
-            return $contrato;
-        });
+        $this->folio = $contratoCreado->folio;
 
         session()->flash('success', 'Contrato creado correctamente y cuotas generadas.');
 

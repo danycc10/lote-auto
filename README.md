@@ -1,58 +1,80 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Lote Autos
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistema administrativo para inventario, apartados, clientes, contratos de financiamiento, cobranza, recibos y seguimiento comercial.
 
-## About Laravel
+## Stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP 8.3 y Laravel 13
+- Livewire 3, Blade y Tailwind CSS 3
+- SQLite para desarrollo/pruebas; MySQL o MariaDB recomendado en producción
+- Cola y cache en base de datos por defecto
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Instalación local
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate
+npm ci
+npm run build
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Configura `INITIAL_ADMIN_EMAIL` e `INITIAL_ADMIN_PASSWORD` únicamente para el primer despliegue y ejecuta:
 
-## Contributing
+```bash
+php artisan db:seed
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+El seeder no crea ni promueve usuarios si esas variables no están configuradas.
 
-## Code of Conduct
+Para desarrollo:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+composer dev
+```
 
-## Security Vulnerabilities
+Este comando inicia servidor, worker de cola, logs y Vite. El scheduler se puede ejecutar en otra terminal con:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+php artisan schedule:work
+```
 
-## License
+## Verificación
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+composer analyse
+php artisan test
+vendor/bin/pint --test
+composer audit --locked
+npm audit --audit-level=high
+npm run build
+```
+
+El CI bloquea errores nuevos de PHPStan, pruebas fallidas, vulnerabilidades altas y errores de compilación frontend. Pint sigue siendo informativo mientras se liquida la deuda de formato heredada.
+
+## Arquitectura principal
+
+- `app/Livewire`: interfaz y coordinación de formularios.
+- `app/Services/Financiamiento`: reglas transaccionales de contratos, cuotas, pagos, recibos y estados de cuenta.
+- `app/Services/Apartados`: creación, conversión y vencimiento de reservas.
+- `app/Jobs`: trabajo asíncrono con reintentos.
+- `app/Enums`: estados y fórmulas válidas del dominio.
+- `tests/Feature/Financiamiento`: invariantes contables y concurrencia.
+- `tests/Feature/Security`: autorización y administración de roles.
+- `tests/Feature/Operations`: health checks, configuración y backups.
+
+Los nuevos contratos guardan una versión explícita de su fórmula financiera. Los contratos históricos conservan `plana_v1`; los nuevos usan `anualidad_v1`.
+
+## Operación
+
+Consulta [docs/OPERATIONS.md](docs/OPERATIONS.md) antes de desplegar. Incluye:
+
+- variables obligatorias;
+- worker y scheduler;
+- despliegue y rollback;
+- backups, verificación y restauración;
+- health checks y observabilidad.
+
+El endpoint `/up` comprueba arranque, base de datos y cache.
+

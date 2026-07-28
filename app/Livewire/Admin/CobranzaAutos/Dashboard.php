@@ -11,6 +11,7 @@ use App\Models\PagoFinanciamiento;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -95,7 +96,7 @@ class Dashboard extends Component
                     })
                     ->orWhereHas('auto', function ($a) use ($term) {
                         $a->where('vin', 'like', $term)
-                            ->orWhere('placas', 'like', $term);
+                            ->orWhere('placa', 'like', $term);
                     });
             });
         });
@@ -180,12 +181,7 @@ class Dashboard extends Component
             ? round($contratosConAtraso / $contratosActivos * 100, 1)
             : 0;
 
-        $diasPromedioAtraso = (int) round(
-            (clone $this->cuotasBase())
-                ->whereIn('estatus', CuotaEstatus::conSaldo())
-                ->whereDate('fecha_vencimiento', '<', $today)
-                ->avg(DB::raw('DATEDIFF(CURDATE(), fecha_vencimiento)')) ?? 0
-        );
+        $diasPromedioAtraso = $this->diasPromedioAtraso($today);
 
         $cuotasCriticasCount = (clone $this->cuotasBase())
             ->whereIn('estatus', CuotaEstatus::conSaldo())
@@ -292,8 +288,7 @@ class Dashboard extends Component
 
     public function getCobranzaPorDiaProperty(): array
     {
-        $desde = Carbon::parse($this->fechaDesde)->startOfDay();
-        $hasta = Carbon::parse($this->fechaHasta)->endOfDay();
+        [$desde, $hasta] = $this->validatedDateRange();
 
         $rows = (clone $this->pagosBase())
             ->selectRaw('DATE(fecha_pago) as fecha, SUM(monto) as total')
@@ -471,7 +466,8 @@ class Dashboard extends Component
 
     public function render()
     {
-        $contratos = $this->contratosQuery()->paginate($this->perPage);
+        $perPage = in_array($this->perPage, [10, 25, 50], true) ? $this->perPage : 10;
+        $contratos = $this->contratosQuery()->paginate($perPage);
 
         return view('livewire.admin.cobranza-autos.dashboard', [
             'contratos' => $contratos,
@@ -484,5 +480,46 @@ class Dashboard extends Component
             'waMensajePlantilla' => Configuracion::obtener('notif.wa_mensaje', 'Hola {nombre}, tiene pagos vencidos por ${monto_atrasado} en su contrato {folio}. Por favor comuníquese con nosotros.'),
             'modalDestinatarios' => $this->mostrarModal ? $this->modalDestinatarios() : [],
         ])->layout('layouts.app');
+    }
+
+    private function diasPromedioAtraso(Carbon $today): int
+    {
+        $totalDays = 0;
+        $overdueCount = 0;
+
+        foreach (
+            (clone $this->cuotasBase())
+                ->select(['id', 'fecha_vencimiento'])
+                ->whereIn('estatus', CuotaEstatus::conSaldo())
+                ->whereDate('fecha_vencimiento', '<', $today)
+                ->cursor() as $cuota
+        ) {
+            $totalDays += (int) $cuota->fecha_vencimiento->startOfDay()->diffInDays($today);
+            $overdueCount++;
+        }
+
+        return $overdueCount > 0 ? (int) round($totalDays / $overdueCount) : 0;
+    }
+
+    /**
+     * @return array{0: Carbon, 1: Carbon}
+     */
+    private function validatedDateRange(): array
+    {
+        $dates = Validator::validate(
+            [
+                'fecha_desde' => $this->fechaDesde,
+                'fecha_hasta' => $this->fechaHasta,
+            ],
+            [
+                'fecha_desde' => ['required', 'date_format:Y-m-d', 'before_or_equal:fecha_hasta'],
+                'fecha_hasta' => ['required', 'date_format:Y-m-d', 'after_or_equal:fecha_desde'],
+            ],
+        );
+
+        return [
+            Carbon::createFromFormat('Y-m-d', $dates['fecha_desde'])->startOfDay(),
+            Carbon::createFromFormat('Y-m-d', $dates['fecha_hasta'])->endOfDay(),
+        ];
     }
 }

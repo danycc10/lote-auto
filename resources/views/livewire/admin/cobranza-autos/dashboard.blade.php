@@ -596,7 +596,7 @@
                                     {{ $contrato->auto?->modelo?->nombre ?? '' }}
                                 </p>
                                 <p class="text-xs text-slate-500 mt-0.5">
-                                    {{ $contrato->auto?->vin ?? $contrato->auto?->placas ?? 'Sin referencia' }}
+                                    {{ $contrato->auto?->vin ?? $contrato->auto?->placa ?? 'Sin referencia' }}
                                 </p>
                             </td>
                             <td class="px-5 py-3.5">

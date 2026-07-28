@@ -7,6 +7,7 @@ use App\Enums\ProspectoEstatus;
 use App\Models\Auto;
 use App\Models\Prospecto;
 use App\Models\User;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -67,13 +68,18 @@ class Index extends Component
             ->with(['auto.marca', 'auto.modelo', 'usuarioAsignado'])
             ->when($this->q, function ($q) {
                 $term = '%'.trim($this->q).'%';
-                $q->where('nombre', 'like', $term)
-                    ->orWhere('telefono', 'like', $term)
-                    ->orWhere('correo', 'like', $term);
+                $q->where(function ($search) use ($term) {
+                    $search->where('nombre', 'like', $term)
+                        ->orWhere('telefono', 'like', $term)
+                        ->orWhere('correo', 'like', $term);
+                });
             })
-            ->when($this->estatus, fn ($q) => $q->where('estatus', $this->estatus))
+            ->when(
+                in_array($this->estatus, ProspectoEstatus::values(), true),
+                fn ($q) => $q->where('estatus', $this->estatus),
+            )
             ->latest()
-            ->paginate($this->perPage);
+            ->paginate(in_array($this->perPage, [15, 30, 50], true) ? $this->perPage : 15);
     }
 
     #[Computed]
@@ -109,7 +115,7 @@ class Index extends Component
                 $q->whereHas('marca', fn ($m) => $m->where('nombre', 'like', $term))
                     ->orWhereHas('modelo', fn ($m) => $m->where('nombre', 'like', $term))
                     ->orWhere('anio', 'like', $term)
-                    ->orWhere('placas', 'like', $term);
+                    ->orWhere('placa', 'like', $term);
             })
             ->limit(6)
             ->get()
@@ -197,9 +203,14 @@ class Index extends Component
     {
         abort_unless(auth()->user()?->can('clientes.editar'), 403);
 
+        $validated = validator(
+            ['estatus' => $estatus],
+            ['estatus' => ['required', Rule::enum(ProspectoEstatus::class)]],
+        )->validate();
+
         Prospecto::findOrFail($id)->update([
-            'estatus' => $estatus,
-            'ultimo_contacto_at' => in_array($estatus, [ProspectoEstatus::Contactado->value, ProspectoEstatus::Interesado->value, ProspectoEstatus::Negociacion->value, ProspectoEstatus::Ganado->value], true)
+            'estatus' => $validated['estatus'],
+            'ultimo_contacto_at' => in_array($validated['estatus'], [ProspectoEstatus::Contactado->value, ProspectoEstatus::Interesado->value, ProspectoEstatus::Negociacion->value, ProspectoEstatus::Ganado->value], true)
                 ? now()
                 : null,
         ]);

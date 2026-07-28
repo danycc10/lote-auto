@@ -32,17 +32,21 @@
         }
     }"
     x-on:toast.window="open($event.detail)"
-    class="fixed top-6 right-6 z-[9999] w-full max-w-sm"
+    x-on:keydown.escape.window="show = false"
+    class="pointer-events-none fixed inset-x-4 top-4 z-[9999] sm:inset-x-auto sm:right-6 sm:top-6 sm:w-full sm:max-w-sm"
 >
     <div
         x-show="show"
+        :role="type === 'error' ? 'alert' : 'status'"
+        :aria-live="type === 'error' ? 'assertive' : 'polite'"
+        aria-atomic="true"
         x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="opacity-0 translate-y-4 scale-95"
         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
         x-transition:leave="transition ease-in duration-200"
         x-transition:leave-start="opacity-100 scale-100"
         x-transition:leave-end="opacity-0 scale-95"
-        class="rounded-3xl shadow-2xl border overflow-hidden bg-white"
+        class="pointer-events-auto rounded-3xl shadow-2xl border overflow-hidden bg-white"
     >
         <div class="flex gap-4 p-5">
             {{-- Ícono --}}
@@ -55,21 +59,21 @@
                         : 'bg-yellow-100 text-yellow-600')"
             >
                 <template x-if="type === 'success'">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <svg aria-hidden="true" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M5 13l4 4L19 7"/>
                     </svg>
                 </template>
 
                 <template x-if="type === 'error'">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <svg aria-hidden="true" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </template>
 
                 <template x-if="type === 'warning'">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <svg aria-hidden="true" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M12 9v2m0 4h.01M4.93 19h14.14c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.2 16c-.77 1.33.19 3 1.73 3z"/>
                     </svg>
@@ -83,8 +87,10 @@
             </div>
 
             {{-- Cerrar --}}
-            <button @click="show = false"
-                    class="text-gray-400 hover:text-gray-600">
+            <button type="button"
+                    @click="show = false"
+                    aria-label="Cerrar notificación"
+                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600">
                 ✕
             </button>
         </div>

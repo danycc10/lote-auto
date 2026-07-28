@@ -3,14 +3,13 @@
 namespace App\Livewire\Admin\CobranzaAutos;
 
 use App\Enums\CuotaEstatus;
-use App\Mail\RecordatorioPagoMail;
+use App\Jobs\EnviarNotificacionCuotaJob;
 use App\Models\Configuracion;
 use App\Models\ContratoFinanciamiento;
 use App\Models\CuotaFinanciamiento;
 use App\Models\PagoFinanciamiento;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -408,14 +407,13 @@ class Dashboard extends Component
                 '{monto_cuota}' => number_format((float) $cuota->monto, 2),
             ];
 
-            Mail::to($cliente->correo)->send(
-                new RecordatorioPagoMail(
-                    str_replace(array_keys($vars), array_values($vars), $asunto),
-                    str_replace(array_keys($vars), array_values($vars), $cuerpo),
-                )
+            EnviarNotificacionCuotaJob::dispatch(
+                cuotaId: $cuota->id,
+                tipo: 'manual',
+                asunto: str_replace(array_keys($vars), array_values($vars), $asunto),
+                cuerpo: str_replace(array_keys($vars), array_values($vars), $cuerpo),
+                fechaOperacion: now()->toDateString(),
             );
-
-            $cuota->update(['notificado_correo_at' => now()]);
 
             $enviados++;
         }
@@ -429,7 +427,7 @@ class Dashboard extends Component
 
         $parts = [];
         if ($enviados > 0) {
-            $parts[] = "Enviados: {$enviados}";
+            $parts[] = "En cola: {$enviados}";
         }
         if ($yaNotificadosHoy > 0) {
             $parts[] = "Ya notificados hoy: {$yaNotificadosHoy}";

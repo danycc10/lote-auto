@@ -283,12 +283,6 @@ parameters:
 			path: app/Livewire/Admin/ContratosFinanciamiento/Create.php
 
 		-
-			message: '#^Comparison operation "\>" between int\<1, max\> and 0 is always true\.$#'
-			identifier: greater.alwaysTrue
-			count: 1
-			path: app/Livewire/Admin/ContratosFinanciamiento/Create.php
-
-		-
 			message: '#^Access to an undefined property App\\Livewire\\Admin\\ContratosFinanciamiento\\Edit\:\:\$autos\.$#'
 			identifier: property.notFound
 			count: 1
@@ -297,12 +291,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Livewire\\Admin\\ContratosFinanciamiento\\Edit\:\:\$clientes\.$#'
 			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Admin/ContratosFinanciamiento/Edit.php
-
-		-
-			message: '#^Comparison operation "\>" between int\<1, max\> and 0 is always true\.$#'
-			identifier: greater.alwaysTrue
 			count: 1
 			path: app/Livewire/Admin/ContratosFinanciamiento/Edit.php
 
@@ -345,13 +333,13 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Livewire\\Admin\\Cotizador\\Index\:\:\$cuotaMensual\.$#'
 			identifier: property.notFound
-			count: 4
+			count: 2
 			path: app/Livewire/Admin/Cotizador/Index.php
 
 		-
 			message: '#^Access to an undefined property App\\Livewire\\Admin\\Cotizador\\Index\:\:\$montoFinanciado\.$#'
 			identifier: property.notFound
-			count: 4
+			count: 2
 			path: app/Livewire/Admin/Cotizador/Index.php
 
 		-
@@ -375,7 +363,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Livewire\\Admin\\Cotizador\\Index\:\:\$totalPagar\.$#'
 			identifier: property.notFound
-			count: 3
+			count: 2
 			path: app/Livewire/Admin/Cotizador/Index.php
 
 		-

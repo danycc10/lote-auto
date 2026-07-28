@@ -3,89 +3,65 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\CotizacionPdfRequest;
 use App\Models\Auto;
 use App\Models\Configuracion;
+use App\Services\Financiamiento\CalculadoraFinanciamientoService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Str;
 
 class CotizadorPdfController extends Controller
 {
-    public function show()
-    {
-        abort_unless(auth()->user()?->can('contratos.ver'), 403);
+    public function show(
+        CotizacionPdfRequest $request,
+        CalculadoraFinanciamientoService $calculadora,
+    ) {
+        $validated = $request->validated();
+        $auto = Auto::with(['marca', 'modelo'])->findOrFail($validated['auto_id']);
+        $enganche = (float) ($validated['enganche'] ?? 0);
+        $plazo = (int) $validated['plazo'];
+        $tasaAnual = (float) ($validated['tasa'] ?? 0);
+        $montoFinanciado = max(0, (float) $auto->precio_financiado - $enganche);
+        $calculo = $calculadora->calcular($montoFinanciado, $tasaAnual, $plazo);
+        $fecha = now()->addMonth()->startOfMonth();
 
-        $autoId    = (int) request('auto_id');
-        $enganche  = (float) request('enganche', 0);
-        $plazo     = (int) request('plazo', 12);
-        $tasaAnual = (float) request('tasa', 0);
-        $cliente   = (string) request('cliente', '');
-
-        $auto = Auto::with(['marca', 'modelo'])->findOrFail($autoId);
-
-        $precio          = (float) $auto->precio_financiado;
-        $montoFinanciado = max(0, $precio - $enganche);
-
-        if ($tasaAnual > 0 && $plazo > 0) {
-            $r            = $tasaAnual / 100 / 12;
-            $cuotaMensual = round($montoFinanciado * $r / (1 - pow(1 + $r, -$plazo)), 2);
-        } else {
-            $cuotaMensual = $plazo > 0 ? round($montoFinanciado / $plazo, 2) : 0;
-        }
-
-        $totalPagar    = round($cuotaMensual * $plazo, 2);
-        $totalIntereses = max(0, round($totalPagar - $montoFinanciado, 2));
-
-        $tabla  = [];
-        $saldo  = $montoFinanciado;
-        $r      = $tasaAnual > 0 ? ($tasaAnual / 100 / 12) : 0;
-        $fecha  = now()->addMonth()->startOfMonth();
-
-        for ($i = 1; $i <= $plazo; $i++) {
-            $interes = round($saldo * $r, 2);
-            $capital = round($cuotaMensual - $interes, 2);
-            $saldo   = round(max(0, $saldo - $capital), 2);
-
-            if ($i === $plazo && $saldo > 0) {
-                $capital += $saldo;
-                $saldo    = 0;
-            }
-
-            $tabla[] = [
-                'numero'  => $i,
-                'fecha'   => $fecha->copy()->format('d/m/Y'),
-                'capital' => $capital,
-                'interes' => $interes,
-                'cuota'   => round($capital + $interes, 2),
-                'saldo'   => $saldo,
-            ];
-
-            $fecha->addMonth();
-        }
+        $tabla = array_map(
+            fn (array $cuota): array => [
+                'numero' => $cuota['numero'],
+                'fecha' => $fecha->copy()->addMonthsNoOverflow($cuota['numero'] - 1)->format('d/m/Y'),
+                'capital' => $cuota['capital'],
+                'interes' => $cuota['interes'],
+                'cuota' => $cuota['monto'],
+                'saldo' => $cuota['saldo'],
+            ],
+            $calculo['cuotas'],
+        );
 
         $datos = [
-            'auto'              => $auto,
-            'nombreCliente'     => $cliente,
-            'enganche'          => $enganche,
-            'plazo'             => $plazo,
-            'tasaAnual'         => $tasaAnual,
-            'montoFinanciado'   => $montoFinanciado,
-            'cuotaMensual'      => $cuotaMensual,
-            'totalPagar'        => $totalPagar,
-            'totalIntereses'    => $totalIntereses,
+            'auto' => $auto,
+            'nombreCliente' => (string) ($validated['cliente'] ?? ''),
+            'enganche' => $enganche,
+            'plazo' => $plazo,
+            'tasaAnual' => $tasaAnual,
+            'montoFinanciado' => $montoFinanciado,
+            'cuotaMensual' => $calculo['monto_cuota'],
+            'totalPagar' => $calculo['total_pagar'],
+            'totalIntereses' => $calculo['total_intereses'],
             'tablaAmortizacion' => $tabla,
-            'empresa'           => [
-                'nombre'    => Configuracion::obtener('branding.seo_titulo', config('app.name')),
-                'logo'      => Configuracion::obtener('branding.logo_url'),
-                'telefono'  => Configuracion::obtener('contact.whatsapp'),
+            'empresa' => [
+                'nombre' => Configuracion::obtener('branding.seo_titulo', config('app.name')),
+                'logo' => Configuracion::obtener('branding.logo_url'),
+                'telefono' => Configuracion::obtener('contact.whatsapp'),
                 'direccion' => Configuracion::obtener('branding.direccion'),
-                'horario'   => Configuracion::obtener('branding.horario'),
+                'horario' => Configuracion::obtener('branding.horario'),
             ],
             'fechaGeneracion' => now()->format('d/m/Y'),
-            'validezDias'     => 7,
+            'validezDias' => 7,
         ];
 
-        $nombre = ($auto->marca?->nombre ?? '') . '-' . ($auto->modelo?->nombre ?? '') . '-' . $auto->anio;
-        $pdf    = Pdf::loadView('pdf.cotizador', $datos)->setPaper('letter', 'portrait');
+        $nombre = ($auto->marca?->nombre ?? '').'-'.($auto->modelo?->nombre ?? '').'-'.$auto->anio;
+        $pdf = Pdf::loadView('pdf.cotizador', $datos)->setPaper('letter', 'portrait');
 
-        return $pdf->stream('cotizacion-' . \Str::slug($nombre) . '.pdf');
+        return $pdf->stream('cotizacion-'.Str::slug($nombre).'.pdf');
     }
 }

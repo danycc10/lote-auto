@@ -213,7 +213,7 @@
                         @error('monto_financiado') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-700 mb-1.5">Tasa interés %</label>
+                        <label class="block text-xs font-medium text-slate-700 mb-1.5">Tasa anual %</label>
                         <input type="number" step="0.01" wire:model.live="tasa_interes"
                                placeholder="0.00"
                                class="block w-full rounded-lg border-slate-300 text-sm focus:border-indigo-500 focus:ring-indigo-500 tabular-nums">

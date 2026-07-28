@@ -4,10 +4,12 @@ namespace App\Livewire\Admin\ContratosFinanciamiento;
 
 use App\Enums\AutoEstatus;
 use App\Enums\ContratoEstatus;
+use App\Enums\FormulaFinanciamiento;
 use App\Enums\PagoEstatus;
 use App\Models\Auto;
 use App\Models\Cliente;
 use App\Models\ContratoFinanciamiento;
+use App\Services\Financiamiento\CalculadoraFinanciamientoService;
 use App\Services\Financiamiento\GeneradorCuotasFinanciamientoService;
 use App\Services\Financiamiento\HistorialFinanciamientoService;
 use Illuminate\Support\Facades\DB;
@@ -20,40 +22,66 @@ class Edit extends Component
 {
     use WithFileUploads;
 
+    private CalculadoraFinanciamientoService $calculadora;
+
     public ContratoFinanciamiento $contrato;
 
     public $folio;
+
     public $auto_id;
+
     public $cliente_id;
+
     public $vendedor_id;
 
     public $fecha_contrato;
+
     public $fecha_primer_pago;
 
     public $precio_contado = 0;
+
     public $precio_venta = 0;
+
     public $enganche = 0;
+
     public $comision_apertura = 0;
+
     public $monto_seguro = 0;
+
     public $monto_gps = 0;
 
     public $monto_financiado = 0;
+
     public $tasa_interes = 0;
+
     public $plazo = 12;
+
     public $frecuencia = 'semanal';
+
     public $monto_cuota = 0;
 
     public $total_pagar = 0;
+
     public $total_pagado = 0;
+
     public $saldo_actual = 0;
 
     public $dias_gracia = 0;
+
     public $tipo_recargo;
+
     public $valor_recargo = 0;
 
     public $estatus = 'activo';
+
     public $observaciones;
+
     public $contrato_firmado;
+
+    public function boot(CalculadoraFinanciamientoService $calculadora): void
+    {
+        $this->calculadora = $calculadora;
+    }
 
     public function mount(ContratoFinanciamiento $contrato): void
     {
@@ -95,7 +123,7 @@ class Edit extends Component
     protected function rules(): array
     {
         return [
-            'folio' => 'required|string|max:255|unique:contratos_financiamiento,folio,' . $this->contrato->id,
+            'folio' => 'required|string|max:255|unique:contratos_financiamiento,folio,'.$this->contrato->id,
             'auto_id' => 'required|exists:autos,id',
             'cliente_id' => 'required|exists:clientes,id',
             'vendedor_id' => 'nullable|exists:users,id',
@@ -111,7 +139,7 @@ class Edit extends Component
             'monto_gps' => 'nullable|numeric|min:0',
 
             'monto_financiado' => 'required|numeric|min:0',
-            'tasa_interes' => 'nullable|numeric|min:0',
+            'tasa_interes' => 'nullable|numeric|min:0|max:100',
             'plazo' => 'required|integer|min:1|max:120',
             'frecuencia' => 'required|in:semanal,quincenal,mensual',
             'monto_cuota' => 'required|numeric|min:0',
@@ -184,6 +212,11 @@ class Edit extends Component
         $this->recalcularTotales();
     }
 
+    public function updatedFrecuencia(): void
+    {
+        $this->recalcularTotales();
+    }
+
     public function recalcularTotales(): void
     {
         $precioVenta = (float) $this->precio_venta;
@@ -191,18 +224,25 @@ class Edit extends Component
         $comision = (float) $this->comision_apertura;
         $seguro = (float) $this->monto_seguro;
         $gps = (float) $this->monto_gps;
-        $tasa = (float) $this->tasa_interes;
         $plazo = max((int) $this->plazo, 1);
 
         $montoBase = max($precioVenta - $enganche, 0);
         $montoFinanciado = $montoBase + $comision + $seguro + $gps;
-        $interesTotal = $montoFinanciado * ($tasa / 100);
-        $totalPagar = $montoFinanciado + $interesTotal;
-        $montoCuota = $plazo > 0 ? ($totalPagar / $plazo) : 0;
+        $formula = FormulaFinanciamiento::tryFrom((string) $this->contrato->formula_calculo)
+            ?? FormulaFinanciamiento::PlanaV1;
+        $calculo = $this->calculadora->calcular(
+            montoFinanciado: $montoFinanciado,
+            tasaAnual: min(max((float) $this->tasa_interes, 0), 100),
+            plazo: min($plazo, 120),
+            frecuencia: in_array($this->frecuencia, ['semanal', 'quincenal', 'mensual'], true)
+                ? $this->frecuencia
+                : 'semanal',
+            formula: $formula,
+        );
 
-        $this->monto_financiado = round($montoFinanciado, 2);
-        $this->total_pagar = round($totalPagar, 2);
-        $this->monto_cuota = round($montoCuota, 2);
+        $this->monto_financiado = $calculo['monto_financiado'];
+        $this->total_pagar = $calculo['total_pagar'];
+        $this->monto_cuota = $calculo['monto_cuota'];
 
         $pagado = (float) $this->total_pagado;
         $saldo = max($this->total_pagar - $pagado, 0);
@@ -212,16 +252,20 @@ class Edit extends Component
 
     public function guardar(GeneradorCuotasFinanciamientoService $generador, HistorialFinanciamientoService $historial)
     {
+        // Conserva lo efectivamente cobrado y recalcula el resto en servidor.
+        $this->total_pagado = (float) $this->contrato->fresh()->total_pagado;
+        $this->recalcularTotales();
         $data = $this->validate();
 
         if ($this->contrato->pagos()->where('estatus', PagoEstatus::Aplicado->value)->exists()) {
             $this->addError('folio', 'Este contrato ya tiene pagos aplicados. Para no romper la trazabilidad financiera, ya no se puede regenerar desde edición.');
+
             return;
         }
 
         $antes = $this->contrato->only([
-            'folio','auto_id','cliente_id','fecha_contrato','fecha_primer_pago','precio_venta','enganche',
-            'monto_financiado','tasa_interes','plazo','frecuencia','monto_cuota','total_pagar','saldo_actual','estatus'
+            'folio', 'auto_id', 'cliente_id', 'fecha_contrato', 'fecha_primer_pago', 'precio_venta', 'enganche',
+            'monto_financiado', 'tasa_interes', 'plazo', 'frecuencia', 'monto_cuota', 'total_pagar', 'saldo_actual', 'estatus',
         ]);
 
         DB::transaction(function () use ($data, $generador, $historial, $antes) {
@@ -293,8 +337,8 @@ class Edit extends Component
                 'contrato_actualizado',
                 $antes,
                 $this->contrato->fresh()->only([
-                    'folio','auto_id','cliente_id','fecha_contrato','fecha_primer_pago','precio_venta','enganche',
-                    'monto_financiado','tasa_interes','plazo','frecuencia','monto_cuota','total_pagar','saldo_actual','estatus'
+                    'folio', 'auto_id', 'cliente_id', 'fecha_contrato', 'fecha_primer_pago', 'precio_venta', 'enganche',
+                    'monto_financiado', 'tasa_interes', 'plazo', 'frecuencia', 'monto_cuota', 'total_pagar', 'saldo_actual', 'estatus',
                 ]),
                 'Contrato actualizado y cuotas regeneradas.'
             );

@@ -28,6 +28,7 @@ class ContratoFinanciamiento extends Model
         'monto_gps',
         'monto_financiado',
         'tasa_interes',
+        'formula_calculo',
         'plazo',
         'frecuencia',
         'monto_cuota',
@@ -60,6 +61,10 @@ class ContratoFinanciamiento extends Model
         'dias_gracia' => 'integer',
         'valor_recargo' => 'decimal:2',
         'plazo' => 'integer',
+    ];
+
+    protected $attributes = [
+        'formula_calculo' => 'plana_v1',
     ];
 
     protected $appends = ['nombre_resumen'];

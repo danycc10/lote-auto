@@ -3,11 +3,13 @@
 namespace App\Livewire\Admin\ContratosFinanciamiento;
 
 use App\Enums\AutoEstatus;
+use App\Enums\FormulaFinanciamiento;
+use App\Models\ApartadoAuto;
 use App\Models\Auto;
 use App\Models\Cliente;
 use App\Models\ContratoFinanciamiento;
-use App\Models\ApartadoAuto;
 use App\Services\Apartados\ConvertirApartadoEnContratoService;
+use App\Services\Financiamiento\CalculadoraFinanciamientoService;
 use App\Services\Financiamiento\GeneradorCuotasFinanciamientoService;
 use App\Services\Financiamiento\HistorialFinanciamientoService;
 use Illuminate\Support\Facades\Auth;
@@ -20,44 +22,72 @@ class Create extends Component
 {
     use WithFileUploads;
 
+    private CalculadoraFinanciamientoService $calculadora;
+
     public $folio;
+
     public $auto_id;
+
     public $cliente_id;
+
     public $vendedor_id;
 
     public $fecha_contrato;
+
     public $fecha_primer_pago;
 
     public $precio_contado = 0;
+
     public $precio_venta = 0;
+
     public $enganche = 0;
+
     public $comision_apertura = 0;
+
     public $monto_seguro = 0;
+
     public $monto_gps = 0;
 
     public $monto_financiado = 0;
+
     public $tasa_interes = 0;
+
     public $plazo = 12;
+
     public $frecuencia = 'semanal';
+
     public $monto_cuota = 0;
 
     public $total_pagar = 0;
+
     public $total_pagado = 0;
+
     public $saldo_actual = 0;
 
     public $dias_gracia = 0;
+
     public $tipo_recargo;
+
     public $valor_recargo = 0;
 
     public $estatus = 'activo';
+
     public $observaciones;
+
     public $contrato_firmado;
 
     public ?int $apartado_auto_id = null;
 
     public bool $bloquear_auto_cliente = false;
+
     public float $anticipo_apartado = 0;
+
     public ?ApartadoAuto $apartadoActual = null;
+
+    public function boot(CalculadoraFinanciamientoService $calculadora): void
+    {
+        $this->calculadora = $calculadora;
+    }
 
     public function mount(): void
     {
@@ -117,7 +147,7 @@ class Create extends Component
             'monto_gps' => 'nullable|numeric|min:0',
 
             'monto_financiado' => 'required|numeric|min:0',
-            'tasa_interes' => 'nullable|numeric|min:0',
+            'tasa_interes' => 'nullable|numeric|min:0|max:100',
             'plazo' => 'required|integer|min:1|max:120',
             'frecuencia' => 'required|in:semanal,quincenal,mensual',
             'monto_cuota' => 'required|numeric|min:0',
@@ -162,25 +192,25 @@ class Create extends Component
             ->get()
             ->map(function ($auto) {
                 $auto->label = trim(
-                    ($auto->marca->nombre ?? '') . ' ' .
-                    ($auto->modelo->nombre ?? '') . ' ' .
+                    ($auto->marca->nombre ?? '').' '.
+                    ($auto->modelo->nombre ?? '').' '.
                     ($auto->anio ?? '')
                 );
 
-                if (!empty($auto->codigo_inventario)) {
-                    $auto->label .= ' | Código: ' . $auto->codigo_inventario;
+                if (! empty($auto->codigo_inventario)) {
+                    $auto->label .= ' | Código: '.$auto->codigo_inventario;
                 }
 
-                if (!empty($auto->placa)) {
-                    $auto->label .= ' | Placa: ' . $auto->placa;
+                if (! empty($auto->placa)) {
+                    $auto->label .= ' | Placa: '.$auto->placa;
                 }
 
-                if (!empty($auto->vin)) {
-                    $auto->label .= ' | VIN: ' . $auto->vin;
+                if (! empty($auto->vin)) {
+                    $auto->label .= ' | VIN: '.$auto->vin;
                 }
 
-                if (!empty($auto->estatus)) {
-                    $auto->label .= ' | ' . strtoupper($auto->estatus);
+                if (! empty($auto->estatus)) {
+                    $auto->label .= ' | '.strtoupper($auto->estatus);
                 }
 
                 return $auto;
@@ -205,13 +235,13 @@ class Create extends Component
             return;
         }
 
-        if (!$value) {
+        if (! $value) {
             return;
         }
 
         $auto = Auto::find($value);
 
-        if (!$auto) {
+        if (! $auto) {
             return;
         }
 
@@ -256,6 +286,11 @@ class Create extends Component
         $this->recalcularTotales();
     }
 
+    public function updatedFrecuencia(): void
+    {
+        $this->recalcularTotales();
+    }
+
     public function recalcularTotales(): void
     {
         $precioVenta = (float) $this->precio_venta;
@@ -263,40 +298,44 @@ class Create extends Component
         $comision = (float) $this->comision_apertura;
         $seguro = (float) $this->monto_seguro;
         $gps = (float) $this->monto_gps;
-        $tasa = (float) $this->tasa_interes;
         $plazo = max((int) $this->plazo, 1);
 
         $montoBase = max($precioVenta - $enganche, 0);
         $montoFinanciado = $montoBase + $comision + $seguro + $gps;
-        $interesTotal = $montoFinanciado * ($tasa / 100);
-        $totalPagar = $montoFinanciado + $interesTotal;
-        $montoCuota = $plazo > 0 ? ($totalPagar / $plazo) : 0;
+        $calculo = $this->calculadora->calcular(
+            montoFinanciado: $montoFinanciado,
+            tasaAnual: min(max((float) $this->tasa_interes, 0), 100),
+            plazo: min($plazo, 120),
+            frecuencia: in_array($this->frecuencia, ['semanal', 'quincenal', 'mensual'], true)
+                ? $this->frecuencia
+                : 'semanal',
+        );
 
-        $this->monto_financiado = round($montoFinanciado, 2);
-        $this->total_pagar = round($totalPagar, 2);
-        $this->monto_cuota = round($montoCuota, 2);
-        $this->saldo_actual = round($totalPagar, 2);
+        $this->monto_financiado = $calculo['monto_financiado'];
+        $this->total_pagar = $calculo['total_pagar'];
+        $this->monto_cuota = $calculo['monto_cuota'];
+        $this->saldo_actual = $calculo['total_pagar'];
         $this->total_pagado = 0;
     }
 
     protected function generarFolio(): string
     {
-        $prefijo = 'CF-' . now()->format('Ymd');
+        $prefijo = 'CF-'.now()->format('Ymd');
 
         $ultimo = ContratoFinanciamiento::query()
-            ->where('folio', 'like', $prefijo . '-%')
+            ->where('folio', 'like', $prefijo.'-%')
             ->latest('id')
             ->value('folio');
 
-        if (!$ultimo) {
-            return $prefijo . '-001';
+        if (! $ultimo) {
+            return $prefijo.'-001';
         }
 
         $partes = explode('-', $ultimo);
         $numero = (int) end($partes);
         $siguiente = str_pad((string) ($numero + 1), 3, '0', STR_PAD_LEFT);
 
-        return $prefijo . '-' . $siguiente;
+        return $prefijo.'-'.$siguiente;
     }
 
     public function guardar(
@@ -304,6 +343,8 @@ class Create extends Component
         HistorialFinanciamientoService $historial,
         ConvertirApartadoEnContratoService $convertirService
     ) {
+        // Los importes derivados nunca se confían al estado enviado por el navegador.
+        $this->recalcularTotales();
         $data = $this->validate();
 
         $data['folio'] = $this->generarFolio();
@@ -311,8 +352,9 @@ class Create extends Component
 
         $auto = Auto::findOrFail($data['auto_id']);
 
-        if (!in_array($auto->estatus, [AutoEstatus::Disponible->value, AutoEstatus::Apartado->value, AutoEstatus::Recuperado->value], true)) {
+        if (! in_array($auto->estatus, [AutoEstatus::Disponible->value, AutoEstatus::Apartado->value, AutoEstatus::Recuperado->value], true)) {
             $this->addError('auto_id', 'Ese auto no está disponible para generar un contrato.');
+
             return;
         }
 
@@ -323,16 +365,19 @@ class Create extends Component
 
             if ((int) $apartado->auto_id !== (int) $data['auto_id']) {
                 $this->addError('auto_id', 'El auto no coincide con el apartado seleccionado.');
+
                 return;
             }
 
             if ((int) $apartado->cliente_id !== (int) $data['cliente_id']) {
                 $this->addError('cliente_id', 'El cliente no coincide con el apartado seleccionado.');
+
                 return;
             }
 
             if ((float) $data['enganche'] < (float) $apartado->monto_anticipo) {
                 $this->addError('enganche', 'El enganche no puede ser menor al anticipo del apartado.');
+
                 return;
             }
         }
@@ -354,6 +399,7 @@ class Create extends Component
                 'monto_gps' => $data['monto_gps'] ?? 0,
                 'monto_financiado' => $data['monto_financiado'],
                 'tasa_interes' => $data['tasa_interes'] ?? 0,
+                'formula_calculo' => FormulaFinanciamiento::AnualidadV1->value,
                 'plazo' => $data['plazo'],
                 'frecuencia' => $data['frecuencia'],
                 'monto_cuota' => $data['monto_cuota'],

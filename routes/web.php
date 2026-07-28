@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\AutoEstatus;
 use App\Http\Controllers\Admin\ClienteArchivoController;
 use App\Http\Controllers\Admin\ContratoFinanciamientoArchivoController;
 use App\Http\Controllers\Admin\CotizadorPdfController;
@@ -56,7 +57,7 @@ Route::get('/robots.txt', function () {
 Route::get('/sitemap.xml', function () {
     $autos = Auto::query()
         ->select(['uuid', 'updated_at'])
-        ->where('estatus', 'disponible')
+        ->where('estatus', AutoEstatus::Disponible->value)
         ->where('activo', true)
         ->latest('updated_at')
         ->get();

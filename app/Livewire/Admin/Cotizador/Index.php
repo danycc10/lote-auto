@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Cotizador;
 
+use App\Enums\AutoEstatus;
 use App\Mail\CotizacionMail;
 use App\Models\Auto;
 use App\Models\Configuracion;
@@ -52,7 +53,7 @@ class Index extends Component
         return Auto::query()
             ->with(['marca', 'modelo', 'imagenPortada'])
             ->where('activo', true)
-            ->where('estatus', 'disponible')
+            ->where('estatus', AutoEstatus::Disponible->value)
             ->where(function ($q) use ($term) {
                 $q->whereHas('marca', fn ($m) => $m->where('nombre', 'like', $term))
                     ->orWhereHas('modelo', fn ($m) => $m->where('nombre', 'like', $term))

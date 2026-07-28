@@ -3,7 +3,9 @@
 namespace Tests\Feature\Cotizador;
 
 use App\Livewire\Admin\Cotizador\Index;
+use App\Mail\CotizacionMail;
 use App\Models\Auto;
+use Illuminate\Contracts\Queue\ShouldQueueAfterCommit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
@@ -13,25 +15,33 @@ class CotizadorCalculoTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_el_correo_de_cotizacion_se_procesa_despues_del_commit(): void
+    {
+        $this->assertInstanceOf(
+            ShouldQueueAfterCommit::class,
+            new CotizacionMail([], '%PDF-1.4'),
+        );
+    }
+
     private function crearAuto(float $precioFinanciado): Auto
     {
         $uid = uniqid('', true);
 
         $marcaId = DB::table('marcas_autos')->insertGetId([
-            'nombre' => 'Marca ' . $uid, 'activo' => 1, 'created_at' => now(), 'updated_at' => now(),
+            'nombre' => 'Marca '.$uid, 'activo' => 1, 'created_at' => now(), 'updated_at' => now(),
         ]);
 
         $modeloId = DB::table('modelos_autos')->insertGetId([
-            'marca_auto_id' => $marcaId, 'nombre' => 'Modelo ' . $uid, 'activo' => 1, 'created_at' => now(), 'updated_at' => now(),
+            'marca_auto_id' => $marcaId, 'nombre' => 'Modelo '.$uid, 'activo' => 1, 'created_at' => now(), 'updated_at' => now(),
         ]);
 
         return Auto::create([
-            'marca_auto_id'     => $marcaId,
-            'modelo_auto_id'    => $modeloId,
-            'anio'              => 2022,
-            'estatus'           => 'disponible',
-            'activo'            => true,
-            'precio_contado'    => $precioFinanciado,
+            'marca_auto_id' => $marcaId,
+            'modelo_auto_id' => $modeloId,
+            'anio' => 2022,
+            'estatus' => 'disponible',
+            'activo' => true,
+            'precio_contado' => $precioFinanciado,
             'precio_financiado' => $precioFinanciado,
         ]);
     }

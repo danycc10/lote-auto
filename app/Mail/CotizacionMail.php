@@ -3,13 +3,14 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueueAfterCommit;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class CotizacionMail extends Mailable
+class CotizacionMail extends Mailable implements ShouldQueueAfterCommit
 {
     use Queueable, SerializesModels;
 
@@ -20,9 +21,9 @@ class CotizacionMail extends Mailable
 
     public function envelope(): Envelope
     {
-        $auto    = $this->datos['auto'];
+        $auto = $this->datos['auto'];
         $empresa = $this->datos['empresa']['nombre'] ?? config('app.name');
-        $nombre  = trim(($auto?->marca?->nombre ?? '') . ' ' . ($auto?->modelo?->nombre ?? '') . ' ' . ($auto?->anio ?? ''));
+        $nombre = trim(($auto?->marca?->nombre ?? '').' '.($auto?->modelo?->nombre ?? '').' '.($auto?->anio ?? ''));
 
         return new Envelope(
             subject: "Cotización – {$nombre} | {$empresa}",

@@ -64,55 +64,64 @@ class ContratoFinanciamiento extends Model
 
     protected $appends = ['nombre_resumen'];
 
+    /** @return BelongsTo<Auto, $this> */
     public function auto(): BelongsTo
     {
         return $this->belongsTo(Auto::class, 'auto_id');
     }
 
+    /** @return BelongsTo<Cliente, $this> */
     public function cliente(): BelongsTo
     {
         return $this->belongsTo(Cliente::class, 'cliente_id');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function vendedor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'vendedor_id');
     }
 
+    /** @return HasMany<CuotaFinanciamiento, $this> */
     public function cuotas(): HasMany
     {
         return $this->hasMany(CuotaFinanciamiento::class, 'contrato_financiamiento_id');
     }
 
+    /** @return HasMany<PagoFinanciamiento, $this> */
     public function pagos(): HasMany
     {
         return $this->hasMany(PagoFinanciamiento::class, 'contrato_financiamiento_id');
     }
 
+    /** @return HasMany<ReciboFinanciamiento, $this> */
     public function recibos(): HasMany
     {
         return $this->hasMany(ReciboFinanciamiento::class, 'contrato_financiamiento_id');
     }
 
+    /** @return HasMany<HistorialFinanciamiento, $this> */
     public function historiales(): HasMany
     {
         return $this->hasMany(HistorialFinanciamiento::class, 'contrato_financiamiento_id');
     }
 
-        public function apartadoAuto(): BelongsTo
+    /** @return BelongsTo<ApartadoAuto, $this> */
+    public function apartadoAuto(): BelongsTo
     {
         return $this->belongsTo(ApartadoAuto::class, 'apartado_auto_id');
     }
 
     public function getNombreResumenAttribute(): string
     {
-        return trim(($this->folio ?? '') . ' - ' . ($this->cliente?->nombre_completo ?? 'Sin cliente'));
+        return trim(($this->folio ?? '').' - '.($this->cliente?->nombre_completo ?? 'Sin cliente'));
     }
 
     public function recalcularEstatus(): void
     {
         if ((float) $this->saldo_actual <= 0) {
             $this->estatus = ContratoEstatus::Liquidado->value;
+
             return;
         }
 

@@ -541,12 +541,6 @@ parameters:
 			path: app/Models/Auto.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$nombre_completo\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/ContratoFinanciamiento.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>nombre_completo" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
@@ -652,24 +646,6 @@ parameters:
 			message: '#^Method App\\Services\\Financiamiento\\EstadoCuentaFinanciamientoService\:\:diasAtraso\(\) should return int but returns float\.$#'
 			identifier: return.type
 			count: 1
-			path: app/Services/Financiamiento/EstadoCuentaFinanciamientoService.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: int, Closure\(App\\Models\\CuotaFinanciamiento\)\: int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Services/Financiamiento/EstadoCuentaFinanciamientoService.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:filter\(\) expects \(callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: bool\)\|null, Closure\(App\\Models\\CuotaFinanciamiento\)\: bool given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Services/Financiamiento/EstadoCuentaFinanciamientoService.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:sum\(\) expects \(callable\(Illuminate\\Database\\Eloquent\\Model\)\: \(0\|float\)\)\|string\|null, Closure\(App\\Models\\CuotaFinanciamiento\)\: \(0\|float\) given\.$#'
-			identifier: argument.type
-			count: 3
 			path: app/Services/Financiamiento/EstadoCuentaFinanciamientoService.php
 
 		-

@@ -116,6 +116,7 @@
     </div>
 
     {{-- Panel: Usuarios --}}
+    @can('seguridad.usuarios')
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-5">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
@@ -218,5 +219,6 @@
             </div>
         </div>
     </div>
+    @endcan
 
 </div>

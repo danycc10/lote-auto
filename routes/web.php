@@ -167,7 +167,7 @@ Route::middleware(['auth', 'verified'])
             ->name('seguridad.roles-permisos');
 
         Route::get('/seguridad/usuarios', UsuariosIndex::class)
-            ->middleware('permission:seguridad.roles')
+            ->middleware('permission:seguridad.usuarios')
             ->name('seguridad.usuarios');
 
         Route::get('/autos', AutosIndex::class)

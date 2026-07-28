@@ -3,10 +3,13 @@
 namespace App\Livewire\Admin\Seguridad;
 
 use App\Models\User;
+use App\Services\Security\RoleAssignmentService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use RuntimeException;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolesPermisosManager extends Component
 {
@@ -24,7 +27,7 @@ class RolesPermisosManager extends Component
 
     public function mount(): void
     {
-        abort_unless(Auth::user()?->can('seguridad.roles'), 403);
+        $this->authorizePermission('seguridad.roles');
 
         $this->rolSeleccionadoId = Role::query()->orderBy('name')->value('id');
 
@@ -35,7 +38,7 @@ class RolesPermisosManager extends Component
 
     public function crearRol(): void
     {
-        abort_unless(Auth::user()?->can('seguridad.roles'), 403);
+        $this->authorizePermission('seguridad.roles');
 
         $this->validate([
             'nuevoRol' => ['required', 'string', 'max:100', 'unique:roles,name'],
@@ -55,12 +58,16 @@ class RolesPermisosManager extends Component
 
     public function seleccionarRol(int $rolId): void
     {
+        $this->authorizePermission('seguridad.roles');
+
         $this->rolSeleccionadoId = $rolId;
         $this->cargarPermisosRol();
     }
 
     public function cargarPermisosRol(): void
     {
+        $this->authorizePermission('seguridad.roles');
+
         $rol = Role::find($this->rolSeleccionadoId);
 
         $this->permisosSeleccionados = $rol
@@ -70,7 +77,7 @@ class RolesPermisosManager extends Component
 
     public function guardarPermisosRol(): void
     {
-        abort_unless(Auth::user()?->can('seguridad.roles'), 403);
+        $this->authorizePermission('seguridad.roles');
 
         $rol = Role::findOrFail($this->rolSeleccionadoId);
 
@@ -80,24 +87,26 @@ class RolesPermisosManager extends Component
             $rol->syncPermissions($this->permisosSeleccionados);
         }
 
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         session()->flash('success', 'Permisos actualizados correctamente.');
     }
 
     public function eliminarRol(int $rolId): void
     {
-        abort_unless(Auth::user()?->can('seguridad.roles'), 403);
+        $this->authorizePermission('seguridad.roles');
 
         $rol = Role::findOrFail($rolId);
 
         if ($rol->name === 'administrador') {
             session()->flash('error', 'No puedes eliminar el rol administrador.');
+
             return;
         }
 
         if ($rol->users()->exists()) {
             session()->flash('error', 'No puedes eliminar un rol que tiene usuarios asignados.');
+
             return;
         }
 
@@ -111,6 +120,8 @@ class RolesPermisosManager extends Component
 
     public function seleccionarUsuario(int $usuarioId): void
     {
+        $this->authorizePermission('seguridad.usuarios');
+
         $this->usuarioSeleccionadoId = $usuarioId;
 
         $usuario = User::findOrFail($usuarioId);
@@ -118,20 +129,25 @@ class RolesPermisosManager extends Component
         $this->rolesUsuario = $usuario->roles()->pluck('name')->toArray();
     }
 
-    public function guardarRolesUsuario(): void
+    public function guardarRolesUsuario(RoleAssignmentService $roleAssignment): void
     {
-        abort_unless(Auth::user()?->can('seguridad.roles'), 403);
+        $actor = $this->authorizePermission('seguridad.usuarios');
+
+        $this->validate([
+            'usuarioSeleccionadoId' => ['required', 'integer', 'exists:users,id'],
+            'rolesUsuario' => ['array'],
+            'rolesUsuario.*' => ['string', 'exists:roles,name'],
+        ]);
 
         $usuario = User::findOrFail($this->usuarioSeleccionadoId);
 
-        if ($usuario->id === Auth::id() && ! in_array('administrador', $this->rolesUsuario, true)) {
-            session()->flash('error', 'No puedes quitarte a ti mismo el rol administrador.');
+        try {
+            $roleAssignment->syncRoles($actor, $usuario, $this->rolesUsuario);
+        } catch (RuntimeException $exception) {
+            session()->flash('error', $exception->getMessage());
+
             return;
         }
-
-        $usuario->syncRoles($this->rolesUsuario);
-
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         session()->flash('success', 'Roles del usuario actualizados correctamente.');
     }
@@ -148,22 +164,35 @@ class RolesPermisosManager extends Component
             ->get()
             ->groupBy(fn ($permiso) => explode('.', $permiso->name)[0] ?? 'otros');
 
-        $usuarios = User::query()
-            ->with('roles')
-            ->when($this->buscarUsuario, function ($query) {
-                $query->where(function ($q) {
-                    $q->where('name', 'like', '%' . $this->buscarUsuario . '%')
-                        ->orWhere('email', 'like', '%' . $this->buscarUsuario . '%');
-                });
-            })
-            ->orderBy('name')
-            ->limit(30)
-            ->get();
+        $usuarios = collect();
+
+        if (Auth::user()?->can('seguridad.usuarios')) {
+            $usuarios = User::query()
+                ->with('roles')
+                ->when($this->buscarUsuario, function ($query) {
+                    $query->where(function ($q) {
+                        $q->where('name', 'like', '%'.$this->buscarUsuario.'%')
+                            ->orWhere('email', 'like', '%'.$this->buscarUsuario.'%');
+                    });
+                })
+                ->orderBy('name')
+                ->limit(30)
+                ->get();
+        }
 
         return view('livewire.admin.seguridad.roles-permisos-manager', [
             'roles' => $roles,
             'permisos' => $permisos,
             'usuarios' => $usuarios,
         ])->layout('layouts.app');
+    }
+
+    private function authorizePermission(string $permission): User
+    {
+        $user = Auth::user();
+
+        abort_unless($user instanceof User && $user->can($permission), 403);
+
+        return $user;
     }
 }

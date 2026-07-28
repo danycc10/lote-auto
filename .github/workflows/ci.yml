@@ -65,7 +65,6 @@ jobs:
       - name: Tests
         run: php artisan test
 
-      # Informativo: estilo de código (aún no se ha hecho el pint pass del repo completo)
-      - name: Pint (estilo, no bloqueante)
+      # Gate duro: el repositorio completo debe conservar el estilo acordado
+      - name: Pint
         run: vendor/bin/pint --test
-        continue-on-error: true

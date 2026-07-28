@@ -7,6 +7,7 @@ use App\Enums\CuotaEstatus;
 use App\Enums\PagoEstatus;
 use App\Enums\ReciboEstatus;
 use App\Mail\PagoConfirmadoMail;
+use App\Models\AplicacionPagoFinanciamiento;
 use App\Models\ContratoFinanciamiento;
 use App\Models\CuotaFinanciamiento;
 use App\Models\PagoFinanciamiento;
@@ -70,10 +71,12 @@ class RegistrarPagoFinanciamientoService
             ];
 
             if (in_array($contratoBloqueado->estatus, $estatusBloqueantes, true)) {
-                throw new RuntimeException('No se puede registrar pago en un contrato con estatus: ' . $contratoBloqueado->estatus);
+                throw new RuntimeException('No se puede registrar pago en un contrato con estatus: '.$contratoBloqueado->estatus);
             }
 
+            $antesContrato = $contratoBloqueado->toArray();
             $cuotaBloqueada = null;
+            $antesCuota = null;
 
             if ($cuota) {
                 $cuotaBloqueada = CuotaFinanciamiento::query()
@@ -81,6 +84,7 @@ class RegistrarPagoFinanciamientoService
                     ->where('contrato_financiamiento_id', $contratoBloqueado->id)
                     ->lockForUpdate()
                     ->firstOrFail();
+                $antesCuota = $cuotaBloqueada->toArray();
 
                 if ($cuotaBloqueada->estatus === CuotaEstatus::Cancelada->value) {
                     throw new RuntimeException('No se puede pagar una cuota cancelada.');
@@ -94,12 +98,12 @@ class RegistrarPagoFinanciamientoService
                 $recargo = round(max(0, $recargo), 2);
                 if ($recargo > 0) {
                     $cuotaBloqueada->recargo_aplicado = round((float) ($cuotaBloqueada->recargo_aplicado ?? 0) + $recargo, 2);
-                    $cuotaBloqueada->monto            = round((float) $cuotaBloqueada->monto + $recargo, 2);
-                    $cuotaBloqueada->saldo            = round((float) ($cuotaBloqueada->saldo ?? $cuotaBloqueada->monto) + $recargo, 2);
+                    $cuotaBloqueada->monto = round((float) $cuotaBloqueada->monto + $recargo, 2);
+                    $cuotaBloqueada->saldo = round((float) ($cuotaBloqueada->saldo ?? $cuotaBloqueada->monto) + $recargo, 2);
                     $cuotaBloqueada->save();
 
                     // Actualizar también los totales del contrato
-                    $contratoBloqueado->total_pagar  = round((float) $contratoBloqueado->total_pagar + $recargo, 2);
+                    $contratoBloqueado->total_pagar = round((float) $contratoBloqueado->total_pagar + $recargo, 2);
                     $contratoBloqueado->saldo_actual = round((float) $contratoBloqueado->saldo_actual + $recargo, 2);
                     $contratoBloqueado->save();
                 }
@@ -125,9 +129,6 @@ class RegistrarPagoFinanciamientoService
                 throw new RuntimeException('El monto no puede ser mayor al saldo actual del contrato.');
             }
 
-            $antesContrato = $contratoBloqueado->toArray();
-            $antesCuota = $cuotaBloqueada?->toArray();
-
             $pago = PagoFinanciamiento::create([
                 'contrato_financiamiento_id' => $contratoBloqueado->id,
                 'cliente_id' => $contratoBloqueado->cliente_id,
@@ -146,7 +147,20 @@ class RegistrarPagoFinanciamientoService
 
             if ($cuotaBloqueada) {
                 $montoCuota = (float) ($cuotaBloqueada->monto ?? 0);
-                $nuevoMontoPagado = (float) ($cuotaBloqueada->monto_pagado ?? 0) + $monto;
+                $montoPagadoAnterior = (float) ($cuotaBloqueada->monto_pagado ?? 0);
+                $nuevoMontoPagado = $montoPagadoAnterior + $monto;
+                $desglose = $this->desglosarAplicacion(
+                    $cuotaBloqueada,
+                    $montoPagadoAnterior,
+                    $monto,
+                    $recargo,
+                );
+
+                AplicacionPagoFinanciamiento::create([
+                    'pago_financiamiento_id' => $pago->id,
+                    'cuota_financiamiento_id' => $cuotaBloqueada->id,
+                    ...$desglose,
+                ]);
 
                 $cuotaBloqueada->monto_pagado = $nuevoMontoPagado;
                 $cuotaBloqueada->saldo = max(0, $montoCuota - $nuevoMontoPagado);
@@ -205,7 +219,7 @@ class RegistrarPagoFinanciamientoService
                     'pago' => $pago->fresh()?->toArray(),
                     'recibo' => $recibo->fresh()?->toArray(),
                 ],
-                observaciones: 'Pago registrado con recibo ' . $recibo->folio
+                observaciones: 'Pago registrado con recibo '.$recibo->folio
             );
 
             $this->logFinancieroService->pagoRegistrado(
@@ -239,10 +253,10 @@ class RegistrarPagoFinanciamientoService
             }
 
             $resultado = [
-                'pago'     => $pago->fresh(),
-                'recibo'   => $recibo->fresh(),
+                'pago' => $pago->fresh(),
+                'recibo' => $recibo->fresh(),
                 'contrato' => $contratoBloqueado->fresh(),
-                'cuota'    => $cuotaBloqueada?->fresh(),
+                'cuota' => $cuotaBloqueada?->fresh(),
             ];
 
             return $resultado;
@@ -252,6 +266,55 @@ class RegistrarPagoFinanciamientoService
         $this->enviarConfirmacionCliente($resultado['pago'], $resultado['recibo']);
 
         return $resultado;
+    }
+
+    /**
+     * @return array{
+     *     monto: float,
+     *     monto_recargo: float,
+     *     monto_interes: float,
+     *     monto_capital: float,
+     *     monto_extra: float,
+     *     recargo_generado: float
+     * }
+     */
+    private function desglosarAplicacion(
+        CuotaFinanciamiento $cuota,
+        float $pagadoAnterior,
+        float $monto,
+        float $recargoGenerado,
+    ): array {
+        $componentes = [
+            'monto_recargo' => (float) $cuota->recargo_aplicado,
+            'monto_interes' => (float) $cuota->monto_interes,
+            'monto_capital' => (float) $cuota->monto_capital,
+            'monto_extra' => (float) $cuota->monto_extra,
+        ];
+        $restanteHistorico = round($pagadoAnterior, 2);
+        $restantePago = round($monto, 2);
+        $desglose = [];
+
+        foreach ($componentes as $campo => $totalComponente) {
+            $cubiertoAntes = min($totalComponente, $restanteHistorico);
+            $restanteHistorico = round(max(0, $restanteHistorico - $cubiertoAntes), 2);
+            $pendiente = round(max(0, $totalComponente - $cubiertoAntes), 2);
+            $aplicado = min($pendiente, $restantePago);
+            $desglose[$campo] = round($aplicado, 2);
+            $restantePago = round(max(0, $restantePago - $aplicado), 2);
+        }
+
+        if ($restantePago > 0.009) {
+            throw new RuntimeException('El pago no puede distribuirse completamente en la cuota.');
+        }
+
+        return [
+            'monto' => round($monto, 2),
+            'monto_recargo' => $desglose['monto_recargo'],
+            'monto_interes' => $desglose['monto_interes'],
+            'monto_capital' => $desglose['monto_capital'],
+            'monto_extra' => $desglose['monto_extra'],
+            'recargo_generado' => round($recargoGenerado, 2),
+        ];
     }
 
     private function enviarConfirmacionCliente(PagoFinanciamiento $pago, ReciboFinanciamiento $recibo): void

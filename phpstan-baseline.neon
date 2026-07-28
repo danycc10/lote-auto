@@ -565,51 +565,9 @@ parameters:
 			path: app/Services/Financiamiento/AuditoriaFinancieraService.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$cancelado_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Services/Financiamiento/CancelarReciboFinanciamientoService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$estatus\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Services/Financiamiento/CancelarReciboFinanciamientoService.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
 			identifier: property.notFound
-			count: 5
-			path: app/Services/Financiamiento/CancelarReciboFinanciamientoService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$observaciones\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Services/Financiamiento/CancelarReciboFinanciamientoService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$saldo_actual\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Services/Financiamiento/CancelarReciboFinanciamientoService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$total_pagado\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Services/Financiamiento/CancelarReciboFinanciamientoService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$total_pagar\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Services/Financiamiento/CancelarReciboFinanciamientoService.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:recalcularEstatus\(\)\.$#'
-			identifier: method.notFound
-			count: 1
+			count: 2
 			path: app/Services/Financiamiento/CancelarReciboFinanciamientoService.php
 
 		-

@@ -50,6 +50,14 @@ class RegistrarPagoTest extends FinanciamientoTestCase
             'estatus' => 'pagada',
             'saldo' => 0,
         ]);
+        $this->assertDatabaseHas('aplicaciones_pagos_financiamiento', [
+            'pago_financiamiento_id' => $resultado['pago']->id,
+            'cuota_financiamiento_id' => $cuota->id,
+            'monto' => 25000,
+            'monto_capital' => 25000,
+            'monto_interes' => 0,
+            'monto_recargo' => 0,
+        ]);
 
         $contrato->refresh();
         $this->assertEquals(75000.0, (float) $contrato->saldo_actual);
@@ -121,6 +129,13 @@ class RegistrarPagoTest extends FinanciamientoTestCase
             'total_pagar' => 100010,
             'total_pagado' => 25010,
             'saldo_actual' => 75000,
+        ]);
+        $this->assertDatabaseHas('aplicaciones_pagos_financiamiento', [
+            'cuota_financiamiento_id' => $cuota->id,
+            'monto' => 25010,
+            'monto_recargo' => 10,
+            'monto_capital' => 25000,
+            'recargo_generado' => 10,
         ]);
     }
 

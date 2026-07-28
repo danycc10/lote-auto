@@ -5,8 +5,11 @@ namespace App\Services\Financiamiento;
 use App\Enums\CuotaEstatus;
 use App\Enums\PagoEstatus;
 use App\Enums\ReciboEstatus;
+use App\Models\AplicacionPagoFinanciamiento;
+use App\Models\ContratoFinanciamiento;
 use App\Models\CuotaFinanciamiento;
 use App\Models\HistorialFinanciamiento;
+use App\Models\PagoFinanciamiento;
 use App\Models\ReciboFinanciamiento;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -40,13 +43,23 @@ class CancelarReciboFinanciamientoService
                 throw new RuntimeException('El recibo ya está cancelado.');
             }
 
+            $tieneReciboPosterior = ReciboFinanciamiento::query()
+                ->where('contrato_financiamiento_id', $recibo->contrato_financiamiento_id)
+                ->where('id', '>', $recibo->id)
+                ->where('estatus', ReciboEstatus::Vigente->value)
+                ->exists();
+
+            if ($tieneReciboPosterior) {
+                throw new RuntimeException('Sólo se puede cancelar el último recibo vigente del contrato.');
+            }
+
             $contrato = $recibo->contrato;
 
             if (! $contrato) {
                 throw new RuntimeException('El recibo no tiene contrato relacionado.');
             }
 
-            $contrato = $contrato->newQuery()
+            $contrato = ContratoFinanciamiento::query()
                 ->whereKey($contrato->id)
                 ->lockForUpdate()
                 ->firstOrFail();
@@ -63,11 +76,18 @@ class CancelarReciboFinanciamientoService
             $pago = $recibo->pago;
 
             if ($pago) {
-                $pago = $pago->newQuery()
+                $pago = PagoFinanciamiento::query()
                     ->whereKey($pago->id)
                     ->lockForUpdate()
                     ->firstOrFail();
             }
+
+            $aplicacion = $pago
+                ? AplicacionPagoFinanciamiento::query()
+                    ->where('pago_financiamiento_id', $pago->id)
+                    ->lockForUpdate()
+                    ->first()
+                : null;
 
             if ($cuota) {
                 $existeCuotaPosteriorPagada = CuotaFinanciamiento::query()
@@ -78,7 +98,7 @@ class CancelarReciboFinanciamientoService
 
                 if ($existeCuotaPosteriorPagada) {
                     throw new RuntimeException(
-                        'No se puede cancelar este recibo porque la cuota #' . $cuota->numero .
+                        'No se puede cancelar este recibo porque la cuota #'.$cuota->numero.
                         ' no es la última cuota pagada del contrato.'
                     );
                 }
@@ -90,6 +110,12 @@ class CancelarReciboFinanciamientoService
             $antesRecibo = $recibo->toArray();
 
             $montoRecibo = (float) $recibo->monto;
+            $recargoGenerado = 0.0;
+
+            if ($aplicacion) {
+                $montoRecibo = (float) $aplicacion->monto;
+                $recargoGenerado = (float) $aplicacion->recargo_generado;
+            }
 
             if ($pago && ($pago->estatus ?? null) !== PagoEstatus::Cancelado->value) {
                 $pago->estatus = PagoEstatus::Cancelado->value;
@@ -100,8 +126,8 @@ class CancelarReciboFinanciamientoService
 
                 if (array_key_exists('observaciones', $pago->getAttributes())) {
                     $pago->observaciones = trim(
-                        ($pago->observaciones ?? '') . "\n" .
-                        'Pago cancelado por cancelación de recibo ' . $recibo->folio
+                        ($pago->observaciones ?? '')."\n".
+                        'Pago cancelado por cancelación de recibo '.$recibo->folio
                     );
                 }
 
@@ -110,6 +136,18 @@ class CancelarReciboFinanciamientoService
 
             if ($cuota) {
                 $nuevoMontoPagado = max(0, (float) $cuota->monto_pagado - $montoRecibo);
+
+                if ($recargoGenerado > 0) {
+                    $cuota->recargo_aplicado = max(
+                        0,
+                        (float) $cuota->recargo_aplicado - $recargoGenerado,
+                    );
+                    $cuota->monto = max(0, (float) $cuota->monto - $recargoGenerado);
+                    $contrato->total_pagar = max(
+                        0,
+                        (float) $contrato->total_pagar - $recargoGenerado,
+                    );
+                }
 
                 $cuota->monto_pagado = $nuevoMontoPagado;
                 $cuota->saldo = max(0, (float) $cuota->monto - $nuevoMontoPagado);
@@ -126,8 +164,8 @@ class CancelarReciboFinanciamientoService
 
                 if (array_key_exists('observaciones', $cuota->getAttributes())) {
                     $cuota->observaciones = trim(
-                        ($cuota->observaciones ?? '') . "\n" .
-                        'Se revirtió pago por cancelación de recibo ' . $recibo->folio
+                        ($cuota->observaciones ?? '')."\n".
+                        'Se revirtió pago por cancelación de recibo '.$recibo->folio
                     );
                 }
 
@@ -140,7 +178,7 @@ class CancelarReciboFinanciamientoService
                     $q->whereNull('estatus')
                         ->orWhere('estatus', '!=', PagoEstatus::Cancelado->value);
                 })
-                ->sum('monto');
+                ->sum('monto_aplicado');
 
             $contrato->total_pagado = $totalPagado;
             $contrato->saldo_actual = max(0, (float) $contrato->total_pagar - (float) $totalPagado);
@@ -151,10 +189,10 @@ class CancelarReciboFinanciamientoService
             $recibo->estatus = ReciboEstatus::Cancelado->value;
             $recibo->cancelado_at = now();
 
-            $notaRecibo = trim(($recibo->observaciones ?? '') . "\n" . 'Cancelado manualmente.');
+            $notaRecibo = trim(($recibo->observaciones ?? '')."\n".'Cancelado manualmente.');
 
             if ($observaciones) {
-                $notaRecibo .= "\n" . $observaciones;
+                $notaRecibo .= "\n".$observaciones;
             }
 
             $recibo->observaciones = trim($notaRecibo);
@@ -176,7 +214,7 @@ class CancelarReciboFinanciamientoService
                     'pago' => $pago?->fresh()?->toArray(),
                     'recibo' => $recibo->fresh()?->toArray(),
                 ],
-                'observaciones' => $observaciones ?: 'Cancelación de recibo ' . $recibo->folio,
+                'observaciones' => $observaciones ?: 'Cancelación de recibo '.$recibo->folio,
             ]);
 
             $this->auditoriaService->registrar(
@@ -194,7 +232,7 @@ class CancelarReciboFinanciamientoService
                     'pago' => $pago?->fresh()?->toArray(),
                     'recibo' => $recibo->fresh()?->toArray(),
                 ],
-                observaciones: $observaciones ?: 'Cancelación de recibo ' . $recibo->folio
+                observaciones: $observaciones ?: 'Cancelación de recibo '.$recibo->folio
             );
 
             return $recibo->fresh(['contrato', 'cuota', 'pago']);

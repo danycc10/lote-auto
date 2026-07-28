@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Financiamiento;
 
-use App\Models\ReciboFinanciamiento;
 use App\Services\Financiamiento\CancelarReciboFinanciamientoService;
+use App\Services\Financiamiento\RegistrarPagoFinanciamientoService;
 use RuntimeException;
 
 class CancelarReciboTest extends FinanciamientoTestCase
@@ -92,5 +92,59 @@ class CancelarReciboTest extends FinanciamientoTestCase
         $this->expectException(RuntimeException::class);
 
         $this->service()->execute($recibo, 'Segundo intento');
+    }
+
+    public function test_cancelar_pago_con_recargo_restaura_cuota_y_contrato(): void
+    {
+        $user = $this->usuarioConPermiso('pagos.registrar', 'recibos.cancelar');
+        $this->actingAs($user);
+        $contrato = $this->crearContrato();
+        $cuota = $this->crearCuota($contrato);
+        $resultado = app(RegistrarPagoFinanciamientoService::class)->ejecutar(
+            contrato: $contrato,
+            monto: 25010,
+            cuota: $cuota,
+            recargo: 10,
+        );
+
+        $this->service()->execute($resultado['recibo']);
+
+        $this->assertDatabaseHas('cuotas_financiamiento', [
+            'id' => $cuota->id,
+            'monto' => 25000,
+            'monto_pagado' => 0,
+            'recargo_aplicado' => 0,
+            'saldo' => 25000,
+            'estatus' => 'pendiente',
+        ]);
+        $this->assertDatabaseHas('contratos_financiamiento', [
+            'id' => $contrato->id,
+            'total_pagar' => 100000,
+            'total_pagado' => 0,
+            'saldo_actual' => 100000,
+        ]);
+    }
+
+    public function test_solo_permite_cancelar_el_ultimo_recibo_vigente(): void
+    {
+        $user = $this->usuarioConPermiso('pagos.registrar', 'recibos.cancelar');
+        $this->actingAs($user);
+        $contrato = $this->crearContrato();
+        $cuota = $this->crearCuota($contrato);
+        $registrar = app(RegistrarPagoFinanciamientoService::class);
+        $primerPago = $registrar->ejecutar(
+            contrato: $contrato,
+            monto: 10000,
+            cuota: $cuota,
+        );
+        $registrar->ejecutar(
+            contrato: $contrato->fresh(),
+            monto: 5000,
+            cuota: $cuota->fresh(),
+        );
+
+        $this->expectException(RuntimeException::class);
+
+        $this->service()->execute($primerPago['recibo']);
     }
 }

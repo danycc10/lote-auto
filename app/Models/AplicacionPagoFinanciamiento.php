@@ -16,6 +16,8 @@ class AplicacionPagoFinanciamiento extends Model
         'monto_recargo',
         'monto_capital',
         'monto_interes',
+        'monto_extra',
+        'recargo_generado',
     ];
 
     protected $casts = [
@@ -23,6 +25,8 @@ class AplicacionPagoFinanciamiento extends Model
         'monto_recargo' => 'decimal:2',
         'monto_capital' => 'decimal:2',
         'monto_interes' => 'decimal:2',
+        'monto_extra' => 'decimal:2',
+        'recargo_generado' => 'decimal:2',
     ];
 
     public function pago(): BelongsTo

@@ -25,6 +25,13 @@ Schedule::command('apartados:vencer')
     ->withoutOverlapping(30)
     ->onOneServer();
 
+Schedule::command('app:backup-database')
+    ->dailyAt('02:00')
+    ->timezone(config('app.timezone'))
+    ->withoutOverlapping(120)
+    ->onOneServer()
+    ->when(fn (): bool => (bool) config('backup.enabled'));
+
 // Envía recordatorios 3 días antes del vencimiento y notificación el día que vence
 Schedule::command('cuotas:notificar-vencimientos')
     ->dailyAt('08:00')

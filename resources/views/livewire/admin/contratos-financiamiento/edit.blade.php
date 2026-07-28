@@ -38,8 +38,8 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-medium text-slate-700 mb-1.5">Folio <span class="text-red-500">*</span></label>
-                            <input type="text" wire:model="folio"
-                                   class="block w-full rounded-lg border-slate-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <input type="text" value="{{ $folio }}" readonly
+                                   class="block w-full rounded-lg border-slate-300 bg-slate-50 text-slate-500 text-sm cursor-not-allowed">
                             @error('folio') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                         </div>
                         <div>

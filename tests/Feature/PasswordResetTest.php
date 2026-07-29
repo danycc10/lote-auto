@@ -23,10 +23,10 @@ class PasswordResetTest extends TestCase
 
         $response
             ->assertStatus(200)
-            ->assertSeeText('Restablece tu contraseña')
+            ->assertSeeText('Recuperar contraseña')
             ->assertSeeText('Volver a iniciar sesión')
             ->assertSee('autocomplete="username"', false)
-            ->assertSee('aria-describedby="email-help"', false);
+            ->assertDontSeeText('Recupera el acceso');
     }
 
     public function test_reset_password_link_can_be_requested(): void

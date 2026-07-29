@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class LogFinanciero extends Model
 {
+    use Concerns\PreventsChangesInDemoMode;
+
     protected $table = 'logs_financieros';
 
     protected $fillable = [

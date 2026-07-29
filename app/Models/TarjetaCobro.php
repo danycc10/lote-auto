@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TarjetaCobro extends Model
 {
+    use Concerns\PreventsChangesInDemoMode;
+
     protected $table = 'tarjetas_cobro';
 
     protected $fillable = [

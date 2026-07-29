@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CuotaFinanciamiento extends Model
 {
+    use Concerns\PreventsChangesInDemoMode;
+
     protected $table = 'cuotas_financiamiento';
 
     protected $fillable = [

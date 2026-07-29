@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ContratoFinanciamiento extends Model
 {
+    use Concerns\PreventsChangesInDemoMode;
+
     protected $table = 'contratos_financiamiento';
 
     protected $fillable = [

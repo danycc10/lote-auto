@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ModeloAuto extends Model
 {
+    use Concerns\PreventsChangesInDemoMode;
+
     protected $table = 'modelos_autos';
 
     protected $fillable = [

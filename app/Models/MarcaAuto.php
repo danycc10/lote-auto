@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MarcaAuto extends Model
 {
+    use Concerns\PreventsChangesInDemoMode;
+
     protected $table = 'marcas_autos';
 
     protected $fillable = [

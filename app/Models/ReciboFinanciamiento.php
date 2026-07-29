@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ReciboFinanciamiento extends Model
 {
+    use Concerns\PreventsChangesInDemoMode;
+
     protected $table = 'recibos_financiamiento';
 
     protected $fillable = [

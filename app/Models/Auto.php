@@ -11,6 +11,8 @@ use Illuminate\Support\Str;
 
 class Auto extends Model
 {
+    use Concerns\PreventsChangesInDemoMode;
+
     protected $table = 'autos';
 
     protected $fillable = [

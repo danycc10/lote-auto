@@ -122,6 +122,8 @@
                 </div>
             @endif
 
+            <x-demo-mode-banner />
+
             <main id="contenido-principal" tabindex="-1" class="flex-1 scroll-mt-16 outline-none">
                 {{ $slot }}
             </main>

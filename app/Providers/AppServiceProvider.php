@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Http\Middleware\PreventChangesInDemoMode;
 use App\Http\Middleware\VerificarModuloFinanciamiento;
+use App\Livewire\Hooks\DemoModeHook;
 use App\Models\User;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Events\QueryExecuted;
@@ -24,7 +26,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $uploadMiddleware = config('livewire.temporary_file_upload.middleware')
+            ?: ['throttle:60,1'];
+
+        config()->set(
+            'livewire.temporary_file_upload.middleware',
+            array_values(array_unique([
+                ...(array) $uploadMiddleware,
+                PreventChangesInDemoMode::class,
+            ])),
+        );
     }
 
     /**
@@ -40,6 +51,7 @@ class AppServiceProvider extends ServiceProvider
             PermissionMiddleware::class,
             VerificarModuloFinanciamiento::class,
         ]);
+        Livewire::componentHook(DemoModeHook::class);
 
         Event::listen(DiagnosingHealth::class, function (): void {
             DB::select('select 1');

@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class HistorialFinanciamiento extends Model
 {
+    use Concerns\PreventsChangesInDemoMode;
+
     protected $table = 'historiales_financiamiento';
 
     protected $fillable = [

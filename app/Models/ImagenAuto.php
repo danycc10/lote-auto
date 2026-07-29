@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Storage;
 
 class ImagenAuto extends Model
 {
+    use Concerns\PreventsChangesInDemoMode;
+
     protected $table = 'imagenes_autos';
 
     protected $fillable = [

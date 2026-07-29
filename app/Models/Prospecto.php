@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Prospecto extends Model
 {
+    use Concerns\PreventsChangesInDemoMode;
     use SoftDeletes;
 
     protected $table = 'prospectos';

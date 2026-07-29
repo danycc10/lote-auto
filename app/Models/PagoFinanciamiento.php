@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PagoFinanciamiento extends Model
 {
+    use Concerns\PreventsChangesInDemoMode;
+
     protected $table = 'pagos_financiamiento';
 
     protected $fillable = [

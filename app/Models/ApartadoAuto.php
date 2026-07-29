@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ApartadoAuto extends Model
 {
+    use Concerns\PreventsChangesInDemoMode;
+
     protected $table = 'apartados_autos';
 
     protected $fillable = [

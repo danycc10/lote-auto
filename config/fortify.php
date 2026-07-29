@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\PreventChangesInDemoMode;
 use Laravel\Fortify\Features;
 
 return [
@@ -101,7 +102,7 @@ return [
     |
     */
 
-    'middleware' => ['web'],
+    'middleware' => ['web', PreventChangesInDemoMode::class],
 
     /*
     |--------------------------------------------------------------------------

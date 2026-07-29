@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Cache;
 
 class Configuracion extends Model
 {
+    use Concerns\PreventsChangesInDemoMode;
+
     protected $table = 'configuraciones';
 
     protected $fillable = ['clave', 'valor', 'descripcion'];

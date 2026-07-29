@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AuditoriaFinanciera extends Model
 {
+    use Concerns\PreventsChangesInDemoMode;
+
     protected $table = 'auditoria_financieras';
 
     protected $fillable = [

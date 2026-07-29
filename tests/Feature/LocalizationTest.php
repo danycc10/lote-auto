@@ -72,4 +72,12 @@ class LocalizationTest extends TestCase
             $message->outroLines
         );
     }
+
+    public function test_la_pagina_no_encontrada_se_muestra_en_espanol(): void
+    {
+        $this->get('/ruta-inexistente-para-probar-localizacion')
+            ->assertNotFound()
+            ->assertSeeText('Página no encontrada')
+            ->assertSeeText('Volver al inicio');
+    }
 }

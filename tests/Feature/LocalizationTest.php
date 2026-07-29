@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -43,5 +44,32 @@ class LocalizationTest extends TestCase
             ->assertSessionHasErrors([
                 'email' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
             ]);
+    }
+
+    public function test_los_textos_de_jetstream_y_fortify_se_muestran_en_espanol(): void
+    {
+        $this->assertSame('Perfil', __('Profile'));
+        $this->assertSame('Autenticación de dos factores', __('Two Factor Authentication'));
+        $this->assertSame(
+            'Esta contraseña no coincide con nuestros registros.',
+            __('This password does not match our records.')
+        );
+    }
+
+    public function test_el_correo_para_restablecer_la_contrasena_se_muestra_en_espanol(): void
+    {
+        $user = User::factory()->make();
+        $message = (new ResetPassword('token-de-prueba'))->toMail($user);
+
+        $this->assertSame('Restablezca su contraseña', $message->subject);
+        $this->assertSame('Restablecer contraseña', $message->actionText);
+        $this->assertContains(
+            'Recibió este mensaje porque se solicitó restablecer la contraseña de su cuenta.',
+            $message->introLines
+        );
+        $this->assertContains(
+            'Si no solicitó restablecer su contraseña, no necesita realizar ninguna acción.',
+            $message->outroLines
+        );
     }
 }

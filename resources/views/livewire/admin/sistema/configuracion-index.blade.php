@@ -41,7 +41,7 @@
                             </div>
                             <p class="text-sm text-gray-500 mt-1">Página pública de autos disponibles, catálogo y detalle de cada unidad. Incluye gestión de autos e imágenes en el panel.</p>
                             <div class="flex flex-wrap gap-2 mt-3">
-                                @foreach(['Landing pública', 'Catálogo', 'Detalle de auto', 'Gestión de inventario'] as $feat)
+                                @foreach(['Sitio público', 'Catálogo', 'Detalle de auto', 'Gestión de inventario'] as $feat)
                                 <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">{{ $feat }}</span>
                                 @endforeach
                             </div>
@@ -139,7 +139,7 @@
                     </div>
                     <div>
                         <h3 class="text-base font-bold text-gray-900">WhatsApp y mapa</h3>
-                        <p class="text-sm text-gray-500 mt-1">Estos datos se muestran en todas las páginas públicas (landing, catálogo y detalle de autos).</p>
+                        <p class="text-sm text-gray-500 mt-1">Estos datos se muestran en todas las páginas públicas (inicio, catálogo y detalle de autos).</p>
                     </div>
                 </div>
 

@@ -3,7 +3,7 @@
     {{-- Header --}}
     <div class="flex items-start justify-between gap-4">
         <div>
-            <h1 class="text-xl font-semibold text-slate-900">Plantillas de Landing</h1>
+            <h1 class="text-xl font-semibold text-slate-900">Plantillas del sitio</h1>
             <p class="text-sm text-slate-500 mt-0.5">Selecciona el diseño visual de tu página pública.</p>
         </div>
         <a href="{{ route('public.home') }}" target="_blank" rel="noopener noreferrer"

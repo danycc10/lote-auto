@@ -3,7 +3,7 @@
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h1 class="text-xl font-semibold text-slate-900">Dashboard de cobranza</h1>
+            <h1 class="text-xl font-semibold text-slate-900">Panel de cobranza</h1>
             <p class="text-sm text-slate-500 mt-0.5">Indicadores de contratos, mora y cobranza del módulo de financiamiento.</p>
         </div>
         <a href="{{ route('admin.contratos-financiamiento.index') }}"

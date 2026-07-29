@@ -3,7 +3,7 @@
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
-            <h1 class="text-xl font-semibold text-slate-900">Dashboard de cobranza</h1>
+            <h1 class="text-xl font-semibold text-slate-900">Panel de cobranza</h1>
             <p class="text-sm text-slate-500 mt-0.5">
                 Control de contratos, cuotas vencidas y cobranza del período.
             </p>

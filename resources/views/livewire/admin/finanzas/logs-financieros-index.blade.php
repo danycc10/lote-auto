@@ -3,8 +3,8 @@
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h1 class="text-xl font-semibold text-slate-900">Log financiero</h1>
-            <p class="text-sm text-slate-500 mt-0.5">Timeline de movimientos críticos: contratos, pagos y recibos.</p>
+            <h1 class="text-xl font-semibold text-slate-900">Registro financiero</h1>
+            <p class="text-sm text-slate-500 mt-0.5">Cronología de movimientos críticos: contratos, pagos y recibos.</p>
         </div>
         <button type="button" wire:click="limpiarFiltros"
                 class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors shrink-0">

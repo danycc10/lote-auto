@@ -26,7 +26,7 @@
             {{-- ── 0. LOGO ── --}}
             <section class="space-y-4">
                 <h2 class="text-[11px] font-semibold text-slate-400 uppercase tracking-widest">Logo</h2>
-                <p class="text-xs text-slate-500 -mt-2">Si subes una imagen, reemplaza el ícono SVG en el navbar y el footer. Formatos: PNG, JPG, WEBP, SVG. Máx. 2 MB.</p>
+                <p class="text-xs text-slate-500 -mt-2">Si subes una imagen, reemplaza el ícono SVG en la barra de navegación y el pie de página. Formatos: PNG, JPG, WEBP, SVG. Máx. 2 MB.</p>
                 <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
 
                     {{-- Current logo preview --}}
@@ -35,7 +35,7 @@
                             @if($logoUrl)
                                 <img src="{{ Storage::url($logoUrl) }}" alt="Logo actual" class="h-full w-full object-contain p-1">
                             @elseif($logoTemp)
-                                <img src="{{ $logoTemp->temporaryUrl() }}" alt="Preview" class="h-full w-full object-contain p-1">
+                                <img src="{{ $logoTemp->temporaryUrl() }}" alt="Vista previa del logo" class="h-full w-full object-contain p-1">
                             @else
                                 <div class="h-10 w-10 rounded-lg flex items-center justify-center"
                                      style="background: linear-gradient(to bottom right, {{ $colorPrimario }}, {{ $colorSecundario }})">
@@ -50,7 +50,7 @@
                         <div>
                             @if($logoUrl)
                                 <p class="text-sm font-medium text-slate-700">Logo personalizado activo</p>
-                                <p class="text-xs text-slate-400 mt-0.5">Se muestra en navbar y footer del sitio público.</p>
+                                <p class="text-xs text-slate-400 mt-0.5">Se muestra en la barra de navegación y el pie de página del sitio público.</p>
                             @else
                                 <p class="text-sm font-medium text-slate-500">Sin logo personalizado</p>
                                 <p class="text-xs text-slate-400 mt-0.5">Se usa el ícono SVG con tu color primario.</p>
@@ -105,7 +105,7 @@
                                 @if($logoTicketUrl)
                                     <img src="{{ Storage::url($logoTicketUrl) }}" alt="Logo ticket" class="h-full w-full object-contain p-1">
                                 @elseif($logoTicketTemp)
-                                    <img src="{{ $logoTicketTemp->temporaryUrl() }}" alt="Preview" class="h-full w-full object-contain p-1">
+                                    <img src="{{ $logoTicketTemp->temporaryUrl() }}" alt="Vista previa del logo para comprobantes" class="h-full w-full object-contain p-1">
                                 @else
                                     <svg class="h-7 w-7 text-slate-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M3.375 4.5C2.339 4.5 1.5 5.34 1.5 6.375V13.5h12V6.375c0-1.036-.84-1.875-1.875-1.875h-8.25zM13.5 15h-12v2.625c0 1.035.84 1.875 1.875 1.875H3.75a3 3 0 106 0h2.25a.75.75 0 00.75-.75V15z"/>
@@ -191,7 +191,7 @@
                 <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-5">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">
-                            Tagline del logo <span class="text-slate-400 font-normal">(bajo el nombre en navbar y footer)</span>
+                            Lema del logo <span class="text-slate-400 font-normal">(bajo el nombre en la barra de navegación y el pie de página)</span>
                         </label>
                         <input type="text" wire:model.live.debounce.400ms="tagline" maxlength="80" placeholder="Autos financiados"
                                class="block w-full rounded-lg border border-slate-300 py-2 px-3 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 @error('tagline') border-red-400 bg-red-50 @enderror">
@@ -199,7 +199,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">
-                            Descripción del footer <span class="text-slate-400 font-normal">(párrafo bajo el logo al pie)</span>
+                            Descripción del pie de página <span class="text-slate-400 font-normal">(párrafo bajo el logo)</span>
                         </label>
                         <textarea wire:model.live.debounce.400ms="descripcionFooter" rows="2" maxlength="200"
                                   placeholder="Financiamiento directo, sin banco ni burocracia..."
@@ -210,7 +210,7 @@
 
             {{-- ── 3. HERO ── --}}
             <section class="space-y-4">
-                <h2 class="text-[11px] font-semibold text-slate-400 uppercase tracking-widest">Hero (sección principal)</h2>
+                <h2 class="text-[11px] font-semibold text-slate-400 uppercase tracking-widest">Sección principal</h2>
                 <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-5">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">
@@ -257,7 +257,7 @@
 
             {{-- ── 4. ESTADÍSTICAS ── --}}
             <section class="space-y-4">
-                <h2 class="text-[11px] font-semibold text-slate-400 uppercase tracking-widest">Estadísticas del hero</h2>
+                <h2 class="text-[11px] font-semibold text-slate-400 uppercase tracking-widest">Estadísticas de la sección principal</h2>
                 <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
                     <div class="grid grid-cols-3 gap-4">
                         @foreach([
@@ -304,7 +304,7 @@
             {{-- ── 6. BANNER CTA ── --}}
             <section class="space-y-4">
                 <h2 class="text-[11px] font-semibold text-slate-400 uppercase tracking-widest">Banner de conversión (CTA)</h2>
-                <p class="text-xs text-slate-500 -mt-2">Sección oscura con gradiente a mitad de la landing.</p>
+                <p class="text-xs text-slate-500 -mt-2">Sección oscura con gradiente a mitad de la página de inicio.</p>
                 <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Eyebrow <span class="text-slate-400 font-normal">(texto pequeño sobre el título)</span></label>
@@ -532,7 +532,7 @@
             {{-- ── 14. SECCIÓN CONTACTO (landing) ── --}}
             <section class="space-y-4">
                 <h2 class="text-[11px] font-semibold text-slate-400 uppercase tracking-widest">Sección Contacto</h2>
-                <p class="text-xs text-slate-500 -mt-2">Encabezado de la sección de contacto al final de la landing.</p>
+                <p class="text-xs text-slate-500 -mt-2">Encabezado de la sección de contacto al final de la página de inicio.</p>
                 <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>

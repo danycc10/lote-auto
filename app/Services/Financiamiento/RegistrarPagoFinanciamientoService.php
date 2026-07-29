@@ -12,6 +12,7 @@ use App\Models\ContratoFinanciamiento;
 use App\Models\CuotaFinanciamiento;
 use App\Models\PagoFinanciamiento;
 use App\Models\ReciboFinanciamiento;
+use App\Support\DemoMode;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -24,6 +25,7 @@ class RegistrarPagoFinanciamientoService
         protected GenerarFolioReciboFinanciamientoService $folioService,
         protected AuditoriaFinancieraService $auditoriaService,
         protected LogFinancieroService $logFinancieroService,
+        protected DemoMode $demoMode,
     ) {}
 
     public function ejecutar(
@@ -39,6 +41,8 @@ class RegistrarPagoFinanciamientoService
         float $recargo = 0,
         ?string $idempotencyKey = null,
     ): array {
+        $this->demoMode->ensureChangesAreAllowed();
+
         $resultado = DB::transaction(function () use (
             $contrato,
             $monto,

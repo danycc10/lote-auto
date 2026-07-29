@@ -6,14 +6,21 @@ use App\Enums\ApartadoEstatus;
 use App\Enums\AutoEstatus;
 use App\Models\ApartadoAuto;
 use App\Models\Auto;
+use App\Support\DemoMode;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class CrearApartadoAutoService
 {
+    public function __construct(
+        private DemoMode $demoMode,
+    ) {}
+
     public function ejecutar(array $data): ApartadoAuto
     {
+        $this->demoMode->ensureChangesAreAllowed();
+
         return DB::transaction(function () use ($data) {
             /** @var Auto $auto */
             $auto = Auto::lockForUpdate()->findOrFail($data['auto_id']);

@@ -11,6 +11,7 @@ use App\Models\CuotaFinanciamiento;
 use App\Models\HistorialFinanciamiento;
 use App\Models\PagoFinanciamiento;
 use App\Models\ReciboFinanciamiento;
+use App\Support\DemoMode;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -19,10 +20,13 @@ class CancelarReciboFinanciamientoService
 {
     public function __construct(
         protected AuditoriaFinancieraService $auditoriaService,
+        protected DemoMode $demoMode,
     ) {}
 
     public function execute(ReciboFinanciamiento $recibo, ?string $observaciones = null): ReciboFinanciamiento
     {
+        $this->demoMode->ensureChangesAreAllowed();
+
         return DB::transaction(function () use ($recibo, $observaciones) {
             if (! Auth::user()?->can('recibos.cancelar')) {
                 throw new RuntimeException('No tienes permiso para cancelar recibos.');

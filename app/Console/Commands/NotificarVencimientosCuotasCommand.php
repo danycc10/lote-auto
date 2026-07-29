@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Enums\CuotaEstatus;
 use App\Jobs\EnviarNotificacionCuotaJob;
 use App\Models\CuotaFinanciamiento;
+use App\Support\DemoMode;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
@@ -14,8 +15,14 @@ class NotificarVencimientosCuotasCommand extends Command
 
     protected $description = 'Envía correos de recordatorio 3 días antes del vencimiento y el día que vence la cuota.';
 
-    public function handle(): int
+    public function handle(DemoMode $demoMode): int
     {
+        if ($demoMode->enabled()) {
+            $this->warn('Modo demo activo: no se programaron notificaciones.');
+
+            return self::SUCCESS;
+        }
+
         $hoy = Carbon::today();
         $en3dias = $hoy->copy()->addDays(3);
 

@@ -6,6 +6,7 @@ use App\Enums\ContratoEstatus;
 use App\Enums\CuotaEstatus;
 use App\Models\ContratoFinanciamiento;
 use App\Models\CuotaFinanciamiento;
+use App\Support\DemoMode;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
@@ -15,8 +16,14 @@ class MarcarCuotasVencidasCommand extends Command
 
     protected $description = 'Marca cuotas pendientes/parciales como vencidas (respeta días de gracia) y actualiza estatus del contrato.';
 
-    public function handle(): int
+    public function handle(DemoMode $demoMode): int
     {
+        if ($demoMode->enabled()) {
+            $this->warn('Modo demo activo: no se actualizaron cuotas ni contratos.');
+
+            return self::SUCCESS;
+        }
+
         $hoy = Carbon::today();
 
         $marcadas = 0;

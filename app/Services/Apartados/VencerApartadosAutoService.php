@@ -6,12 +6,19 @@ use App\Enums\ApartadoEstatus;
 use App\Enums\AutoEstatus;
 use App\Models\ApartadoAuto;
 use App\Models\Auto;
+use App\Support\DemoMode;
 use Illuminate\Support\Facades\DB;
 
 class VencerApartadosAutoService
 {
+    public function __construct(
+        private DemoMode $demoMode,
+    ) {}
+
     public function ejecutar(): int
     {
+        $this->demoMode->ensureChangesAreAllowed();
+
         $total = 0;
 
         ApartadoAuto::query()

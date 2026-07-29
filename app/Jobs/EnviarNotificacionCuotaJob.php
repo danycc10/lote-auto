@@ -7,6 +7,7 @@ use App\Mail\NotificacionVencimientoCuotaMail;
 use App\Mail\RecordatorioPagoMail;
 use App\Models\ContratoFinanciamiento;
 use App\Models\CuotaFinanciamiento;
+use App\Support\DemoMode;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -30,6 +31,10 @@ class EnviarNotificacionCuotaJob implements ShouldBeUnique, ShouldQueue
 
     public function handle(): void
     {
+        if (app(DemoMode::class)->enabled()) {
+            return;
+        }
+
         $cuota = CuotaFinanciamiento::query()
             ->find($this->cuotaId);
 

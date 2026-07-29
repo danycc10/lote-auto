@@ -10,6 +10,7 @@ use App\Models\ApartadoAuto;
 use App\Models\Auto;
 use App\Models\ContratoFinanciamiento;
 use App\Services\Apartados\ConvertirApartadoEnContratoService;
+use App\Support\DemoMode;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -21,6 +22,7 @@ class CrearContratoFinanciamientoService
         private GeneradorCuotasFinanciamientoService $generador,
         private HistorialFinanciamientoService $historial,
         private ConvertirApartadoEnContratoService $convertirApartado,
+        private DemoMode $demoMode,
     ) {}
 
     /**
@@ -32,6 +34,8 @@ class CrearContratoFinanciamientoService
         int $actorId,
         ?string $rutaContratoFirmado = null,
     ): ContratoFinanciamiento {
+        $this->demoMode->ensureChangesAreAllowed();
+
         return DB::transaction(function () use ($data, $apartadoId, $actorId, $rutaContratoFirmado) {
             $this->validarDatosFinancieros($data);
 

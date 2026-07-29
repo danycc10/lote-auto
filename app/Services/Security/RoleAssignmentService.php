@@ -3,6 +3,7 @@
 namespace App\Services\Security;
 
 use App\Models\User;
+use App\Support\DemoMode;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -10,11 +11,17 @@ use Spatie\Permission\Models\Role;
 
 class RoleAssignmentService
 {
+    public function __construct(
+        private DemoMode $demoMode,
+    ) {}
+
     /**
      * @param  array<int, string>  $roleNames
      */
     public function syncRoles(User $actor, User $target, array $roleNames): void
     {
+        $this->demoMode->ensureChangesAreAllowed();
+
         $this->authorizeAssignment($actor, $roleNames);
 
         DB::transaction(function () use ($actor, $target, $roleNames): void {
@@ -42,6 +49,8 @@ class RoleAssignmentService
 
     public function delete(User $actor, User $target): void
     {
+        $this->demoMode->ensureChangesAreAllowed();
+
         if (! $actor->can('seguridad.usuarios')) {
             throw new AuthorizationException;
         }

@@ -7,11 +7,16 @@ use App\Enums\AutoEstatus;
 use App\Models\ApartadoAuto;
 use App\Models\Auto;
 use App\Models\ContratoFinanciamiento;
+use App\Support\DemoMode;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class ConvertirApartadoEnContratoService
 {
+    public function __construct(
+        private DemoMode $demoMode,
+    ) {}
+
     public function validarParaConvertir(ApartadoAuto $apartado): ApartadoAuto
     {
         $apartado->loadMissing(['auto', 'cliente', 'contratoFinanciamiento']);
@@ -45,6 +50,8 @@ class ConvertirApartadoEnContratoService
 
     public function finalizarConversion(ApartadoAuto $apartado, ContratoFinanciamiento $contrato): ApartadoAuto
     {
+        $this->demoMode->ensureChangesAreAllowed();
+
         return DB::transaction(function () use ($apartado, $contrato) {
             $contrato->refresh();
 

@@ -6,6 +6,7 @@ use App\Enums\CuotaEstatus;
 use App\Enums\FormulaFinanciamiento;
 use App\Models\ContratoFinanciamiento;
 use App\Models\CuotaFinanciamiento;
+use App\Support\DemoMode;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -13,10 +14,13 @@ class GeneradorCuotasFinanciamientoService
 {
     public function __construct(
         private CalculadoraFinanciamientoService $calculadora,
+        private DemoMode $demoMode,
     ) {}
 
     public function regenerar(ContratoFinanciamiento $contrato): void
     {
+        $this->demoMode->ensureChangesAreAllowed();
+
         DB::transaction(function () use ($contrato) {
             $contrato->cuotas()->delete();
 

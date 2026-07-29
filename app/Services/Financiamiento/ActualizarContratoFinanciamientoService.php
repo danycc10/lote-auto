@@ -9,6 +9,7 @@ use App\Enums\FormulaFinanciamiento;
 use App\Enums\PagoEstatus;
 use App\Models\Auto;
 use App\Models\ContratoFinanciamiento;
+use App\Support\DemoMode;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -19,6 +20,7 @@ class ActualizarContratoFinanciamientoService
         private CalculadoraFinanciamientoService $calculadora,
         private GeneradorCuotasFinanciamientoService $generador,
         private HistorialFinanciamientoService $historial,
+        private DemoMode $demoMode,
     ) {}
 
     /**
@@ -30,6 +32,8 @@ class ActualizarContratoFinanciamientoService
         int $actorId,
         ?string $nuevaRutaContrato = null,
     ): ContratoFinanciamiento {
+        $this->demoMode->ensureChangesAreAllowed();
+
         return DB::transaction(function () use ($contrato, $data, $actorId, $nuevaRutaContrato) {
             $contrato = ContratoFinanciamiento::query()
                 ->whereKey($contrato->id)

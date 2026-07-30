@@ -10,15 +10,32 @@ class AuthenticationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_login_screen_can_be_rendered(): void
+    public function test_professional_login_is_rendered_outside_demo_mode(): void
     {
+        config(['demo.enabled' => false]);
+
         $response = $this->get('/login');
 
         $response
             ->assertStatus(200)
-            ->assertSeeText('Bienvenido de nuevo')
+            ->assertSeeText('Iniciar sesión')
+            ->assertSeeText('Accede al panel administrativo.')
+            ->assertDontSeeText('Todo tu lote')
             ->assertSee('autocomplete="username"', false)
+            ->assertSee('type="password"', false)
             ->assertSee('aria-label="Mostrar contraseña"', false);
+    }
+
+    public function test_current_login_is_preserved_in_demo_mode(): void
+    {
+        config(['demo.enabled' => true]);
+
+        $this->get('/login')
+            ->assertOk()
+            ->assertSeeText('Bienvenido de nuevo')
+            ->assertSeeText('Todo tu lote')
+            ->assertSeeText('Seguimiento de contratos y pagos en tiempo real')
+            ->assertSee('type="password"', false);
     }
 
     public function test_users_can_authenticate_using_the_login_screen(): void

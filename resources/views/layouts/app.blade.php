@@ -51,6 +51,8 @@
 
                 <div class="flex-1"></div>
 
+                <x-contextual-help />
+
                 {{-- User dropdown --}}
                 <div x-data="{ open: false }" @keydown.escape.window="open = false" class="relative">
                     <button @click="open = !open" type="button"

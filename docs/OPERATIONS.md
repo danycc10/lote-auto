@@ -24,6 +24,10 @@ SESSION_DRIVER=database
 DB_BACKUP_ENABLED=true
 DB_BACKUP_KEEP_DAYS=14
 DB_SLOW_QUERY_MS=500
+
+REPORTES_DISK=local
+REPORTES_EXPIRATION_HOURS=24
+REPORTES_FAILED_RETENTION_DAYS=7
 ```
 
 No reutilices `INITIAL_ADMIN_PASSWORD` después del bootstrap. Déjala vacía y rota cualquier valor que haya sido expuesto.
@@ -44,6 +48,7 @@ composer install --no-dev --classmap-authoritative --no-interaction
 npm ci
 npm run build
 php artisan migrate --force
+php artisan storage:link
 php artisan optimize
 php artisan reload
 php artisan up
@@ -70,7 +75,7 @@ Ejemplo de Supervisor:
 ```ini
 [program:lote-autos-worker]
 process_name=%(program_name)s_%(process_num)02d
-command=php /var/www/lote-autos/artisan queue:work database --queue=default --sleep=3 --tries=3 --timeout=120 --max-time=3600
+command=php /var/www/lote-autos/artisan queue:work database --queue=default --sleep=3 --tries=3 --timeout=300 --max-time=3600
 directory=/var/www/lote-autos
 autostart=true
 autorestart=true
@@ -80,10 +85,10 @@ user=www-data
 numprocs=2
 redirect_stderr=true
 stdout_logfile=/var/log/supervisor/lote-autos-worker.log
-stopwaitsecs=130
+stopwaitsecs=310
 ```
 
-El timeout del worker debe ser menor que `DB_QUEUE_RETRY_AFTER`. Ajusta ambos si un Job legítimo supera 90 segundos.
+El timeout del worker debe ser menor que `DB_QUEUE_RETRY_AFTER`. La configuración propuesta permite hasta cinco minutos para exportaciones grandes y usa 360 segundos como tiempo de reintento.
 
 ## Scheduler
 
@@ -94,6 +99,12 @@ Registra una sola entrada cron por servidor:
 ```
 
 Las tareas usan exclusión mutua y `onOneServer`. Todos los nodos deben compartir un cache compatible con locks atómicos.
+
+El scheduler también ejecuta diariamente `reportes:limpiar-expirados`. El comando elimina los archivos privados cuya descarga expiró y conserva los reportes fallidos durante `REPORTES_FAILED_RETENTION_DAYS` para facilitar el diagnóstico. Puede ejecutarse manualmente con:
+
+```bash
+php artisan reportes:limpiar-expirados
+```
 
 ## Backups
 
@@ -173,4 +184,3 @@ Alertas mínimas:
 - vencimientos o notificaciones programadas sin ejecutar.
 
 Los logs de consultas lentas incluyen SQL con placeholders, conexión y duración; no incluyen bindings para evitar fuga de datos personales.
-

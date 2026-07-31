@@ -32,6 +32,12 @@ Schedule::command('app:backup-database')
     ->onOneServer()
     ->when(fn (): bool => (bool) config('backup.enabled'));
 
+Schedule::command('reportes:limpiar-expirados')
+    ->dailyAt('02:30')
+    ->timezone(config('app.timezone'))
+    ->withoutOverlapping(30)
+    ->onOneServer();
+
 // Envía recordatorios 3 días antes del vencimiento y notificación el día que vence
 Schedule::command('cuotas:notificar-vencimientos')
     ->dailyAt('08:00')

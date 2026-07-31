@@ -87,13 +87,13 @@ class Index extends Component
     #[Computed]
     public function precioVenta(): float
     {
-        return (float) ($this->auto?->precio_financiado ?? 0);
+        return (float) ($this->auto()?->precio_financiado ?? 0);
     }
 
     #[Computed]
     public function montoFinanciado(): float
     {
-        return max(0, $this->precioVenta - $this->enganche);
+        return max(0, $this->precioVenta() - $this->enganche);
     }
 
     #[Computed]
@@ -126,8 +126,10 @@ class Index extends Component
     #[Computed]
     public function calculoFinanciero(): array
     {
+        $montoFinanciado = $this->montoFinanciado();
+
         if (
-            $this->montoFinanciado <= 0
+            $montoFinanciado <= 0
             || $this->plazo < 1
             || $this->plazo > 120
             || $this->tasaAnual < 0
@@ -143,7 +145,7 @@ class Index extends Component
         }
 
         return $this->calculadora->calcular(
-            montoFinanciado: $this->montoFinanciado,
+            montoFinanciado: $montoFinanciado,
             tasaAnual: $this->tasaAnual,
             plazo: $this->plazo,
         );
@@ -195,7 +197,6 @@ class Index extends Component
         $this->nombreCliente = '';
         $this->telefonoCliente = '';
         $this->correoCliente = '';
-        $this->unsetComputedProperties();
     }
 
     public function abrirModalCorreo(): void
@@ -228,17 +229,17 @@ class Index extends Component
     public function datosCotizacion(): array
     {
         return [
-            'auto' => $this->auto,
+            'auto' => $this->auto(),
             'nombreCliente' => $this->nombreCliente,
             'telefonoCliente' => $this->telefonoCliente,
             'enganche' => $this->enganche,
             'plazo' => $this->plazo,
             'tasaAnual' => $this->tasaAnual,
-            'montoFinanciado' => $this->montoFinanciado,
-            'cuotaMensual' => $this->cuotaMensual,
-            'totalPagar' => $this->totalPagar,
-            'totalIntereses' => $this->totalIntereses,
-            'tablaAmortizacion' => $this->tablaAmortizacion,
+            'montoFinanciado' => $this->montoFinanciado(),
+            'cuotaMensual' => $this->cuotaMensual(),
+            'totalPagar' => $this->totalPagar(),
+            'totalIntereses' => $this->totalIntereses(),
+            'tablaAmortizacion' => $this->tablaAmortizacion(),
             'empresa' => $this->datosEmpresa(),
             'fechaGeneracion' => now()->format('d/m/Y'),
             'validezDias' => 7,
@@ -278,16 +279,16 @@ class Index extends Component
             $tel = '52'.$tel;
         }
 
-        $auto = $this->auto;
+        $auto = $this->auto();
         $nombre = $auto?->marca?->nombre.' '.$auto?->modelo?->nombre.' '.$auto?->anio;
 
         $msg = ($this->nombreCliente ? "Hola {$this->nombreCliente}, " : 'Hola, ')
              ."te comparto la cotización del {$nombre}.\n\n"
-             .'• Precio: $'.number_format($this->precioVenta, 2)."\n"
+             .'• Precio: $'.number_format($this->precioVenta(), 2)."\n"
              .'• Enganche: $'.number_format($this->enganche, 2)."\n"
              ."• Plazo: {$this->plazo} meses\n"
-             .'• Mensualidad: $'.number_format($this->cuotaMensual, 2)."\n"
-             .'• Total a pagar: $'.number_format($this->totalPagar, 2);
+             .'• Mensualidad: $'.number_format($this->cuotaMensual(), 2)."\n"
+             .'• Total a pagar: $'.number_format($this->totalPagar(), 2);
 
         return 'https://wa.me/'.$tel.'?text='.urlencode($msg);
     }

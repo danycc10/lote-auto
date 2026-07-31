@@ -54,11 +54,13 @@ class Auto extends Model
         });
     }
 
+    /** @return BelongsTo<MarcaAuto, $this> */
     public function marca(): BelongsTo
     {
         return $this->belongsTo(MarcaAuto::class, 'marca_auto_id');
     }
 
+    /** @return BelongsTo<ModeloAuto, $this> */
     public function modelo(): BelongsTo
     {
         return $this->belongsTo(ModeloAuto::class, 'modelo_auto_id');
@@ -69,7 +71,8 @@ class Auto extends Model
         return $this->hasMany(ImagenAuto::class, 'auto_id');
     }
 
-    public function imagenPortada()
+    /** @return HasOne<ImagenAuto, $this> */
+    public function imagenPortada(): HasOne
     {
         return $this->hasOne(ImagenAuto::class, 'auto_id')->where('es_portada', true);
     }

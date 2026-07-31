@@ -103,12 +103,6 @@ parameters:
 			path: app/Exports/ReportePagosExport.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$nombre\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Http/Controllers/Admin/CotizadorPdfController.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>nombre" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 2
@@ -145,72 +139,6 @@ parameters:
 			path: app/Livewire/Admin/ContratosFinanciamiento/Create.php
 
 		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\Cotizador\\Index\:\:\$auto\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Livewire/Admin/Cotizador/Index.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\Cotizador\\Index\:\:\$cuotaMensual\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Livewire/Admin/Cotizador/Index.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\Cotizador\\Index\:\:\$montoFinanciado\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Livewire/Admin/Cotizador/Index.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\Cotizador\\Index\:\:\$precioVenta\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Livewire/Admin/Cotizador/Index.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\Cotizador\\Index\:\:\$tablaAmortizacion\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Admin/Cotizador/Index.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\Cotizador\\Index\:\:\$totalIntereses\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Admin/Cotizador/Index.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\Cotizador\\Index\:\:\$totalPagar\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Livewire/Admin/Cotizador/Index.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Auto\:\:\$imagenPortada\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Admin/Cotizador/Index.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$nombre\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Livewire/Admin/Cotizador/Index.php
-
-		-
-			message: '#^Call to an undefined method App\\Livewire\\Admin\\Cotizador\\Index\:\:unsetComputedProperties\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Livewire/Admin/Cotizador/Index.php
-
-		-
-			message: '#^Relation ''imagenPortada'' is not found in App\\Models\\Auto model\.$#'
-			identifier: larastan.relationExistence
-			count: 2
-			path: app/Livewire/Admin/Cotizador/Index.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>nombre" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 2
@@ -226,12 +154,6 @@ parameters:
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$anio\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Livewire/Admin/Prospectos/Index.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$nombre\.$#'
-			identifier: property.notFound
-			count: 2
 			path: app/Livewire/Admin/Prospectos/Index.php
 
 		-
@@ -271,30 +193,6 @@ parameters:
 			path: app/Livewire/Admin/Usuarios/Index.php
 
 		-
-			message: '#^Relation ''imagenPortada'' is not found in App\\Models\\Auto model\.$#'
-			identifier: larastan.relationExistence
-			count: 2
-			path: app/Livewire/Public/AutoDetalle.php
-
-		-
-			message: '#^Relation ''imagenPortada'' is not found in App\\Models\\Auto model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: app/Livewire/Public/AutosDisponibles.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Auto\:\:\$imagenPortada\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Livewire/Public/LandingAutos.php
-
-		-
-			message: '#^Relation ''imagenPortada'' is not found in App\\Models\\Auto model\.$#'
-			identifier: larastan.relationExistence
-			count: 2
-			path: app/Livewire/Public/LandingAutos.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>anio" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
@@ -323,12 +221,6 @@ parameters:
 			identifier: booleanAnd.rightAlwaysTrue
 			count: 1
 			path: app/Models/ApartadoAuto.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$nombre\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Models/Auto.php
 
 		-
 			message: '#^Using nullsafe property access "\?\-\>nombre" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'

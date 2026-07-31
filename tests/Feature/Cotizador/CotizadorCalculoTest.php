@@ -94,4 +94,20 @@ class CotizadorCalculoTest extends TestCase
         $this->assertCount(12, $tabla);
         $this->assertSame(0.0, (float) end($tabla)['saldo']);
     }
+
+    public function test_limpiar_restablece_la_cotizacion_sin_invocar_metodos_inexistentes(): void
+    {
+        $auto = $this->crearAuto(120000);
+
+        Livewire::test(Index::class)
+            ->set('autoId', $auto->id)
+            ->set('enganche', 20000)
+            ->set('plazo', 24)
+            ->set('tasaAnual', 12)
+            ->call('limpiar')
+            ->assertSet('autoId', null)
+            ->assertSet('enganche', 0.0)
+            ->assertSet('plazo', 12)
+            ->assertSet('tasaAnual', 0.0);
+    }
 }

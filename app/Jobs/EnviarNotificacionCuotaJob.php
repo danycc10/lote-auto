@@ -11,13 +11,21 @@ use App\Support\DemoMode;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 class EnviarNotificacionCuotaJob implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;
 
     public int $tries = 3;
+
+    public int $maxExceptions = 3;
+
+    public int $timeout = 60;
+
+    public bool $failOnTimeout = true;
 
     public int $uniqueFor = 3600;
 
@@ -84,5 +92,15 @@ class EnviarNotificacionCuotaJob implements ShouldBeUnique, ShouldQueue
         $fecha = $this->fechaOperacion !== '' ? $this->fechaOperacion : now()->toDateString();
 
         return "{$this->cuotaId}:{$this->tipo}:{$fecha}";
+    }
+
+    public function failed(?Throwable $exception): void
+    {
+        Log::error('No fue posible enviar la notificación de una cuota.', [
+            'cuota_id' => $this->cuotaId,
+            'tipo' => $this->tipo,
+            'fecha_operacion' => $this->fechaOperacion,
+            'error' => $exception?->getMessage(),
+        ]);
     }
 }

@@ -9,13 +9,14 @@ use App\Exports\ReporteInventarioExport;
 use App\Exports\ReportePagosExport;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ReportesExportController extends Controller
 {
     public function export(Request $request)
     {
-        abort_unless(auth()->user()?->can('dashboard.ver'), 403);
+        Gate::authorize('reportes.ver');
 
         $tipo = $request->input('tipo', 'pagos');
         $desde = $request->input('desde');

@@ -2,39 +2,27 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Exports\ReporteApartadosExport;
-use App\Exports\ReporteContratosExport;
-use App\Exports\ReporteCuotasVencidasExport;
-use App\Exports\ReporteInventarioExport;
-use App\Exports\ReportePagosExport;
+use App\Enums\TipoReporte;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\Admin\ExportarReporteRequest;
 use Illuminate\Support\Facades\Gate;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ReportesExportController extends Controller
 {
-    public function export(Request $request)
+    public function export(ExportarReporteRequest $request): BinaryFileResponse
     {
         Gate::authorize('reportes.ver');
 
-        $tipo = $request->input('tipo', 'pagos');
-        $desde = $request->input('desde');
-        $hasta = $request->input('hasta');
-
-        $exports = [
-            'pagos' => [ReportePagosExport::class,          'reporte-pagos'],
-            'contratos' => [ReporteContratosExport::class,      'reporte-contratos'],
-            'cuotas' => [ReporteCuotasVencidasExport::class, 'reporte-cuotas-vencidas'],
-            'inventario' => [ReporteInventarioExport::class,     'reporte-inventario'],
-            'apartados' => [ReporteApartadosExport::class,      'reporte-apartados'],
-        ];
-
-        abort_unless(array_key_exists($tipo, $exports), 404);
-
-        [$class, $nombre] = $exports[$tipo];
+        $validated = $request->validated();
+        $tipo = TipoReporte::from($validated['tipo']);
+        $exportClass = $tipo->exportClass();
         $fecha = now()->format('Ymd');
 
-        return Excel::download(new $class($desde, $hasta), "{$nombre}-{$fecha}.xlsx");
+        return Excel::download(
+            new $exportClass($validated['desde'] ?? null, $validated['hasta'] ?? null),
+            "{$tipo->filePrefix()}-{$fecha}.xlsx",
+        );
     }
 }

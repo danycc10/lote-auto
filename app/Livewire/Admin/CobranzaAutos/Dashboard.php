@@ -8,6 +8,7 @@ use App\Models\Configuracion;
 use App\Models\ContratoFinanciamiento;
 use App\Models\CuotaFinanciamiento;
 use App\Models\PagoFinanciamiento;
+use App\Services\Financiamiento\ObtenerKpisCobranzaService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -150,74 +151,6 @@ class Dashboard extends Component
             ->whereHas('contrato', function ($q) {
                 $q->where('estatus', '!=', 'cancelado');
             });
-    }
-
-    public function getKpisProperty(): array
-    {
-        $today = today();
-        $startMonth = now()->startOfMonth()->toDateString();
-        $endMonth = now()->endOfMonth()->toDateString();
-
-        $totalVencido = (clone $this->cuotasBase())
-            ->whereIn('estatus', CuotaEstatus::conSaldo())
-            ->whereDate('fecha_vencimiento', '<', $today)
-            ->sum(DB::raw('COALESCE(saldo, monto)'));
-
-        $totalPorVencer = (clone $this->cuotasBase())
-            ->whereIn('estatus', CuotaEstatus::pendientesDePago())
-            ->whereBetween('fecha_vencimiento', [$today, $today->copy()->addDays(7)])
-            ->sum(DB::raw('COALESCE(saldo, monto)'));
-
-        $cobradoMes = (clone $this->pagosBase())
-            ->whereBetween('fecha_pago', [$startMonth, $endMonth])
-            ->sum('monto');
-
-        $contratosActivos = ContratoFinanciamiento::query()
-            ->whereIn('estatus', ['activo', 'atrasado'])
-            ->count();
-
-        $contratosConAtraso = ContratoFinanciamiento::query()
-            ->whereIn('estatus', ['activo', 'atrasado'])
-            ->whereHas('cuotas', function ($q) use ($today) {
-                $q->whereIn('estatus', CuotaEstatus::conSaldo())
-                    ->where('estatus', '!=', 'cancelada')
-                    ->whereDate('fecha_vencimiento', '<', $today);
-            })
-            ->count();
-
-        $cuotasVencidas = (clone $this->cuotasBase())
-            ->whereIn('estatus', CuotaEstatus::conSaldo())
-            ->whereDate('fecha_vencimiento', '<', $today)
-            ->count();
-
-        $pctMorosidad = $contratosActivos > 0
-            ? round($contratosConAtraso / $contratosActivos * 100, 1)
-            : 0;
-
-        $diasPromedioAtraso = $this->diasPromedioAtraso($today);
-
-        $cuotasCriticasCount = (clone $this->cuotasBase())
-            ->whereIn('estatus', CuotaEstatus::conSaldo())
-            ->whereDate('fecha_vencimiento', '<', $today->copy()->subDays(30))
-            ->count();
-
-        $montoCritico = (clone $this->cuotasBase())
-            ->whereIn('estatus', CuotaEstatus::conSaldo())
-            ->whereDate('fecha_vencimiento', '<', $today->copy()->subDays(30))
-            ->sum(DB::raw('COALESCE(saldo, monto)'));
-
-        return [
-            'total_vencido' => $totalVencido,
-            'total_por_vencer' => $totalPorVencer,
-            'cobrado_mes' => $cobradoMes,
-            'contratos_activos' => $contratosActivos,
-            'contratos_con_atraso' => $contratosConAtraso,
-            'cuotas_vencidas' => $cuotasVencidas,
-            'pct_morosidad' => $pctMorosidad,
-            'dias_promedio_atraso' => $diasPromedioAtraso,
-            'cuotas_criticas_count' => $cuotasCriticasCount,
-            'monto_critico' => $montoCritico,
-        ];
     }
 
     public function getProximosVencimientosProperty()
@@ -479,14 +412,14 @@ class Dashboard extends Component
             ->toArray();
     }
 
-    public function render()
+    public function render(ObtenerKpisCobranzaService $kpisService)
     {
         $perPage = in_array($this->perPage, [10, 25, 50], true) ? $this->perPage : 10;
         $contratos = $this->contratosQuery()->paginate($perPage);
 
         return view('livewire.admin.cobranza-autos.dashboard', [
             'contratos' => $contratos,
-            'kpis' => $this->kpis,
+            'kpis' => $kpisService->ejecutar(),
             'proximosVencimientos' => $this->proximosVencimientos,
             'cuotasVencidas' => $this->cuotasVencidas,
             'contratosTopAtraso' => $this->contratosTopAtraso,
@@ -495,25 +428,6 @@ class Dashboard extends Component
             'waMensajePlantilla' => Configuracion::obtener('notif.wa_mensaje', 'Hola {nombre}, tiene pagos vencidos por ${monto_atrasado} en su contrato {folio}. Por favor comuníquese con nosotros.'),
             'modalDestinatarios' => $this->mostrarModal ? $this->modalDestinatarios() : [],
         ])->layout('layouts.app');
-    }
-
-    private function diasPromedioAtraso(Carbon $today): int
-    {
-        $driver = DB::connection()->getDriverName();
-        $expression = match ($driver) {
-            'sqlite' => 'AVG(julianday(?) - julianday(fecha_vencimiento))',
-            'pgsql' => 'AVG((?::date - fecha_vencimiento::date))',
-            'sqlsrv' => 'AVG(CAST(DATEDIFF(day, fecha_vencimiento, ?) AS FLOAT))',
-            default => 'AVG(DATEDIFF(?, fecha_vencimiento))',
-        };
-
-        $average = (clone $this->cuotasBase())
-            ->whereIn('estatus', CuotaEstatus::conSaldo())
-            ->whereDate('fecha_vencimiento', '<', $today)
-            ->selectRaw("{$expression} as dias_promedio", [$today->toDateString()])
-            ->value('dias_promedio');
-
-        return $average !== null ? (int) round((float) $average) : 0;
     }
 
     /**

@@ -3,7 +3,9 @@
 namespace Tests\Feature\Financiamiento;
 
 use App\Livewire\Admin\CobranzaAutos\Dashboard;
+use App\Services\Financiamiento\ObtenerKpisCobranzaService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 
@@ -66,5 +68,21 @@ class DashboardRendimientoTest extends FinanciamientoTestCase
         $blade = file_get_contents(resource_path('views/livewire/admin/cobranza-autos/dashboard.blade.php'));
         $this->assertIsString($blade);
         $this->assertStringNotContainsString('->cuotas()', $blade);
+    }
+
+    public function test_consolida_y_reutiliza_los_kpis_durante_el_ttl_configurado(): void
+    {
+        Cache::clear();
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        $service = app(ObtenerKpisCobranzaService::class);
+        $primerResultado = $service->ejecutar();
+        $consultasIniciales = count(DB::getQueryLog());
+        $segundoResultado = $service->ejecutar();
+
+        $this->assertSame(3, $consultasIniciales);
+        $this->assertCount($consultasIniciales, DB::getQueryLog());
+        $this->assertSame($primerResultado, $segundoResultado);
     }
 }

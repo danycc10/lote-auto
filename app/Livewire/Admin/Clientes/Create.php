@@ -4,9 +4,12 @@ namespace App\Livewire\Admin\Clientes;
 
 use App\Livewire\Concerns\ClienteFormRules;
 use App\Models\Cliente;
+use App\Services\Archivos\ArchivoPrivadoService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Throwable;
 
 class Create extends Component
 {
@@ -55,38 +58,51 @@ class Create extends Component
         return $this->mensajesCliente();
     }
 
-    public function guardar()
+    public function guardar(ArchivoPrivadoService $archivoService)
     {
         $data = $this->validate();
+        $rutasGuardadas = [];
 
-        $cliente = Cliente::create([
-            'nombre' => $data['nombre'],
-            'apellido_paterno' => $data['apellido_paterno'] ?? null,
-            'apellido_materno' => $data['apellido_materno'] ?? null,
-            'telefono' => $data['telefono'] ?? null,
-            'correo' => $data['correo'] ?? null,
-            'curp' => $data['curp'] ?? null,
-            'rfc' => $data['rfc'] ?? null,
-            'direccion' => $data['direccion'] ?? null,
-            'ciudad' => $data['ciudad'] ?? null,
-            'estado' => $data['estado'] ?? null,
-            'codigo_postal' => $data['codigo_postal'] ?? null,
-            'ocupacion' => $data['ocupacion'] ?? null,
-            'ingreso_mensual' => $data['ingreso_mensual'] ?? null,
-            'activo' => (bool) ($data['activo'] ?? true),
-        ]);
+        try {
+            DB::transaction(function () use ($data, $archivoService, &$rutasGuardadas): void {
+                $cliente = Cliente::create([
+                    'nombre' => $data['nombre'],
+                    'apellido_paterno' => $data['apellido_paterno'] ?? null,
+                    'apellido_materno' => $data['apellido_materno'] ?? null,
+                    'telefono' => $data['telefono'] ?? null,
+                    'correo' => $data['correo'] ?? null,
+                    'curp' => $data['curp'] ?? null,
+                    'rfc' => $data['rfc'] ?? null,
+                    'direccion' => $data['direccion'] ?? null,
+                    'ciudad' => $data['ciudad'] ?? null,
+                    'estado' => $data['estado'] ?? null,
+                    'codigo_postal' => $data['codigo_postal'] ?? null,
+                    'ocupacion' => $data['ocupacion'] ?? null,
+                    'ingreso_mensual' => $data['ingreso_mensual'] ?? null,
+                    'activo' => (bool) ($data['activo'] ?? true),
+                ]);
 
-        $basePath = 'clientes/'.$cliente->id.'-'.Str::slug($cliente->nombre_completo ?: $cliente->nombre);
+                $basePath = 'clientes/'.$cliente->id.'-'.Str::slug($cliente->nombre_completo ?: $cliente->nombre);
 
-        if ($this->ine) {
-            $cliente->ruta_ine = $this->ine->store($basePath.'/documentos', 'private');
+                if ($this->ine) {
+                    $cliente->ruta_ine = $archivoService->guardar($this->ine, $basePath.'/documentos');
+                    $rutasGuardadas[] = $cliente->ruta_ine;
+                }
+
+                if ($this->comprobante_domicilio) {
+                    $cliente->ruta_comprobante_domicilio = $archivoService->guardar($this->comprobante_domicilio, $basePath.'/documentos');
+                    $rutasGuardadas[] = $cliente->ruta_comprobante_domicilio;
+                }
+
+                $cliente->save();
+            });
+        } catch (Throwable $exception) {
+            foreach ($rutasGuardadas as $ruta) {
+                $archivoService->eliminar($ruta);
+            }
+
+            throw $exception;
         }
-
-        if ($this->comprobante_domicilio) {
-            $cliente->ruta_comprobante_domicilio = $this->comprobante_domicilio->store($basePath.'/documentos', 'private');
-        }
-
-        $cliente->save();
 
         session()->flash('success', 'Cliente creado correctamente.');
 

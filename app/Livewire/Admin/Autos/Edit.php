@@ -6,12 +6,13 @@ use App\Models\Auto;
 use App\Models\ImagenAuto;
 use App\Models\MarcaAuto;
 use App\Models\ModeloAuto;
+use App\Services\Autos\ImagenAutoService;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
+use Throwable;
 
 class Edit extends Component
 {
@@ -103,7 +104,7 @@ class Edit extends Component
             'activo' => 'boolean',
 
             'imagenesNuevas' => 'nullable|array|max:15',
-            'imagenesNuevas.*' => 'image|mimes:jpg,jpeg,png,webp|max:4096',
+            'imagenesNuevas.*' => 'image|mimes:jpg,jpeg,png,webp|max:4096|dimensions:max_width=4500,max_height=4500',
             'portadaNuevaIndex' => 'nullable|integer|min:0',
         ];
     }
@@ -120,6 +121,7 @@ class Edit extends Component
         'imagenesNuevas.*.image' => 'Cada archivo debe ser una imagen válida.',
         'imagenesNuevas.*.mimes' => 'Las imágenes deben ser JPG, JPEG, PNG o WEBP.',
         'imagenesNuevas.*.max' => 'Cada imagen debe pesar máximo 4 MB.',
+        'imagenesNuevas.*.dimensions' => 'Cada imagen debe medir como máximo 4500 × 4500 píxeles.',
     ];
 
     public function getMarcasProperty()
@@ -205,74 +207,69 @@ class Edit extends Component
         $this->portadaNuevaIndex = $index;
     }
 
-    public function actualizar()
+    public function actualizar(ImagenAutoService $imagenService)
     {
         $data = $this->validate();
+        $rutasGuardadas = [];
 
-        DB::transaction(function () use ($data) {
-            $this->auto->update([
-                'marca_auto_id' => $data['marca_auto_id'],
-                'modelo_auto_id' => $data['modelo_auto_id'],
-                'codigo_inventario' => $data['codigo_inventario'] ?? null,
-                'vin' => $data['vin'] ?? null,
-                'placa' => $data['placa'] ?? null,
-                'anio' => $data['anio'],
-                'version' => $data['version'] ?? null,
-                'color' => $data['color'] ?? null,
-                'kilometraje' => $data['kilometraje'] ?? 0,
-                'transmision' => $data['transmision'] ?? null,
-                'tipo_combustible' => $data['tipo_combustible'] ?? null,
-                'precio_contado' => $data['precio_contado'],
-                'precio_financiado' => $data['precio_financiado'] ?? 0,
-                'estatus' => $data['estatus'],
-                'descripcion' => $data['descripcion'] ?? null,
-                'destacado' => (bool) ($data['destacado'] ?? false),
-                'activo' => (bool) ($data['activo'] ?? true),
-            ]);
+        try {
+            DB::transaction(function () use ($data, $imagenService, &$rutasGuardadas) {
+                $this->auto->update([
+                    'marca_auto_id' => $data['marca_auto_id'],
+                    'modelo_auto_id' => $data['modelo_auto_id'],
+                    'codigo_inventario' => $data['codigo_inventario'] ?? null,
+                    'vin' => $data['vin'] ?? null,
+                    'placa' => $data['placa'] ?? null,
+                    'anio' => $data['anio'],
+                    'version' => $data['version'] ?? null,
+                    'color' => $data['color'] ?? null,
+                    'kilometraje' => $data['kilometraje'] ?? 0,
+                    'transmision' => $data['transmision'] ?? null,
+                    'tipo_combustible' => $data['tipo_combustible'] ?? null,
+                    'precio_contado' => $data['precio_contado'],
+                    'precio_financiado' => $data['precio_financiado'] ?? 0,
+                    'estatus' => $data['estatus'],
+                    'descripcion' => $data['descripcion'] ?? null,
+                    'destacado' => (bool) ($data['destacado'] ?? false),
+                    'activo' => (bool) ($data['activo'] ?? true),
+                ]);
 
-            if (! empty($this->imagenesNuevas)) {
-                $siguienteOrden = ((int) $this->auto->imagenes()->max('orden')) + 1;
+                $imagenesCreadas = [];
 
-                foreach ($this->imagenesNuevas as $index => $imagen) {
-                    $ruta = $imagen->store("autos/{$this->auto->id}", 'public');
+                if (! empty($this->imagenesNuevas)) {
+                    $siguienteOrden = ((int) $this->auto->imagenes()->max('orden')) + 1;
 
-                    ImagenAuto::create([
-                        'auto_id' => $this->auto->id,
-                        'ruta' => $ruta,
-                        'disco' => 'public',
-                        'mime_type' => $imagen->getMimeType(),
-                        'tamano' => $imagen->getSize(),
-                        'es_portada' => false,
-                        'orden' => $siguienteOrden + $index,
-                    ]);
-                }
+                    foreach ($this->imagenesNuevas as $index => $imagen) {
+                        $datosImagen = $imagenService->guardar($imagen, $this->auto->id);
+                        $rutasGuardadas[] = $datosImagen['ruta'];
 
-                if ($this->portadaNuevaIndex !== null && isset($this->imagenesNuevas[$this->portadaNuevaIndex])) {
-                    $this->auto->imagenes()->update(['es_portada' => false]);
-
-                    $ultimaInsertadaComoPortada = $this->auto->imagenes()
-                        ->orderByDesc('id')
-                        ->skip(count($this->imagenesNuevas) - 1 - $this->portadaNuevaIndex)
-                        ->first();
-
-                    if ($ultimaInsertadaComoPortada) {
-                        $ultimaInsertadaComoPortada->update(['es_portada' => true]);
+                        $imagenesCreadas[$index] = ImagenAuto::create($datosImagen + [
+                            'auto_id' => $this->auto->id,
+                            'es_portada' => false,
+                            'orden' => $siguienteOrden + $index,
+                        ]);
                     }
-                } elseif (! $this->auto->imagenes()->where('es_portada', true)->exists()) {
-                    $primera = $this->auto->imagenes()->orderBy('orden')->first();
-                    if ($primera) {
-                        $primera->update(['es_portada' => true]);
+
+                    if ($this->portadaNuevaIndex !== null && isset($imagenesCreadas[$this->portadaNuevaIndex])) {
+                        $this->auto->imagenes()->update(['es_portada' => false]);
+                        $imagenesCreadas[$this->portadaNuevaIndex]->update(['es_portada' => true]);
                     }
                 }
-            } else {
+
                 if (! $this->auto->imagenes()->where('es_portada', true)->exists()) {
                     $primera = $this->auto->imagenes()->orderBy('orden')->first();
                     if ($primera) {
                         $primera->update(['es_portada' => true]);
                     }
                 }
+            });
+        } catch (Throwable $exception) {
+            foreach ($rutasGuardadas as $ruta) {
+                $imagenService->eliminar($ruta);
             }
-        });
+
+            throw $exception;
+        }
 
         $this->imagenesNuevas = [];
         $this->portadaNuevaIndex = 0;
@@ -283,7 +280,7 @@ class Edit extends Component
         return redirect()->route('admin.autos.edit', $this->auto);
     }
 
-    public function eliminarImagen(int $imagenId): void
+    public function eliminarImagen(int $imagenId, ImagenAutoService $imagenService): void
     {
         $imagen = ImagenAuto::query()
             ->where('auto_id', $this->auto->id)
@@ -291,17 +288,22 @@ class Edit extends Component
 
         $eraPortada = (bool) $imagen->es_portada;
 
-        if ($imagen->ruta && Storage::disk($imagen->disco)->exists($imagen->ruta)) {
-            Storage::disk($imagen->disco)->delete($imagen->ruta);
-        }
+        $ruta = $imagen->ruta;
+        $disco = $imagen->disco;
 
-        $imagen->delete();
+        DB::transaction(function () use ($imagen, $eraPortada): void {
+            $imagen->delete();
 
-        if ($eraPortada) {
-            $nuevaPortada = $this->auto->imagenes()->orderBy('orden')->first();
-            if ($nuevaPortada) {
-                $nuevaPortada->update(['es_portada' => true]);
+            if ($eraPortada) {
+                $nuevaPortada = $this->auto->imagenes()->orderBy('orden')->first();
+                if ($nuevaPortada) {
+                    $nuevaPortada->update(['es_portada' => true]);
+                }
             }
+        });
+
+        if ($ruta) {
+            $imagenService->eliminar($ruta, $disco);
         }
 
         session()->flash('success', 'Imagen eliminada correctamente.');

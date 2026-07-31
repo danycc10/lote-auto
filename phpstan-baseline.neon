@@ -541,12 +541,6 @@ parameters:
 			path: app/Services/Apartados/ConvertirApartadoEnContratoService.php
 
 		-
-			message: '#^Call to static method read\(\) on an unknown class Intervention\\Image\\Laravel\\Facades\\Image\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/Services/Autos/ImagenAutoService.php
-
-		-
 			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Http\\Request\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 2

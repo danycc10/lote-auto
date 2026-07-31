@@ -6,10 +6,12 @@ use App\Models\Auto;
 use App\Models\ImagenAuto;
 use App\Models\MarcaAuto;
 use App\Models\ModeloAuto;
+use App\Services\Autos\ImagenAutoService;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
+use Throwable;
 
 class Create extends Component
 {
@@ -82,7 +84,7 @@ class Create extends Component
             'activo' => 'boolean',
 
             'imagenes' => 'nullable|array|max:15',
-            'imagenes.*' => 'image|mimes:jpg,jpeg,png,webp|max:4096',
+            'imagenes.*' => 'image|mimes:jpg,jpeg,png,webp|max:4096|dimensions:max_width=4500,max_height=4500',
             'portadaIndex' => 'nullable|integer|min:0',
         ];
     }
@@ -92,6 +94,7 @@ class Create extends Component
         'imagenes.*.image' => 'Todos los archivos deben ser imágenes.',
         'imagenes.*.mimes' => 'Las imágenes deben ser jpg, jpeg, png o webp.',
         'imagenes.*.max' => 'Cada imagen debe pesar máximo 4 MB.',
+        'imagenes.*.dimensions' => 'Cada imagen debe medir como máximo 4500 × 4500 píxeles.',
     ];
 
     public function getMarcasProperty()
@@ -161,47 +164,51 @@ class Create extends Component
         $this->portadaIndex = $index;
     }
 
-    public function guardar()
+    public function guardar(ImagenAutoService $imagenService)
     {
         $data = $this->validate();
+        $rutasGuardadas = [];
 
-        DB::transaction(function () use ($data) {
-            $auto = Auto::create([
-                'marca_auto_id' => $data['marca_auto_id'],
-                'modelo_auto_id' => $data['modelo_auto_id'],
-                'codigo_inventario' => $data['codigo_inventario'] ?? null,
-                'vin' => $data['vin'] ?? null,
-                'placa' => $data['placa'] ?? null,
-                'anio' => $data['anio'],
-                'version' => $data['version'] ?? null,
-                'color' => $data['color'] ?? null,
-                'kilometraje' => $data['kilometraje'] ?? 0,
-                'transmision' => $data['transmision'] ?? null,
-                'tipo_combustible' => $data['tipo_combustible'] ?? null,
-                'precio_contado' => $data['precio_contado'],
-                'precio_financiado' => $data['precio_financiado'] ?? 0,
-                'estatus' => $data['estatus'],
-                'descripcion' => $data['descripcion'] ?? null,
-                'destacado' => (bool) ($data['destacado'] ?? false),
-                'activo' => (bool) ($data['activo'] ?? true),
-            ]);
+        try {
+            DB::transaction(function () use ($data, $imagenService, &$rutasGuardadas) {
+                $auto = Auto::create([
+                    'marca_auto_id' => $data['marca_auto_id'],
+                    'modelo_auto_id' => $data['modelo_auto_id'],
+                    'codigo_inventario' => $data['codigo_inventario'] ?? null,
+                    'vin' => $data['vin'] ?? null,
+                    'placa' => $data['placa'] ?? null,
+                    'anio' => $data['anio'],
+                    'version' => $data['version'] ?? null,
+                    'color' => $data['color'] ?? null,
+                    'kilometraje' => $data['kilometraje'] ?? 0,
+                    'transmision' => $data['transmision'] ?? null,
+                    'tipo_combustible' => $data['tipo_combustible'] ?? null,
+                    'precio_contado' => $data['precio_contado'],
+                    'precio_financiado' => $data['precio_financiado'] ?? 0,
+                    'estatus' => $data['estatus'],
+                    'descripcion' => $data['descripcion'] ?? null,
+                    'destacado' => (bool) ($data['destacado'] ?? false),
+                    'activo' => (bool) ($data['activo'] ?? true),
+                ]);
 
-            if (! empty($this->imagenes)) {
                 foreach ($this->imagenes as $index => $imagen) {
-                    $ruta = $imagen->store("autos/{$auto->id}", 'public');
+                    $datosImagen = $imagenService->guardar($imagen, $auto->id);
+                    $rutasGuardadas[] = $datosImagen['ruta'];
 
-                    ImagenAuto::create([
+                    ImagenAuto::create($datosImagen + [
                         'auto_id' => $auto->id,
-                        'ruta' => $ruta,
-                        'disco' => 'public',
-                        'mime_type' => $imagen->getMimeType(),
-                        'tamano' => $imagen->getSize(),
                         'es_portada' => (int) $index === (int) ($this->portadaIndex ?? 0),
                         'orden' => $index + 1,
                     ]);
                 }
+            });
+        } catch (Throwable $exception) {
+            foreach ($rutasGuardadas as $ruta) {
+                $imagenService->eliminar($ruta);
             }
-        });
+
+            throw $exception;
+        }
 
         session()->flash('success', 'Auto creado correctamente.');
 

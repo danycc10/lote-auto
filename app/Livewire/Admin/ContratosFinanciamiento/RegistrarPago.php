@@ -108,12 +108,12 @@ class RegistrarPago extends Component
             return null;
         }
 
-        return $this->cuotasDisponibles->firstWhere('id', $this->cuota_id);
+        return $this->getCuotasDisponiblesProperty()->firstWhere('id', $this->cuota_id);
     }
 
     public function seleccionarCuota(int $id): void
     {
-        $cuota = $this->cuotasDisponibles->firstWhere('id', $id);
+        $cuota = $this->getCuotasDisponiblesProperty()->firstWhere('id', $id);
         if (! $cuota) {
             return;
         }
@@ -126,13 +126,13 @@ class RegistrarPago extends Component
 
     public function updatedIncluirRecargo($value): void
     {
-        $cuota = $this->cuotaSeleccionada;
+        $cuota = $this->getCuotaSeleccionadaProperty();
         if (! $cuota) {
             return;
         }
 
         $saldo = (float) $cuota->saldo;
-        $recargo = $this->recargoSugerido;
+        $recargo = $this->getRecargoSugeridoProperty();
 
         $this->monto = number_format(
             $value ? $saldo + $recargo : $saldo,
@@ -174,7 +174,7 @@ class RegistrarPago extends Component
             ->findOrFail($this->cuota_id);
 
         try {
-            $recargo = $this->incluirRecargo ? (float) $this->recargoSugerido : 0;
+            $recargo = $this->incluirRecargo ? $this->getRecargoSugeridoProperty() : 0;
 
             $resultado = $service->ejecutar(
                 contrato: $this->contrato,
@@ -203,10 +203,10 @@ class RegistrarPago extends Component
     public function render()
     {
         return view('livewire.admin.contratos-financiamiento.registrar-pago', [
-            'cuotasDisponibles' => $this->cuotasDisponibles,
-            'recargoSugerido' => $this->recargoSugerido,
-            'cuotaSeleccionada' => $this->cuotaSeleccionada,
-            'tarjetasDisponibles' => $this->tarjetasDisponibles,
+            'cuotasDisponibles' => $this->getCuotasDisponiblesProperty(),
+            'recargoSugerido' => $this->getRecargoSugeridoProperty(),
+            'cuotaSeleccionada' => $this->getCuotaSeleccionadaProperty(),
+            'tarjetasDisponibles' => $this->getTarjetasDisponiblesProperty(),
         ])
             ->layout('layouts.app')
             ->title('Registrar pago');

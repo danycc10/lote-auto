@@ -115,42 +115,6 @@ parameters:
 			path: app/Http/Controllers/Admin/CotizadorPdfController.php
 
 		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\Administracion\\TarjetasCobroIndex\:\:\$tarjetas\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Admin/Administracion/TarjetasCobroIndex.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\ApartadosAutos\\Create\:\:\$autosDisponibles\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Admin/ApartadosAutos/Create.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\ApartadosAutos\\Create\:\:\$clientesDisponibles\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Admin/ApartadosAutos/Create.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\Autos\\Edit\:\:\$imagenesActuales\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Admin/Autos/Edit.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\Autos\\Index\:\:\$autos\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Admin/Autos/Index.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\Autos\\Index\:\:\$marcas\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Admin/Autos/Index.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Cliente\:\:\$curp\.$#'
 			identifier: property.notFound
 			count: 1
@@ -161,24 +125,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Livewire/Admin/Clientes/Edit.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\Clientes\\Index\:\:\$clientes\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Admin/Clientes/Index.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\ContratosFinanciamiento\\Create\:\:\$autos\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Admin/ContratosFinanciamiento/Create.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\ContratosFinanciamiento\\Create\:\:\$clientes\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Admin/ContratosFinanciamiento/Create.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Auto\:\:\$label\.$#'
@@ -197,48 +143,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Livewire/Admin/ContratosFinanciamiento/Create.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\ContratosFinanciamiento\\Edit\:\:\$autos\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Admin/ContratosFinanciamiento/Edit.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\ContratosFinanciamiento\\Edit\:\:\$clientes\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Admin/ContratosFinanciamiento/Edit.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\ContratosFinanciamiento\\Index\:\:\$contratos\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Admin/ContratosFinanciamiento/Index.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\ContratosFinanciamiento\\RegistrarPago\:\:\$cuotaSeleccionada\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Livewire/Admin/ContratosFinanciamiento/RegistrarPago.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\ContratosFinanciamiento\\RegistrarPago\:\:\$cuotasDisponibles\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Livewire/Admin/ContratosFinanciamiento/RegistrarPago.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\ContratosFinanciamiento\\RegistrarPago\:\:\$recargoSugerido\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Livewire/Admin/ContratosFinanciamiento/RegistrarPago.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\ContratosFinanciamiento\\RegistrarPago\:\:\$tarjetasDisponibles\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Admin/ContratosFinanciamiento/RegistrarPago.php
 
 		-
 			message: '#^Access to an undefined property App\\Livewire\\Admin\\Cotizador\\Index\:\:\$auto\.$#'
@@ -341,12 +245,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 4
 			path: app/Livewire/Admin/Prospectos/Index.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\Recibos\\Index\:\:\$recibos\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Admin/Recibos/Index.php
 
 		-
 			message: '#^Match arm comparison between ''cancelado'' and ''cancelado'' is always true\.$#'

@@ -185,8 +185,8 @@ class Index extends Component
     public function render()
     {
         return view('livewire.admin.autos.index', [
-            'autos' => $this->autos,
-            'marcas' => $this->marcas,
+            'autos' => $this->getAutosProperty(),
+            'marcas' => $this->getMarcasProperty(),
         ])->layout('layouts.app');
     }
 }

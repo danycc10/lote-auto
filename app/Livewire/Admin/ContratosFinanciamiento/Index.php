@@ -122,7 +122,7 @@ class Index extends Component
     public function render()
     {
         return view('livewire.admin.contratos-financiamiento.index', [
-            'contratos' => $this->contratos,
+            'contratos' => $this->getContratosProperty(),
         ])->layout('layouts.app');
     }
 }

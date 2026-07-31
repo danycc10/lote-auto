@@ -125,7 +125,7 @@ class Index extends Component
     public function render()
     {
         return view('livewire.admin.clientes.index', [
-            'clientes' => $this->clientes,
+            'clientes' => $this->getClientesProperty(),
         ])->layout('layouts.app');
     }
 }

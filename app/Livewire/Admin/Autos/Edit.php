@@ -324,7 +324,7 @@ class Edit extends Component
     public function render()
     {
         return view('livewire.admin.autos.edit', [
-            'imagenesActuales' => $this->imagenesActuales,
+            'imagenesActuales' => $this->imagenesActuales(),
         ])->layout('layouts.app');
     }
 }

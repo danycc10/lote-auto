@@ -316,8 +316,8 @@ class Edit extends Component
         $contrato = $this->contrato->fresh(['auto.marca', 'auto.modelo', 'cliente', 'cuotas']);
 
         return view('livewire.admin.contratos-financiamiento.edit', [
-            'autos' => $this->autos,
-            'clientes' => $this->clientes,
+            'autos' => $this->getAutosProperty(),
+            'clientes' => $this->getClientesProperty(),
             'estatusDisponibles' => $this->getEstatusDisponiblesProperty(),
             'contratoActual' => $contrato,
         ])->layout('layouts.app');

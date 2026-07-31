@@ -131,8 +131,8 @@ class Create extends Component
     public function render()
     {
         return view('livewire.admin.apartados-autos.create', [
-            'autosDisponibles' => $this->autosDisponibles,
-            'clientesDisponibles' => $this->clientesDisponibles,
+            'autosDisponibles' => $this->getAutosDisponiblesProperty(),
+            'clientesDisponibles' => $this->getClientesDisponiblesProperty(),
         ])->layout('layouts.app');
     }
 }

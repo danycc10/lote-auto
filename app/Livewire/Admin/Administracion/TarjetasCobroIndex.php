@@ -136,7 +136,7 @@ class TarjetasCobroIndex extends Component
     public function render()
     {
         return view('livewire.admin.administracion.tarjetas-cobro-index', [
-            'tarjetas' => $this->tarjetas,
+            'tarjetas' => $this->getTarjetasProperty(),
         ])
             ->layout('layouts.app')
             ->title('Tarjetas y cuentas de cobro');

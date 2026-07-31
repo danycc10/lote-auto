@@ -347,8 +347,8 @@ class Create extends Component
     public function render()
     {
         return view('livewire.admin.contratos-financiamiento.create', [
-            'autos' => $this->autos,
-            'clientes' => $this->clientes,
+            'autos' => $this->getAutosProperty(),
+            'clientes' => $this->getClientesProperty(),
         ])->layout('layouts.app');
     }
 }

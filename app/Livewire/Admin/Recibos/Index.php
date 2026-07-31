@@ -247,7 +247,7 @@ class Index extends Component
     public function render()
     {
         return view('livewire.admin.recibos.index', [
-            'recibos' => $this->recibos,
+            'recibos' => $this->getRecibosProperty(),
         ])->layout('layouts.app')->title('Recibos');
     }
 }

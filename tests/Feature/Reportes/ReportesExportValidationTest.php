@@ -3,11 +3,13 @@
 namespace Tests\Feature\Reportes;
 
 use App\Enums\TipoReporte;
+use App\Jobs\GenerarReporteJob;
 use App\Livewire\Admin\Reportes\Index;
+use App\Models\ReporteGenerado;
 use App\Models\User;
 use Database\Seeders\RolesPermisosSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Queue;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -29,13 +31,11 @@ class ReportesExportValidationTest extends TestCase
         $this->reportero = User::factory()->create();
         $this->reportero->assignRole($rol);
 
-        Excel::fake();
+        Queue::fake();
     }
 
     public function test_cada_tipo_valido_selecciona_su_exportador(): void
     {
-        $fecha = now()->format('Ymd');
-
         foreach (TipoReporte::cases() as $tipo) {
             $parameters = ['tipo' => $tipo->value];
 
@@ -44,14 +44,14 @@ class ReportesExportValidationTest extends TestCase
             }
 
             $this->actingAs($this->reportero)
-                ->get(route('admin.reportes.export', $parameters))
-                ->assertOk();
+                ->post(route('admin.reportes.export'), $parameters)
+                ->assertRedirect(route('admin.reportes.index'));
 
-            $exportClass = $tipo->exportClass();
-
-            Excel::assertDownloaded(
-                "{$tipo->filePrefix()}-{$fecha}.xlsx",
-                fn (object $export): bool => $export instanceof $exportClass,
+            $reporte = ReporteGenerado::query()->latest('id')->firstOrFail();
+            $this->assertSame($tipo, $reporte->tipo);
+            Queue::assertPushed(
+                GenerarReporteJob::class,
+                fn (GenerarReporteJob $job): bool => $job->reporteId === $reporte->id,
             );
         }
     }
@@ -59,11 +59,11 @@ class ReportesExportValidationTest extends TestCase
     public function test_rechaza_tipo_de_reporte_desconocido(): void
     {
         $this->actingAs($this->reportero)
-            ->getJson(route('admin.reportes.export', [
+            ->postJson(route('admin.reportes.export'), [
                 'tipo' => 'desconocido',
                 'desde' => '2026-01-01',
                 'hasta' => '2026-01-31',
-            ]))
+            ])
             ->assertUnprocessable()
             ->assertJsonValidationErrors('tipo');
     }
@@ -71,7 +71,7 @@ class ReportesExportValidationTest extends TestCase
     public function test_reportes_temporales_requieren_ambas_fechas(): void
     {
         $this->actingAs($this->reportero)
-            ->getJson(route('admin.reportes.export', ['tipo' => TipoReporte::Pagos->value]))
+            ->postJson(route('admin.reportes.export'), ['tipo' => TipoReporte::Pagos->value])
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['desde', 'hasta']);
     }
@@ -79,27 +79,27 @@ class ReportesExportValidationTest extends TestCase
     public function test_inventario_no_requiere_fechas(): void
     {
         $this->actingAs($this->reportero)
-            ->get(route('admin.reportes.export', ['tipo' => TipoReporte::Inventario->value]))
-            ->assertOk();
+            ->post(route('admin.reportes.export'), ['tipo' => TipoReporte::Inventario->value])
+            ->assertRedirect(route('admin.reportes.index'));
     }
 
     public function test_rechaza_formato_y_orden_de_fechas_invalidos(): void
     {
         $this->actingAs($this->reportero)
-            ->getJson(route('admin.reportes.export', [
+            ->postJson(route('admin.reportes.export'), [
                 'tipo' => TipoReporte::Contratos->value,
                 'desde' => '31/01/2026',
                 'hasta' => '2026-01-01',
-            ]))
+            ])
             ->assertUnprocessable()
             ->assertJsonValidationErrors('desde');
 
         $this->actingAs($this->reportero)
-            ->getJson(route('admin.reportes.export', [
+            ->postJson(route('admin.reportes.export'), [
                 'tipo' => TipoReporte::Contratos->value,
                 'desde' => '2026-02-01',
                 'hasta' => '2026-01-01',
-            ]))
+            ])
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['desde', 'hasta']);
     }
@@ -107,11 +107,11 @@ class ReportesExportValidationTest extends TestCase
     public function test_rechaza_rangos_mayores_a_un_ano(): void
     {
         $this->actingAs($this->reportero)
-            ->getJson(route('admin.reportes.export', [
+            ->postJson(route('admin.reportes.export'), [
                 'tipo' => TipoReporte::Apartados->value,
                 'desde' => '2025-01-01',
                 'hasta' => '2026-01-03',
-            ]))
+            ])
             ->assertUnprocessable()
             ->assertJsonValidationErrors('hasta');
     }

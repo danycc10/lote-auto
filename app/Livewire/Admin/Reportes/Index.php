@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Admin\Reportes;
 
+use App\Models\ReporteGenerado;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class Index extends Component
@@ -59,21 +61,15 @@ class Index extends Component
         ];
     }
 
-    public function descargar(): void
-    {
-        $url = route('admin.reportes.export', [
-            'tipo' => $this->tipo,
-            'desde' => $this->desde,
-            'hasta' => $this->hasta,
-        ]);
-
-        $this->js("window.open('{$url}', '_blank')");
-    }
-
     public function render()
     {
         return view('livewire.admin.reportes.index', [
             'reportes' => $this->reportes(),
+            'reportesGenerados' => ReporteGenerado::query()
+                ->where('user_id', Auth::id())
+                ->latest()
+                ->limit(10)
+                ->get(),
         ])->layout('layouts.app');
     }
 }

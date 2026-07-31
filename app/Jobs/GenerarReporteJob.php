@@ -10,6 +10,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
+use RuntimeException;
 use Throwable;
 
 class GenerarReporteJob implements ShouldBeUnique, ShouldQueue
@@ -46,11 +47,15 @@ class GenerarReporteJob implements ShouldBeUnique, ShouldQueue
         $disk = (string) config('reportes.disk', 'local');
         $ruta = "reportes/{$reporte->user_id}/{$reporte->uuid}.xlsx";
 
-        Excel::store(
+        $guardado = Excel::store(
             new $exportClass($reporte->desde?->toDateString(), $reporte->hasta?->toDateString()),
             $ruta,
             $disk,
         );
+
+        if ($guardado !== true) {
+            throw new RuntimeException('El adaptador de almacenamiento no confirmó la escritura del reporte.');
+        }
 
         $reporte->update([
             'archivo' => $ruta,

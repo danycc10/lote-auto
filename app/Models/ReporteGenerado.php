@@ -20,6 +20,8 @@ use Illuminate\Support\Str;
  * @property ReporteGeneradoEstatus $estatus
  * @property string|null $error
  * @property Carbon|null $expires_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class ReporteGenerado extends Model
 {

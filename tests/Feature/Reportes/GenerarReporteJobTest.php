@@ -69,6 +69,16 @@ class GenerarReporteJobTest extends TestCase
         $this->assertNull($reporte->archivo);
     }
 
+    public function test_no_marca_como_listo_si_el_disco_no_confirma_la_escritura(): void
+    {
+        Excel::shouldReceive('store')->once()->andReturnFalse();
+        $reporte = $this->crearReporte();
+
+        $this->expectException(RuntimeException::class);
+
+        (new GenerarReporteJob($reporte->id))->handle();
+    }
+
     private function crearReporte(array $atributos = []): ReporteGenerado
     {
         return ReporteGenerado::create(array_merge([

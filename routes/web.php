@@ -262,9 +262,13 @@ Route::middleware(['auth', 'verified'])
                 ->middleware('permission:reportes.ver')
                 ->name('reportes.index');
 
-            Route::get('/reportes/export', [ReportesExportController::class, 'export'])
+            Route::post('/reportes/export', [ReportesExportController::class, 'export'])
                 ->middleware('permission:reportes.ver')
                 ->name('reportes.export');
+
+            Route::get('/reportes/export/{reporte}/download', [ReportesExportController::class, 'download'])
+                ->middleware('permission:reportes.ver')
+                ->name('reportes.download');
 
             Route::get('/administracion/tarjetas-cobro', TarjetasCobroIndex::class)
                 ->middleware('permission:seguridad.roles')

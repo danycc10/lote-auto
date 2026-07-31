@@ -5,7 +5,7 @@ namespace Tests\Feature\Security;
 use App\Models\User;
 use Database\Seeders\RolesPermisosSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Queue;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -18,7 +18,7 @@ class ReportesExportAuthorizationTest extends TestCase
         parent::setUp();
 
         $this->seed(RolesPermisosSeeder::class);
-        Excel::fake();
+        Queue::fake();
     }
 
     public function test_usuario_con_permiso_de_reportes_puede_exportar_sin_permiso_de_dashboard(): void
@@ -26,10 +26,8 @@ class ReportesExportAuthorizationTest extends TestCase
         $usuario = $this->usuarioConRol('reportero', ['reportes.ver']);
 
         $this->actingAs($usuario)
-            ->get(route('admin.reportes.export', ['tipo' => 'inventario']))
-            ->assertOk();
-
-        Excel::assertDownloaded('reporte-inventario-'.now()->format('Ymd').'.xlsx');
+            ->post(route('admin.reportes.export'), ['tipo' => 'inventario'])
+            ->assertRedirect(route('admin.reportes.index'));
     }
 
     public function test_usuario_con_dashboard_pero_sin_reportes_no_puede_exportar(): void
@@ -37,7 +35,7 @@ class ReportesExportAuthorizationTest extends TestCase
         $usuario = $this->usuarioConRol('operador-dashboard', ['dashboard.ver']);
 
         $this->actingAs($usuario)
-            ->get(route('admin.reportes.export', ['tipo' => 'inventario']))
+            ->post(route('admin.reportes.export'), ['tipo' => 'inventario'])
             ->assertForbidden();
     }
 
@@ -47,10 +45,8 @@ class ReportesExportAuthorizationTest extends TestCase
         $administrador->assignRole('administrador');
 
         $this->actingAs($administrador)
-            ->get(route('admin.reportes.export', ['tipo' => 'inventario']))
-            ->assertOk();
-
-        Excel::assertDownloaded('reporte-inventario-'.now()->format('Ymd').'.xlsx');
+            ->post(route('admin.reportes.export'), ['tipo' => 'inventario'])
+            ->assertRedirect(route('admin.reportes.index'));
     }
 
     /**

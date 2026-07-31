@@ -18,6 +18,8 @@ class Dashboard extends Component
 {
     use WithPagination;
 
+    private const CUOTAS_VENCIDAS_LIMIT = 50;
+
     public string $q = '';
 
     public string $estatus = 'activos'; // activos | atrasados | liquidados | todos
@@ -80,7 +82,19 @@ class Dashboard extends Component
 
     protected function contratosQuery()
     {
-        $query = $this->baseContratosQuery();
+        $query = $this->baseContratosQuery()
+            ->withSum([
+                'cuotas as saldo_pendiente' => fn ($cuota) => $cuota
+                    ->whereIn('estatus', CuotaEstatus::conSaldo()),
+            ], DB::raw('COALESCE(saldo, monto)'))
+            ->addSelect([
+                'proxima_cuota_monto' => CuotaFinanciamiento::query()
+                    ->select('monto')
+                    ->whereColumn('contrato_financiamiento_id', 'contratos_financiamiento.id')
+                    ->whereIn('estatus', CuotaEstatus::conSaldo())
+                    ->orderBy('fecha_vencimiento')
+                    ->limit(1),
+            ]);
 
         $query->when($this->q, function ($q) {
             $term = '%'.trim($this->q).'%';
@@ -224,6 +238,7 @@ class Dashboard extends Component
             ->whereIn('estatus', CuotaEstatus::conSaldo())
             ->whereDate('fecha_vencimiento', '<', today())
             ->orderBy('fecha_vencimiento')
+            ->limit(self::CUOTAS_VENCIDAS_LIMIT)
             ->get();
     }
 
@@ -348,6 +363,8 @@ class Dashboard extends Component
                 $q->whereNull('notificado_correo_at')
                     ->orWhereDate('notificado_correo_at', '<', today());
             })
+            ->orderBy('fecha_vencimiento')
+            ->limit(self::CUOTAS_VENCIDAS_LIMIT)
             ->pluck('id')
             ->map(fn ($id) => (string) $id)
             ->toArray();
@@ -482,21 +499,21 @@ class Dashboard extends Component
 
     private function diasPromedioAtraso(Carbon $today): int
     {
-        $totalDays = 0;
-        $overdueCount = 0;
+        $driver = DB::connection()->getDriverName();
+        $expression = match ($driver) {
+            'sqlite' => 'AVG(julianday(?) - julianday(fecha_vencimiento))',
+            'pgsql' => 'AVG((?::date - fecha_vencimiento::date))',
+            'sqlsrv' => 'AVG(CAST(DATEDIFF(day, fecha_vencimiento, ?) AS FLOAT))',
+            default => 'AVG(DATEDIFF(?, fecha_vencimiento))',
+        };
 
-        foreach (
-            (clone $this->cuotasBase())
-                ->select(['id', 'fecha_vencimiento'])
-                ->whereIn('estatus', CuotaEstatus::conSaldo())
-                ->whereDate('fecha_vencimiento', '<', $today)
-                ->cursor() as $cuota
-        ) {
-            $totalDays += (int) $cuota->fecha_vencimiento->startOfDay()->diffInDays($today);
-            $overdueCount++;
-        }
+        $average = (clone $this->cuotasBase())
+            ->whereIn('estatus', CuotaEstatus::conSaldo())
+            ->whereDate('fecha_vencimiento', '<', $today)
+            ->selectRaw("{$expression} as dias_promedio", [$today->toDateString()])
+            ->value('dias_promedio');
 
-        return $overdueCount > 0 ? (int) round($totalDays / $overdueCount) : 0;
+        return $average !== null ? (int) round((float) $average) : 0;
     }
 
     /**

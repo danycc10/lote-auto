@@ -398,7 +398,7 @@
                 @can('notificaciones.enviar')
                 <button wire:click="seleccionarAtrasadas" type="button"
                         class="shrink-0 text-xs font-medium text-indigo-600 hover:text-indigo-800 transition">
-                    Seleccionar todas
+                    Seleccionar visibles
                 </button>
                 @endcan
             </div>
@@ -421,6 +421,12 @@
                     @endcan
                 </div>
             </div>
+            @endif
+
+            @if($kpis['cuotas_vencidas'] > $cuotasVencidas->count())
+                <p class="mb-3 text-xs text-amber-700">
+                    Se muestran las 50 cuotas más antiguas de {{ number_format($kpis['cuotas_vencidas']) }} vencidas.
+                </p>
             @endif
 
             <div class="space-y-1.5 max-h-[600px] overflow-y-auto pr-0.5">
@@ -572,13 +578,7 @@
                 <tbody class="divide-y divide-slate-100">
                     @forelse($contratos as $contrato)
                         @php
-                            $cuotaPendiente = $contrato->cuotas()
-                                ->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
-                                ->orderBy('fecha_vencimiento')
-                                ->first();
-                            $saldoPendiente = $contrato->cuotas()
-                                ->whereIn('estatus', ['pendiente', 'parcial', 'vencida'])
-                                ->sum(DB::raw('COALESCE(saldo, monto)'));
+                            $saldoPendiente = (float) ($contrato->saldo_pendiente ?? 0);
                         @endphp
                         <tr class="hover:bg-slate-50/60 transition-colors">
                             <td class="px-5 py-3.5">
@@ -619,7 +619,7 @@
                                 @endif
                             </td>
                             <td class="px-5 py-3.5 text-right">
-                                <span class="text-slate-700 tabular-nums">${{ number_format((float) ($cuotaPendiente->monto ?? 0), 2) }}</span>
+                                <span class="text-slate-700 tabular-nums">${{ number_format((float) ($contrato->proxima_cuota_monto ?? 0), 2) }}</span>
                             </td>
                             <td class="px-5 py-3.5 text-right">
                                 <span class="font-semibold tabular-nums {{ $saldoPendiente > 0 ? 'text-red-600' : 'text-emerald-600' }}">

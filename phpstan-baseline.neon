@@ -1,22 +1,10 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$dias_gracia\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Console/Commands/MarcarCuotasVencidasCommand.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>dias_gracia" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Console/Commands/MarcarCuotasVencidasCommand.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$cliente\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Console/Commands/NotificarVencimientosCuotasCommand.php
 
 		-
 			message: '#^Method App\\Exports\\ReporteApartadosExport\:\:query\(\) has invalid return type Laravel\\Scout\\Builder\.$#'
@@ -179,72 +167,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Livewire/Admin/Clientes/Index.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\CobranzaAutos\\Dashboard\:\:\$alertasCriticas\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Admin/CobranzaAutos/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\CobranzaAutos\\Dashboard\:\:\$cobranzaPorDia\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Admin/CobranzaAutos/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\CobranzaAutos\\Dashboard\:\:\$contratosTopAtraso\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Admin/CobranzaAutos/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\CobranzaAutos\\Dashboard\:\:\$cuotasVencidas\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Admin/CobranzaAutos/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Admin\\CobranzaAutos\\Dashboard\:\:\$proximosVencimientos\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Admin/CobranzaAutos/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$cliente\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Livewire/Admin/CobranzaAutos/Dashboard.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$folio\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Livewire/Admin/CobranzaAutos/Dashboard.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\CuotaFinanciamiento\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
-			path: app/Livewire/Admin/CobranzaAutos/Dashboard.php
-
-		-
-			message: '#^Parameter \#2 \$replace of function str_replace expects array\<string\>\|string, array\<int, mixed\> given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Livewire/Admin/CobranzaAutos/Dashboard.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>folio" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Livewire/Admin/CobranzaAutos/Dashboard.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>nombre_completo" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Livewire/Admin/CobranzaAutos/Dashboard.php
 
 		-
 			message: '#^Access to an undefined property App\\Livewire\\Admin\\ContratosFinanciamiento\\Create\:\:\$autos\.$#'
@@ -487,12 +409,6 @@ parameters:
 			path: app/Mail/CotizacionMail.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$folio\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Mail/NotificacionVencimientoCuotaMail.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>folio" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
@@ -551,24 +467,6 @@ parameters:
 			identifier: property.notFound
 			count: 2
 			path: app/Services/Financiamiento/CancelarReciboFinanciamientoService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$dias_gracia\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Services/Financiamiento/EstadoCuentaFinanciamientoService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tipo_recargo\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Services/Financiamiento/EstadoCuentaFinanciamientoService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$valor_recargo\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Services/Financiamiento/EstadoCuentaFinanciamientoService.php
 
 		-
 			message: '#^Method App\\Services\\Financiamiento\\EstadoCuentaFinanciamientoService\:\:diasAtraso\(\) should return int but returns float\.$#'

@@ -43,6 +43,7 @@ class CuotaFinanciamiento extends Model
         'notificado_correo_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<ContratoFinanciamiento, $this> */
     public function contrato(): BelongsTo
     {
         return $this->belongsTo(ContratoFinanciamiento::class, 'contrato_financiamiento_id');

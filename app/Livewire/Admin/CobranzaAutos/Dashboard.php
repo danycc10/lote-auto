@@ -318,8 +318,8 @@ class Dashboard extends Component
             return;
         }
 
-        $asunto = Configuracion::obtener('notif.correo_asunto', 'Recordatorio de pago — Cuota #{numero_cuota} / Contrato {folio}');
-        $cuerpo = Configuracion::obtener('notif.correo_cuerpo', "Estimado/a {nombre},\n\nLa cuota #{numero_cuota} de su contrato {folio} venció el {fecha_vencimiento} ({dias_atraso} días de atraso). Monto pendiente: \${monto_pendiente}.\n\nPor favor comuníquese con nosotros.");
+        $asunto = (string) Configuracion::obtener('notif.correo_asunto', 'Recordatorio de pago — Cuota #{numero_cuota} / Contrato {folio}');
+        $cuerpo = (string) Configuracion::obtener('notif.correo_cuerpo', "Estimado/a {nombre},\n\nLa cuota #{numero_cuota} de su contrato {folio} venció el {fecha_vencimiento} ({dias_atraso} días de atraso). Monto pendiente: \${monto_pendiente}.\n\nPor favor comuníquese con nosotros.");
 
         $cuotas = CuotaFinanciamiento::with(['contrato.cliente'])
             ->whereIn('id', $this->cuotasParaEnviar)
@@ -348,11 +348,11 @@ class Dashboard extends Component
             $montoPendiente = (float) ($cuota->saldo ?: $cuota->monto);
 
             $vars = [
-                '{nombre}' => $cliente->nombre_completo,
-                '{folio}' => $cuota->contrato->folio,
-                '{numero_cuota}' => $cuota->numero,
+                '{nombre}' => (string) $cliente->nombre_completo,
+                '{folio}' => (string) $cuota->contrato->folio,
+                '{numero_cuota}' => (string) $cuota->numero,
                 '{fecha_vencimiento}' => Carbon::parse($cuota->fecha_vencimiento)->format('d/m/Y'),
-                '{dias_atraso}' => $diasAtraso,
+                '{dias_atraso}' => (string) $diasAtraso,
                 '{monto_pendiente}' => number_format($montoPendiente, 2),
                 '{monto_cuota}' => number_format((float) $cuota->monto, 2),
             ];
@@ -400,15 +400,20 @@ class Dashboard extends Component
             ->whereIn('id', $this->cuotasParaEnviar)
             ->orderBy('fecha_vencimiento')
             ->get()
-            ->map(fn ($c) => [
-                'nombre' => $c->contrato?->cliente?->nombre_completo ?? '—',
-                'correo' => $c->contrato?->cliente?->correo ?: null,
-                'cuota' => $c->numero,
-                'folio' => $c->contrato?->folio ?? '—',
-                'monto' => number_format((float) ($c->saldo ?: $c->monto), 2),
-                'dias' => (int) now()->diffInDays(Carbon::parse($c->fecha_vencimiento)),
-                'notificado_hoy' => $c->notificado_correo_at?->isToday() ?? false,
-            ])
+            ->map(function (CuotaFinanciamiento $cuota): array {
+                $contrato = $cuota->contrato;
+                $cliente = $contrato->cliente;
+
+                return [
+                    'nombre' => $cliente->nombre_completo,
+                    'correo' => $cliente->correo ?: null,
+                    'cuota' => $cuota->numero,
+                    'folio' => $contrato->folio,
+                    'monto' => number_format((float) ($cuota->saldo ?: $cuota->monto), 2),
+                    'dias' => (int) now()->diffInDays(Carbon::parse($cuota->fecha_vencimiento)),
+                    'notificado_hoy' => $cuota->notificado_correo_at?->isToday() ?? false,
+                ];
+            })
             ->toArray();
     }
 
@@ -420,11 +425,11 @@ class Dashboard extends Component
         return view('livewire.admin.cobranza-autos.dashboard', [
             'contratos' => $contratos,
             'kpis' => $kpisService->ejecutar(),
-            'proximosVencimientos' => $this->proximosVencimientos,
-            'cuotasVencidas' => $this->cuotasVencidas,
-            'contratosTopAtraso' => $this->contratosTopAtraso,
-            'alertasCriticas' => $this->alertasCriticas,
-            'cobranzaPorDia' => $this->cobranzaPorDia,
+            'proximosVencimientos' => $this->getProximosVencimientosProperty(),
+            'cuotasVencidas' => $this->getCuotasVencidasProperty(),
+            'contratosTopAtraso' => $this->getContratosTopAtrasoProperty(),
+            'alertasCriticas' => $this->getAlertasCriticasProperty(),
+            'cobranzaPorDia' => $this->getCobranzaPorDiaProperty(),
             'waMensajePlantilla' => Configuracion::obtener('notif.wa_mensaje', 'Hola {nombre}, tiene pagos vencidos por ${monto_atrasado} en su contrato {folio}. Por favor comuníquese con nosotros.'),
             'modalDestinatarios' => $this->mostrarModal ? $this->modalDestinatarios() : [],
         ])->layout('layouts.app');

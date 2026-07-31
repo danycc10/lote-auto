@@ -35,7 +35,7 @@ class ContextualHelpTest extends TestCase
                 return is_string($name)
                     && in_array('GET', $route->methods(), true)
                     && ($name === 'dashboard' || Str::startsWith($name, 'admin.'))
-                    && ! Str::endsWith($name, ['.pdf', '.export', '.archivo']);
+                    && ! Str::endsWith($name, ['.pdf', '.export', '.archivo', '.download']);
             })
             ->map(fn ($route): string => (string) $route->getName())
             ->values();

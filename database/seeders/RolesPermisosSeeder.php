@@ -47,6 +47,7 @@ class RolesPermisosSeeder extends Seeder
             'seguridad.usuarios',
             'seguridad.roles.asignar_administrador',
             'sistema.configurar',
+            'sistema.salud.ver',
             'notificaciones.enviar',
 
             'recibos.ver',
@@ -97,6 +98,7 @@ class RolesPermisosSeeder extends Seeder
             'recibos.imprimir',
             'recibos.cancelar',
             'logs_financieros.ver',
+            'sistema.salud.ver',
         ]);
 
         $cobrador->syncPermissions([

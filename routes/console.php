@@ -56,7 +56,9 @@ Schedule::command('app:backup-database')
     ->timezone(config('app.timezone'))
     ->withoutOverlapping(120)
     ->onOneServer()
-    ->when(fn (): bool => (bool) config('backup.enabled'));
+    ->when(fn (): bool => (bool) config('backup.enabled'))
+    ->onSuccess(fn (OperationalStatusService $status) => $status->success('backup', 'El respaldo programado finalizó correctamente.'))
+    ->onFailure(fn (OperationalStatusService $status) => $status->failure('backup', 'El respaldo programado terminó con error.'));
 
 Schedule::command('reportes:limpiar-expirados')
     ->dailyAt('02:30')

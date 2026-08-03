@@ -3,7 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property string $clave
+ * @property string $estado
+ * @property string|null $mensaje
+ * @property Carbon $ejecutado_at
+ */
 class EstadoOperacion extends Model
 {
     protected $table = 'estado_operaciones';

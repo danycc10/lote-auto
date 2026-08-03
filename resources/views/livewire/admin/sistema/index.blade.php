@@ -7,6 +7,19 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
+        @can('sistema.salud.ver')
+            <a href="{{ route('admin.sistema.salud') }}" wire:navigate
+               class="group bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                <div class="h-10 w-10 rounded-lg bg-emerald-50 flex items-center justify-center mb-4">
+                    <svg class="h-5 w-5 text-emerald-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12h4l2-6 4 12 2-6h6" />
+                    </svg>
+                </div>
+                <h2 class="text-sm font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors">Salud operativa</h2>
+                <p class="text-xs text-slate-500 mt-1">Supervisa cron, colas, respaldos y almacenamiento de esta instalación.</p>
+            </a>
+        @endcan
+
         @if(\App\Models\Configuracion::esActivo('modulo.financiamiento'))
             @can('logs_financieros.ver')
                 <a href="{{ route('admin.finanzas.logs-financieros') }}"

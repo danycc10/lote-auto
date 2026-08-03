@@ -185,6 +185,22 @@ return [
             ],
             'tip' => 'Los cambios de sistema pueden afectar a todos los usuarios; valida su alcance antes de guardar.',
         ],
+        'admin.sistema.salud' => [
+            'title' => 'Salud de la instalación',
+            'purpose' => 'Confirma que los procesos técnicos esenciales de este lote estén funcionando.',
+            'steps' => [
+                'Revisa primero el estado general y las tarjetas marcadas como aviso o error.',
+                'Pulsa Actualizar estado después de corregir el cron, la cola, el respaldo o el almacenamiento.',
+                'Escala cualquier error persistente antes de continuar con la operación diaria.',
+            ],
+            'information_title' => 'Información mostrada',
+            'information' => [
+                'Última actividad del scheduler, worker de colas y respaldo local.',
+                'Disponibilidad de copia externa, espacio en disco y trabajos fallidos.',
+                'Identidad de la instalación y versiones técnicas sin credenciales.',
+            ],
+            'tip' => 'Un respaldo solo es confiable si periódicamente compruebas que puede restaurarse.',
+        ],
         'admin.sistema.configuracion' => [
             'title' => 'Configuración del sistema',
             'purpose' => 'Controla módulos, datos públicos de contacto y plantillas de notificación.',

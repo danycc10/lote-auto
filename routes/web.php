@@ -37,6 +37,7 @@ use App\Livewire\Admin\Sistema\BrandingIndex as SistemaBrandingIndex;
 use App\Livewire\Admin\Sistema\ConfiguracionIndex as SistemaConfiguracionIndex;
 use App\Livewire\Admin\Sistema\Index as SistemaIndex;
 use App\Livewire\Admin\Sistema\LandingTemplateIndex;
+use App\Livewire\Admin\Sistema\SaludIndex;
 use App\Livewire\Admin\Usuarios\Index as UsuariosIndex;
 use App\Livewire\Public\AutoDetalle;
 use App\Livewire\Public\AutosDisponibles;
@@ -153,6 +154,10 @@ Route::middleware(['auth', 'verified'])
         Route::get('/sistema/auditoria', AuditoriaIndex::class)
             ->middleware('permission:auditoria.ver')
             ->name('sistema.auditoria');
+
+        Route::get('/sistema/salud', SaludIndex::class)
+            ->middleware('permission:sistema.salud.ver')
+            ->name('sistema.salud');
 
         Route::get('/seguridad/roles-permisos', RolesPermisosManager::class)
             ->middleware('permission:seguridad.roles')

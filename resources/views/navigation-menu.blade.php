@@ -223,6 +223,17 @@
                 <p class="text-[10px] font-semibold text-slate-600 uppercase tracking-widest">Sistema</p>
             </div>
 
+            @can('sistema.salud.ver')
+            <a href="{{ route('admin.sistema.salud') }}" wire:navigate @click="$store.sidebar.open = false"
+                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                    {{ request()->routeIs('admin.sistema.salud') ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
+                <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 12h4l2-6 4 12 2-6h6" />
+                </svg>
+                Salud operativa
+            </a>
+            @endcan
+
 
             @if(auth()->user()->hasAnyRole(['administrador', 'gerente']))
             <a href="{{ route('admin.sistema.apariencia') }}" wire:navigate @click="$store.sidebar.open = false"

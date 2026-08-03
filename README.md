@@ -78,4 +78,6 @@ Consulta [docs/OPERATIONS.md](docs/OPERATIONS.md) antes de desplegar. Incluye:
 - backups, verificación y restauración;
 - health checks y observabilidad.
 
+Para instalaciones independientes por lote en HostGator/cPanel consulta también [docs/HOSTGATOR.md](docs/HOSTGATOR.md).
+
 El endpoint `/up` comprueba arranque, base de datos y cache.

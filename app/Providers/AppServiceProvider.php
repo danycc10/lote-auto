@@ -26,6 +26,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $customPublicPath = config('hosting.public_path');
+
+        if (is_string($customPublicPath) && filled($customPublicPath)) {
+            $this->app->usePublicPath($customPublicPath);
+        }
+
         $uploadMiddleware = config('livewire.temporary_file_upload.middleware')
             ?: ['throttle:60,1'];
 

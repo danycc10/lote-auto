@@ -2,6 +2,7 @@
 
 namespace App\Services\Operations;
 
+use App\Models\Configuracion;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -134,9 +135,12 @@ class HostingReadinessService
         $appUrl = (string) config('app.url');
         $databaseDriver = DB::connection()->getDriverName();
         $workerMode = (string) config('hosting.queue_worker.mode', 'external');
+        $instanceUuid = Configuracion::obtener('instalacion.uuid');
+        $instanceName = Configuracion::obtener('instalacion.nombre');
 
         return [
             $this->result(filled(config('app.key')), 'Clave de aplicación', 'APP_KEY debe ser única y persistente.'),
+            $this->result(filled($instanceUuid) && filled($instanceName), 'Identidad de la instalación', 'Ejecuta php artisan lote:aprovisionar antes de publicar.'),
             $this->result(! (bool) config('app.debug'), 'Modo de depuración', 'APP_DEBUG debe ser false.'),
             $this->result(Str::startsWith($appUrl, 'https://'), 'HTTPS', 'APP_URL debe utilizar https://.'),
             $this->result(in_array($databaseDriver, ['mysql', 'mariadb'], true), 'Base de datos de producción', 'Driver actual: '.$databaseDriver),

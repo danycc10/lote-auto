@@ -12,6 +12,14 @@ php artisan hosting:verificar --strict
 
 No publiques la instalación si el comando devuelve errores. Los avisos deben revisarse antes de habilitar usuarios reales.
 
+Después de las migraciones aprovisiona una sola vez la identidad del lote:
+
+```bash
+php artisan lote:aprovisionar --name="Nombre del lote" --slug="nombre-lote" --admin-email="admin@dominio.com"
+```
+
+La contraseña se toma de `INITIAL_ADMIN_PASSWORD` o se solicita de forma oculta. El comando crea los permisos, asigna el administrador y guarda un UUID que identifica exclusivamente esa instalación. No reutilices el mismo `.env` ni el mismo UUID entre lotes.
+
 ## Estructura de archivos
 
 Para un dominio adicional o subdominio, configura su document root hacia:
@@ -44,6 +52,7 @@ php artisan down --retry=60
 php artisan app:backup-database
 composer install --no-dev --classmap-authoritative --no-interaction
 php artisan migrate --force
+php artisan lote:aprovisionar --name="Nombre del lote" --slug="nombre-lote" --admin-email="admin@dominio.com"
 php artisan storage:link
 php artisan optimize
 php artisan hosting:verificar --strict

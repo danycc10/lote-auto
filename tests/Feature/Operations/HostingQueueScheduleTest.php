@@ -34,4 +34,17 @@ class HostingQueueScheduleTest extends TestCase
         $this->assertStringContainsString('--timeout=300', $worker->command);
         $this->assertStringContainsString('--max-time=50', $worker->command);
     }
+
+    public function test_la_programacion_aplica_retencion_a_datos_operativos(): void
+    {
+        $commands = collect(app(Schedule::class)->events())
+            ->pluck('command')
+            ->filter()
+            ->implode("\n");
+
+        $this->assertStringContainsString('auth:clear-resets', $commands);
+        $this->assertStringContainsString('queue:prune-failed --hours=168', $commands);
+        $this->assertStringContainsString('queue:prune-batches --hours=168 --unfinished=168 --cancelled=168', $commands);
+        $this->assertStringContainsString('sanctum:prune-expired --hours=24', $commands);
+    }
 }

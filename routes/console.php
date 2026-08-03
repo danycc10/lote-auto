@@ -72,3 +72,39 @@ Schedule::command('cuotas:notificar-vencimientos')
     ->timezone(config('app.timezone'))
     ->withoutOverlapping(60)
     ->onOneServer();
+
+Schedule::command('auth:clear-resets')
+    ->name('maintenance:expired-password-resets')
+    ->dailyAt('03:00')
+    ->timezone(config('app.timezone'))
+    ->withoutOverlapping(10)
+    ->onOneServer();
+
+Schedule::command('queue:prune-failed', [
+    '--hours' => max(1, (int) config('hosting.maintenance.failed_jobs_hours', 168)),
+])
+    ->name('maintenance:failed-jobs')
+    ->dailyAt('03:05')
+    ->timezone(config('app.timezone'))
+    ->withoutOverlapping(10)
+    ->onOneServer();
+
+Schedule::command('queue:prune-batches', [
+    '--hours' => max(1, (int) config('hosting.maintenance.job_batches_hours', 168)),
+    '--unfinished' => max(1, (int) config('hosting.maintenance.job_batches_hours', 168)),
+    '--cancelled' => max(1, (int) config('hosting.maintenance.job_batches_hours', 168)),
+])
+    ->name('maintenance:job-batches')
+    ->dailyAt('03:10')
+    ->timezone(config('app.timezone'))
+    ->withoutOverlapping(10)
+    ->onOneServer();
+
+Schedule::command('sanctum:prune-expired', [
+    '--hours' => max(1, (int) config('hosting.maintenance.expired_tokens_hours', 24)),
+])
+    ->name('maintenance:expired-api-tokens')
+    ->dailyAt('03:15')
+    ->timezone(config('app.timezone'))
+    ->withoutOverlapping(10)
+    ->onOneServer();

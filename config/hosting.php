@@ -28,4 +28,9 @@ return [
         'timeout' => (int) env('HOSTING_QUEUE_TIMEOUT', 300),
         'max_time' => (int) env('HOSTING_QUEUE_MAX_TIME', 50),
     ],
+    'maintenance' => [
+        'failed_jobs_hours' => (int) env('HOSTING_FAILED_JOBS_RETENTION_HOURS', 168),
+        'job_batches_hours' => (int) env('HOSTING_JOB_BATCHES_RETENTION_HOURS', 168),
+        'expired_tokens_hours' => (int) env('HOSTING_EXPIRED_TOKENS_RETENTION_HOURS', 24),
+    ],
 ];

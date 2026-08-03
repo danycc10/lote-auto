@@ -71,6 +71,10 @@ HOSTING_QUEUE_WORKER_MODE=cron
 DB_QUEUE_RETRY_AFTER=360
 HOSTING_QUEUE_TIMEOUT=300
 HOSTING_QUEUE_MAX_TIME=50
+LOG_STACK=daily
+LOG_LEVEL=info
+LOG_DAILY_DAYS=14
+SESSION_ENCRYPT=true
 ```
 
 Agrega un único cron cada minuto desde cPanel, sustituyendo la ruta del usuario y confirmando el binario PHP 8.3 disponible en la cuenta:
@@ -82,6 +86,8 @@ Agrega un único cron cada minuto desde cPanel, sustituyendo la ruta del usuario
 El scheduler utiliza bloqueo de base de datos para impedir workers programados simultáneos. `HOSTING_QUEUE_MAX_TIME` limita el ciclo completo, pero no interrumpe un Job que ya esté ejecutándose. Si el plan no permite que una exportación individual alcance `HOSTING_QUEUE_TIMEOUT`, limita el rango del reporte o utiliza un VPS.
 
 En VPS con Supervisor configura `HOSTING_QUEUE_WORKER_MODE=supervisor`. Si otro sistema administra el worker, usa `external`.
+
+Cada madrugada el scheduler elimina restablecimientos de contraseña vencidos, trabajos fallidos y lotes de cola con más de 7 días, y tokens de API caducados. Los valores pueden ajustarse con `HOSTING_FAILED_JOBS_RETENTION_HOURS`, `HOSTING_JOB_BATCHES_RETENTION_HOURS` y `HOSTING_EXPIRED_TOKENS_RETENTION_HOURS`. Los logs diarios conservan 14 días mediante `LOG_DAILY_DAYS`.
 
 ## Backup externo
 

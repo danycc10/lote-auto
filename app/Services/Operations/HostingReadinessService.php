@@ -133,6 +133,7 @@ class HostingReadinessService
 
         $appUrl = (string) config('app.url');
         $databaseDriver = DB::connection()->getDriverName();
+        $workerMode = (string) config('hosting.queue_worker.mode', 'external');
 
         return [
             $this->result(filled(config('app.key')), 'Clave de aplicación', 'APP_KEY debe ser única y persistente.'),
@@ -140,6 +141,7 @@ class HostingReadinessService
             $this->result(Str::startsWith($appUrl, 'https://'), 'HTTPS', 'APP_URL debe utilizar https://.'),
             $this->result(in_array($databaseDriver, ['mysql', 'mariadb'], true), 'Base de datos de producción', 'Driver actual: '.$databaseDriver),
             $this->result(config('queue.default') !== 'sync', 'Cola asíncrona', 'QUEUE_CONNECTION no debe ser sync para reportes y correos.'),
+            $this->result(in_array($workerMode, ['cron', 'supervisor', 'external'], true), 'Ejecución de la cola', 'Modo configurado: '.$workerMode),
             $this->result(config('cache.default') !== 'array', 'Cache persistente', 'CACHE_STORE no debe ser array.'),
             $this->result(config('mail.default') !== 'log', 'Correo saliente', 'Configura un proveedor SMTP real.', self::WARNING),
             $this->result(! (bool) config('demo.enabled'), 'Modo demo', 'APP_DEMO_MODE debe ser false.', self::WARNING),

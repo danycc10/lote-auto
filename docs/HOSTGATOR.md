@@ -51,3 +51,25 @@ php artisan up
 ```
 
 Después del despliegue comprueba `/up`, el inicio de sesión, una imagen pública, un documento privado y la generación de un reporte.
+
+## Cron y cola en hosting compartido
+
+Configura la cola para que el scheduler procese trabajos en intervalos acotados:
+
+```dotenv
+QUEUE_CONNECTION=database
+HOSTING_QUEUE_WORKER_MODE=cron
+DB_QUEUE_RETRY_AFTER=360
+HOSTING_QUEUE_TIMEOUT=300
+HOSTING_QUEUE_MAX_TIME=50
+```
+
+Agrega un único cron cada minuto desde cPanel, sustituyendo la ruta del usuario y confirmando el binario PHP 8.3 disponible en la cuenta:
+
+```cron
+* * * * * cd /home/USUARIO/apps/NOMBRE_LOTE && /opt/cpanel/ea-php83/root/usr/bin/php artisan schedule:run >> storage/logs/cron.log 2>&1
+```
+
+El scheduler utiliza bloqueo de base de datos para impedir workers programados simultáneos. `HOSTING_QUEUE_MAX_TIME` limita el ciclo completo, pero no interrumpe un Job que ya esté ejecutándose. Si el plan no permite que una exportación individual alcance `HOSTING_QUEUE_TIMEOUT`, limita el rango del reporte o utiliza un VPS.
+
+En VPS con Supervisor configura `HOSTING_QUEUE_WORKER_MODE=supervisor`. Si otro sistema administra el worker, usa `external`.

@@ -80,4 +80,6 @@ Consulta [docs/OPERATIONS.md](docs/OPERATIONS.md) antes de desplegar. Incluye:
 
 Para instalaciones independientes por lote en HostGator/cPanel consulta también [docs/HOSTGATOR.md](docs/HOSTGATOR.md).
 
+El estado de las fases implementadas y la lista de activación por lote están en [docs/ROADMAP_HOSTGATOR.md](docs/ROADMAP_HOSTGATOR.md).
+
 El endpoint `/up` comprueba arranque, base de datos y cache.

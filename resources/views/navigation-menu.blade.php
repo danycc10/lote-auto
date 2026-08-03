@@ -193,7 +193,7 @@
             </a>
             @endcan
 
-            @can('dashboard.ver')
+            @can('reportes.ver')
             <a href="{{ route('admin.reportes.index') }}" wire:navigate @click="$store.sidebar.open = false"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                     {{ request()->routeIs('admin.reportes.*') ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
@@ -204,7 +204,7 @@
             </a>
             @endcan
 
-            @can('dashboard.ver')
+            @can('seguridad.roles')
             <a href="{{ route('admin.administracion.tarjetas-cobro') }}" wire:navigate @click="$store.sidebar.open = false"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                     {{ request()->routeIs('admin.administracion.tarjetas-cobro') ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">

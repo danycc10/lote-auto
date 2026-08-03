@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Configuracion;
 use App\Models\User;
+use Database\Seeders\RolesPermisosSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -37,5 +38,25 @@ class NavigationMenuTest extends TestCase
         foreach ($coincidencias[0] as $enlace) {
             $this->assertStringContainsString('wire:navigate', $enlace);
         }
+    }
+
+    public function test_el_menu_respeta_los_permisos_exigidos_por_las_rutas(): void
+    {
+        $this->seed(RolesPermisosSeeder::class);
+
+        $user = User::factory()->create();
+        $user->givePermissionTo('dashboard.ver');
+        $this->actingAs($user);
+
+        $html = (string) $this->view('navigation-menu');
+
+        $this->assertStringNotContainsString(route('admin.reportes.index'), $html);
+        $this->assertStringNotContainsString(route('admin.administracion.tarjetas-cobro'), $html);
+
+        $user->givePermissionTo(['reportes.ver', 'seguridad.roles']);
+        $html = (string) $this->view('navigation-menu');
+
+        $this->assertStringContainsString(route('admin.reportes.index'), $html);
+        $this->assertStringContainsString(route('admin.administracion.tarjetas-cobro'), $html);
     }
 }

@@ -6,6 +6,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class BackupDatabaseCommandTest extends TestCase
@@ -88,5 +89,24 @@ class BackupDatabaseCommandTest extends TestCase
             ->assertSuccessful();
 
         $this->assertFileDoesNotExist($vencido);
+    }
+
+    public function test_copia_el_respaldo_y_su_hash_a_un_disco_externo(): void
+    {
+        Storage::fake('backup_remote');
+        config([
+            'backup.remote_disk' => 'backup_remote',
+            'backup.remote_prefix' => 'lotes/demo/backups',
+        ]);
+
+        $this->artisan('app:backup-database', ['--keep' => 14])
+            ->expectsOutputToContain('Copia remota creada: lotes/demo/backups/database-')
+            ->assertSuccessful();
+
+        $archivos = Storage::disk('backup_remote')->allFiles('lotes/demo/backups');
+
+        $this->assertCount(2, $archivos);
+        $this->assertCount(1, array_filter($archivos, fn (string $archivo): bool => str_ends_with($archivo, '.sqlite')));
+        $this->assertCount(1, array_filter($archivos, fn (string $archivo): bool => str_ends_with($archivo, '.sha256')));
     }
 }

@@ -144,6 +144,7 @@ class HostingReadinessService
             $this->result(in_array($workerMode, ['cron', 'supervisor', 'external'], true), 'Ejecución de la cola', 'Modo configurado: '.$workerMode),
             $this->result(config('cache.default') !== 'array', 'Cache persistente', 'CACHE_STORE no debe ser array.'),
             $this->result(config('mail.default') !== 'log', 'Correo saliente', 'Configura un proveedor SMTP real.', self::WARNING),
+            $this->result(filled(config('backup.remote_disk')), 'Backup externo', 'Configura DB_BACKUP_REMOTE_DISK para conservar una copia fuera del hosting.', self::WARNING),
             $this->result(! (bool) config('demo.enabled'), 'Modo demo', 'APP_DEMO_MODE debe ser false.', self::WARNING),
         ];
     }

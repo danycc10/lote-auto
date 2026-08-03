@@ -7,11 +7,12 @@ use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
 use Symfony\Component\Process\Process;
 
-#[Signature('app:backup-database {--keep= : Días de retención}')]
+#[Signature('app:backup-database {--keep= : Días de retención} {--local-only : Omite la copia remota configurada}')]
 #[Description('Genera un respaldo consistente de la base de datos y elimina copias vencidas.')]
 class BackupDatabaseCommand extends Command
 {
@@ -46,10 +47,21 @@ class BackupDatabaseCommand extends Command
             true,
         );
         $eliminados = $this->aplicarRetencion($directorio, $retencion);
+        $remotosEliminados = 0;
+        $rutaRemota = null;
+
+        if (! $this->option('local-only')) {
+            [$rutaRemota, $remotosEliminados] = $this->copiarRemoto($ruta, $retencion);
+        }
 
         $this->info('Respaldo creado: '.$ruta);
         $this->info('SHA-256: '.$hash);
         $this->info("Archivos vencidos eliminados: {$eliminados}");
+
+        if ($rutaRemota) {
+            $this->info('Copia remota creada: '.$rutaRemota);
+            $this->info("Archivos remotos vencidos eliminados: {$remotosEliminados}");
+        }
 
         return self::SUCCESS;
     }
@@ -131,5 +143,54 @@ class BackupDatabaseCommand extends Command
         }
 
         return $eliminados;
+    }
+
+    /** @return array{0: string|null, 1: int} */
+    private function copiarRemoto(string $ruta, int $diasRetencion): array
+    {
+        $diskName = config('backup.remote_disk');
+
+        if (! is_string($diskName) || blank($diskName)) {
+            return [null, 0];
+        }
+
+        $disk = Storage::disk($diskName);
+        $prefix = trim((string) config('backup.remote_prefix', 'backups'), '/');
+        $rutaRemota = ($prefix === '' ? '' : $prefix.'/').basename($ruta);
+
+        $this->subirArchivo($diskName, $ruta, $rutaRemota);
+        $this->subirArchivo($diskName, $ruta.'.sha256', $rutaRemota.'.sha256');
+
+        $limite = now()->subDays($diasRetencion)->getTimestamp();
+        $eliminados = 0;
+
+        foreach ($disk->files($prefix) as $archivo) {
+            if ($disk->lastModified($archivo) >= $limite) {
+                continue;
+            }
+
+            if ($disk->delete($archivo)) {
+                $eliminados++;
+            }
+        }
+
+        return [$rutaRemota, $eliminados];
+    }
+
+    private function subirArchivo(string $diskName, string $origen, string $destino): void
+    {
+        $stream = fopen($origen, 'rb');
+
+        if ($stream === false) {
+            throw new RuntimeException('No se pudo abrir el respaldo para copiarlo al almacenamiento remoto.');
+        }
+
+        try {
+            if (! Storage::disk($diskName)->put($destino, $stream)) {
+                throw new RuntimeException("No se pudo guardar la copia remota {$destino}.");
+            }
+        } finally {
+            fclose($stream);
+        }
     }
 }

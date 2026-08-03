@@ -73,3 +73,19 @@ Agrega un único cron cada minuto desde cPanel, sustituyendo la ruta del usuario
 El scheduler utiliza bloqueo de base de datos para impedir workers programados simultáneos. `HOSTING_QUEUE_MAX_TIME` limita el ciclo completo, pero no interrumpe un Job que ya esté ejecutándose. Si el plan no permite que una exportación individual alcance `HOSTING_QUEUE_TIMEOUT`, limita el rango del reporte o utiliza un VPS.
 
 En VPS con Supervisor configura `HOSTING_QUEUE_WORKER_MODE=supervisor`. Si otro sistema administra el worker, usa `external`.
+
+## Backup externo
+
+El respaldo local comparte el mismo riesgo que la cuenta de hosting. Configura un bucket S3 o un proveedor compatible con S3:
+
+```dotenv
+DB_BACKUP_REMOTE_DISK=s3
+DB_BACKUP_REMOTE_PREFIX=backups/IDENTIFICADOR_LOTE
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_DEFAULT_REGION=
+AWS_BUCKET=
+AWS_S3_SERVER_SIDE_ENCRYPTION=AES256
+```
+
+`app:backup-database` copia el respaldo y su archivo SHA-256 al disco remoto y aplica la misma retención configurada. Usa credenciales limitadas al prefijo de ese lote; no compartas claves entre instalaciones.
